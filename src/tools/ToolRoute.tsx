@@ -4,11 +4,13 @@ import { getToolById } from './registry';
 import { Calculator } from './calculator/Calculator';
 import { UnitConverter } from './unit-converter/UnitConverter';
 import { TimerStopwatch } from './timer-stopwatch/TimerStopwatch';
+import { Notes } from './notes/Notes';
 
 const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
   calculator: Calculator,
   'unit-converter': UnitConverter,
   'timer-stopwatch': TimerStopwatch,
+  notes: Notes,
 };
 
 export function ToolRoute({ toolId }: { toolId: string }) {
