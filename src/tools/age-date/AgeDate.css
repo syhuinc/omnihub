@@ -27,6 +27,8 @@
   padding: 8px 20px 32px;
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  flex: 1;
   gap: 18px;
 }
 

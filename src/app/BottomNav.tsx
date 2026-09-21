@@ -24,7 +24,9 @@ export function BottomNav() {
             onClick={() => navigate(tab.path)}
             aria-current={active ? 'page' : undefined}
           >
-            <Icon name={tab.icon} size={22} />
+            <span className="bottom-nav__icon-wrap">
+              <Icon name={tab.icon} size={22} />
+            </span>
             <span>{tab.label}</span>
           </button>
         );
