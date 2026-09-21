@@ -6,14 +6,29 @@ export interface SearchResult {
   score: number;
 }
 
+const STOPWORDS = new Set([
+  'a', 'an', 'the', 'to', 'of', 'do', 'does', 'is', 'are', 'i', 'my', 'me',
+  'how', 'much', 'many', 'for', 'and', 'or', 'in', 'on', 'at', 'up',
+]);
+
 function normalize(text: string): string {
   return text.trim().toLowerCase();
+}
+
+function wordSet(text: string): string[] {
+  return text.split(/[^a-z0-9]+/).filter(Boolean);
+}
+
+function hasWordMatch(words: string[], token: string): boolean {
+  return words.some((word) => word === token || word.startsWith(token));
 }
 
 function scoreTool(tool: ToolMeta, query: string, tokens: string[]): number {
   const name = normalize(tool.name);
   const description = normalize(tool.shortDescription);
   const keywords = tool.keywords.map(normalize);
+  const nameWords = wordSet(name);
+  const descriptionWords = wordSet(description);
 
   let score = 0;
 
@@ -28,11 +43,11 @@ function scoreTool(tool: ToolMeta, query: string, tokens: string[]): number {
 
   if (description.includes(query)) score += 20;
 
-  for (const token of tokens) {
-    if (token.length < 2) continue;
-    if (name.includes(token)) score += 12;
-    if (keywords.some((keyword) => keyword.includes(token))) score += 10;
-    if (description.includes(token)) score += 5;
+  const meaningfulTokens = tokens.filter((t) => t.length >= 2 && !STOPWORDS.has(t));
+  for (const token of meaningfulTokens) {
+    if (hasWordMatch(nameWords, token)) score += 12;
+    if (keywords.some((keyword) => hasWordMatch(wordSet(keyword), token))) score += 10;
+    if (hasWordMatch(descriptionWords, token)) score += 5;
   }
 
   return score;
