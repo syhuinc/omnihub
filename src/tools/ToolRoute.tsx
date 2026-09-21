@@ -2,9 +2,11 @@ import { ScreenHeader } from '../components/ScreenHeader';
 import { useRouter } from '../app/Router';
 import { getToolById } from './registry';
 import { Calculator } from './calculator/Calculator';
+import { UnitConverter } from './unit-converter/UnitConverter';
 
 const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
   calculator: Calculator,
+  'unit-converter': UnitConverter,
 };
 
 export function ToolRoute({ toolId }: { toolId: string }) {
