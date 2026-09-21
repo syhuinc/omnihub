@@ -1,0 +1,43 @@
+.screen-header {
+  padding: calc(16px + var(--safe-top)) 20px 12px;
+}
+
+.screen-header__row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.screen-header__back {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+}
+
+.screen-header__titles {
+  flex: 1;
+  min-width: 0;
+}
+
+.screen-header__titles h1 {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+}
+
+.screen-header__titles p {
+  margin-top: 2px;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.screen-header__action {
+  flex-shrink: 0;
+}

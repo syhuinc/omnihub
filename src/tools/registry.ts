@@ -1,0 +1,133 @@
+import type { ToolMeta } from '../types';
+
+export const CATEGORY_LABELS: Record<ToolMeta['category'], string> = {
+  essentials: 'Essentials',
+  productivity: 'Productivity',
+  finance: 'Finance',
+  more: 'More',
+};
+
+export const TOOLS: ToolMeta[] = [
+  {
+    id: 'calculator',
+    name: 'Calculator',
+    shortDescription: 'Basic calculator with history',
+    category: 'essentials',
+    color: 'var(--green)',
+    icon: 'calculator',
+    keywords: ['calculate', 'math', 'add', 'subtract', 'multiply', 'divide', 'sum'],
+  },
+  {
+    id: 'unit-converter',
+    name: 'Unit Converter',
+    shortDescription: 'Length, weight, temperature & more',
+    category: 'essentials',
+    color: 'var(--blue)',
+    icon: 'converter',
+    keywords: [
+      'convert',
+      'units',
+      'cm to inches',
+      'kg to lbs',
+      'celsius',
+      'fahrenheit',
+      'length',
+      'weight',
+      'temperature',
+      'volume',
+      'speed',
+      'area',
+      'data',
+      'mb to gb',
+    ],
+  },
+  {
+    id: 'timer-stopwatch',
+    name: 'Timer & Stopwatch',
+    shortDescription: 'Countdown and stopwatch with laps',
+    category: 'essentials',
+    color: 'var(--purple)',
+    icon: 'timer',
+    keywords: ['countdown', 'stopwatch', 'lap', 'alarm', 'time', 'clock'],
+  },
+  {
+    id: 'random-generator',
+    name: 'Random Generator',
+    shortDescription: 'Dice, coin, number, pick from list',
+    category: 'more',
+    color: 'var(--teal)',
+    icon: 'dice',
+    keywords: ['dice', 'coin', 'flip', 'random', 'pick', 'choose', 'lottery', 'roll'],
+  },
+  {
+    id: 'notes',
+    name: 'Notes',
+    shortDescription: 'Create, edit and pin notes',
+    category: 'productivity',
+    color: 'var(--pink)',
+    icon: 'note',
+    keywords: ['note', 'write', 'memo', 'text', 'idea'],
+  },
+  {
+    id: 'checklist',
+    name: 'Checklist',
+    shortDescription: 'Multiple lists, check off items',
+    category: 'productivity',
+    color: 'var(--yellow)',
+    icon: 'checklist',
+    keywords: ['checklist', 'todo', 'to-do', 'list', 'tasks', 'shopping list'],
+  },
+  {
+    id: 'age-calculator',
+    name: 'Age Calculator',
+    shortDescription: 'How old am I?',
+    category: 'more',
+    color: 'var(--orange)',
+    icon: 'cake',
+    keywords: ['age', 'how old', 'birthday', 'birthdate'],
+  },
+  {
+    id: 'date-calculator',
+    name: 'Date Calculator',
+    shortDescription: 'Date difference, add or subtract days',
+    category: 'more',
+    color: 'var(--blue)',
+    icon: 'calendar',
+    keywords: ['date', 'days between', 'add days', 'subtract days', 'difference'],
+  },
+  {
+    id: 'expense-tracker',
+    name: 'Expense Tracker',
+    shortDescription: 'Track spending by category',
+    category: 'finance',
+    color: 'var(--orange)',
+    icon: 'wallet',
+    keywords: ['expense', 'spending', 'money', 'track', 'purchase', 'cost'],
+  },
+  {
+    id: 'budget',
+    name: 'Budget',
+    shortDescription: 'Monthly limits vs spending',
+    category: 'finance',
+    color: 'var(--teal)',
+    icon: 'budget',
+    keywords: ['budget', 'limit', 'monthly', 'save', 'savings'],
+  },
+  {
+    id: 'tip-split',
+    name: 'Tip & Split Bill',
+    shortDescription: 'Calculate tip and split the bill',
+    category: 'finance',
+    color: 'var(--red)',
+    icon: 'receipt',
+    keywords: ['tip', 'split', 'bill', 'how much do i owe', 'restaurant', 'gratuity', 'divide bill'],
+  },
+];
+
+export function getToolById(id: string): ToolMeta | undefined {
+  return TOOLS.find((tool) => tool.id === id);
+}
+
+export function getToolsByCategory(category: ToolMeta['category']): ToolMeta[] {
+  return TOOLS.filter((tool) => tool.category === category);
+}
