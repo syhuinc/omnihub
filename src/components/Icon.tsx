@@ -32,13 +32,20 @@ export type IconName =
   | 'receipt'
   | 'cake'
   | 'calendar'
-  | 'dice';
+  | 'dice'
+  | 'food'
+  | 'transport'
+  | 'shopping'
+  | 'entertainment'
+  | 'health'
+  | 'more-dots';
 
 interface IconProps {
   name: IconName;
   size?: number;
   strokeWidth?: number;
   className?: string;
+  style?: React.CSSProperties;
 }
 
 const paths: Record<IconName, React.ReactNode> = {
@@ -124,9 +131,25 @@ const paths: Record<IconName, React.ReactNode> = {
   dice: (
     <path d="M5 5h14a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z M8 8h.01M16 8h.01M8 16h.01M16 16h.01M12 12h.01" />
   ),
+  food: (
+    <path d="M6 2v8a2 2 0 0 0 4 0V2M8 10v12M18 2c-2 2-2 5-2 7a2 2 0 0 0 2 2v10" />
+  ),
+  transport: (
+    <path d="M5 16V8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v8 M3 16h18 M6 19a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3ZM18 19a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z" />
+  ),
+  shopping: (
+    <path d="M6 8h12l1 13H5Z M9 8V6a3 3 0 0 1 6 0v2" />
+  ),
+  entertainment: (
+    <path d="M4 4h16v13H6l-2 3Z M8 8h8M8 11h5" />
+  ),
+  health: (
+    <path d="M12 21s-7-4.5-9.5-9A5.5 5.5 0 0 1 12 6a5.5 5.5 0 0 1 9.5 6c-2.5 4.5-9.5 9-9.5 9Z" />
+  ),
+  'more-dots': <path d="M5 12h.01M12 12h.01M19 12h.01" />,
 };
 
-export function Icon({ name, size = 20, strokeWidth = 2, className }: IconProps) {
+export function Icon({ name, size = 20, strokeWidth = 2, className, style }: IconProps) {
   return (
     <svg
       width={size}
@@ -138,6 +161,7 @@ export function Icon({ name, size = 20, strokeWidth = 2, className }: IconProps)
       strokeLinecap="round"
       strokeLinejoin="round"
       className={className}
+      style={style}
       aria-hidden="true"
     >
       {paths[name]}
