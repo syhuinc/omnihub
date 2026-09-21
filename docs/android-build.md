@@ -92,7 +92,9 @@ Google Play itself needs a few extra graphics uploaded separately in Play Consol
 | Phone screenshots | min 2, up to 8 — 16:9 or 9:16, each side 320–3840 px (JPEG/24-bit PNG, no alpha) | Take these from a real device or emulator running the app (Home, Tools, a couple of tools in use, Profile) |
 | (Optional) Tablet/other screenshots | same rules | Skip for a phone-only v1 |
 
-Launcher icons (all densities + adaptive icon layers) and splash screens are already generated for you under `android/app/src/main/res/mipmap-*` and `drawable*`, produced from `omni-hub/assets/icon*.png` and `omni-hub/assets/splash.png` via `npx capacitor-assets generate --android`. Re-run that command any time you change the source images in `omni-hub/assets/`.
+Launcher icons (all densities + adaptive icon layers) and splash screens are already generated for you under `android/app/src/main/res/mipmap-*` and `drawable*`, produced from `omni-hub/assets/icon*.png` and `omni-hub/assets/splash.png` via `npx capacitor-assets generate --android --iconBackgroundColor '#0a0e16' --iconBackgroundColorDark '#0a0e16'`. Re-run that command any time you change the source images in `omni-hub/assets/`.
+
+`assets/icon-foreground.png` and `assets/icon-background.png` are the dedicated adaptive-icon layers (full-bleed logo art + solid brand-color backdrop). capacitor-assets always regenerates `mipmap-anydpi-v26/ic_launcher.xml` and `ic_launcher_round.xml` with a 16.7% `<inset>` on both layers, which shrinks and dims the icon since our art is already full-bleed — after regenerating, re-edit those two XML files to drop the `<inset>` wrapper (`<background android:drawable="@mipmap/ic_launcher_background" />` / `<foreground android:drawable="@mipmap/ic_launcher_foreground" />` with no inset) so the icon fills the tile edge-to-edge again.
 
 ## Store listing text
 
