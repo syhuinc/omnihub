@@ -26,6 +26,12 @@
   padding: 0 4px;
 }
 
+.home__section-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .home__section-close {
   display: flex;
   align-items: center;
@@ -164,6 +170,87 @@
   color: var(--text-tertiary);
 }
 
+.home__banner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 20px 24px;
+  padding: 18px 18px;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, #4f46e5 0%, #4d7cfe 45%, #a855f7 100%);
+  box-shadow: 0 10px 28px rgba(77, 92, 254, 0.35), 0 2px 8px rgba(0, 0, 0, 0.2);
+  text-align: left;
+}
+
+.home__banner-glow {
+  position: absolute;
+  top: -40%;
+  right: -20%;
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0) 70%);
+  pointer-events: none;
+}
+
+.home__banner-eyebrow {
+  position: absolute;
+  top: 14px;
+  left: 18px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.home__banner-mark {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ffffff;
+}
+
+.home__banner-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  margin-top: 14px;
+}
+
+.home__banner-text strong {
+  font-size: 17px;
+  font-weight: 800;
+  line-height: 1.25;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+}
+
+.home__banner-text span {
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.home__banner-arrow {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+}
+
 .home__quick-actions {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -182,4 +269,18 @@
   font-weight: 600;
   color: var(--text-primary);
   min-height: 48px;
+}
+
+.home__quick-action span {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: left;
+}
+
+.home__quick-action-chevron {
+  flex-shrink: 0;
+  color: var(--text-tertiary);
 }

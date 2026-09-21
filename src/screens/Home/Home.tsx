@@ -162,18 +162,39 @@ export function Home() {
             )}
           </div>
 
+          <button type="button" className="home__banner" onClick={() => navigate('/tools')}>
+            <div className="home__banner-glow" />
+            <div className="home__banner-eyebrow">
+              <span className="home__banner-mark" />
+              Omni Hub
+            </div>
+            <div className="home__banner-text">
+              <strong>Small Tools.</strong>
+              <strong>Big Progress.</strong>
+              <span>A simpler everyday life.</span>
+            </div>
+            <span className="home__banner-arrow">
+              <Icon name="chevron-right" size={20} />
+            </span>
+          </button>
+
           {sections.recommended && (
             <div className="home__section">
               <div className="home__section-header">
                 <h2>Recommended for You</h2>
-                <button
-                  type="button"
-                  className="home__section-close"
-                  onClick={() => hideSection('recommended')}
-                  aria-label="Hide Recommended for You"
-                >
-                  <Icon name="x" size={14} strokeWidth={2.5} />
-                </button>
+                <div className="home__section-actions">
+                  <button type="button" className="home__link" onClick={() => navigate('/tools')}>
+                    See All
+                  </button>
+                  <button
+                    type="button"
+                    className="home__section-close"
+                    onClick={() => hideSection('recommended')}
+                    aria-label="Hide Recommended for You"
+                  >
+                    <Icon name="x" size={14} strokeWidth={2.5} />
+                  </button>
+                </div>
               </div>
               <div className="home__grid">
                 {recommended.map((tool) => (
@@ -205,7 +226,8 @@ export function Home() {
                     onClick={() => openTool(action.toolId)}
                   >
                     <Icon name={action.icon} size={18} />
-                    {action.label}
+                    <span>{action.label}</span>
+                    <Icon name="chevron-right" size={16} className="home__quick-action-chevron" />
                   </button>
                 ))}
               </div>
