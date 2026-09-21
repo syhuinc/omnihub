@@ -1,17 +1,17 @@
-.ts__body {
+.tc__body {
   padding: 8px 20px 32px;
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
 
-.ts__field {
+.tc__field {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-.ts__label {
+.tc__label {
   font-size: 12px;
   font-weight: 600;
   color: var(--text-secondary);
@@ -19,7 +19,7 @@
   letter-spacing: 0.04em;
 }
 
-.ts__amount-row {
+.tc__amount-row {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -29,13 +29,13 @@
   padding: 16px 20px;
 }
 
-.ts__currency {
+.tc__currency {
   font-size: 28px;
   font-weight: 700;
   color: var(--text-secondary);
 }
 
-.ts__amount-input {
+.tc__amount-input {
   flex: 1;
   min-width: 0;
   background: transparent;
@@ -47,19 +47,19 @@
   -moz-appearance: textfield;
 }
 
-.ts__amount-input::-webkit-outer-spin-button,
-.ts__amount-input::-webkit-inner-spin-button {
+.tc__amount-input::-webkit-outer-spin-button,
+.tc__amount-input::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
 
-.ts__tip-row {
+.tc__tip-row {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
 
-.ts__tip-chip {
+.tc__tip-chip {
   flex: 1;
   min-width: 56px;
   padding: 12px 8px;
@@ -72,13 +72,13 @@
   font-weight: 600;
 }
 
-.ts__tip-chip--active {
+.tc__tip-chip--active {
   background: var(--accent);
   border-color: var(--accent);
   color: #fff;
 }
 
-.ts__custom-tip-row {
+.tc__custom-tip-row {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -88,7 +88,7 @@
   padding: 10px 16px;
 }
 
-.ts__custom-tip-input {
+.tc__custom-tip-input {
   flex: 1;
   min-width: 0;
   background: transparent;
@@ -99,48 +99,12 @@
   color: var(--text-primary);
 }
 
-.ts__custom-tip-row span {
+.tc__custom-tip-row span {
   color: var(--text-secondary);
   font-weight: 600;
 }
 
-.ts__people-row {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 24px;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 12px;
-}
-
-.ts__stepper-btn {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: var(--bg-active);
-  border: 1px solid var(--border-strong);
-  color: var(--text-primary);
-  font-size: 22px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.ts__people-count {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 22px;
-  font-weight: 700;
-  color: var(--text-primary);
-  min-width: 48px;
-  justify-content: center;
-}
-
-.ts__result {
+.tc__result {
   background: var(--bg-elevated);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
@@ -150,19 +114,14 @@
   gap: 12px;
 }
 
-.ts__result-row {
+.tc__result-row {
   display: flex;
   justify-content: space-between;
   font-size: 14px;
   color: var(--text-secondary);
 }
 
-.ts__result-row--sub {
-  font-size: 13px;
-  opacity: 0.85;
-}
-
-.ts__result-row--highlight {
+.tc__result-row--highlight {
   padding-top: 10px;
   border-top: 1px solid var(--border);
   font-size: 20px;

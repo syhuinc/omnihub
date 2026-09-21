@@ -10,13 +10,13 @@ import { storageGet, storageSet, StorageKeys } from '../../storage/db';
 import type { ToolMeta } from '../../types';
 import './Home.css';
 
-const DEFAULT_PINNED = ['calculator', 'unit-converter', 'notes', 'timer-stopwatch'];
+const DEFAULT_PINNED = ['calculator', 'unit-converter', 'notes', 'timer'];
 
 const QUICK_ACTIONS: { label: string; toolId: string; icon: ToolMeta['icon'] }[] = [
   { label: 'New Note', toolId: 'notes', icon: 'note' },
   { label: 'Add Expense', toolId: 'expense-tracker', icon: 'wallet' },
-  { label: 'Start Timer', toolId: 'timer-stopwatch', icon: 'timer' },
-  { label: 'Split Bill', toolId: 'tip-split', icon: 'receipt' },
+  { label: 'Start Timer', toolId: 'timer', icon: 'timer' },
+  { label: 'Split Bill', toolId: 'split-bill', icon: 'receipt' },
 ];
 
 function greeting(): string {

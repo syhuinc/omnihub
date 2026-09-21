@@ -1,28 +1,3 @@
-.tsw__switch {
-  display: flex;
-  gap: 6px;
-  margin: 0 20px 24px;
-  padding: 4px;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-pill);
-}
-
-.tsw__switch-btn {
-  flex: 1;
-  padding: 10px;
-  min-height: 40px;
-  border-radius: var(--radius-pill);
-  color: var(--text-secondary);
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.tsw__switch-btn--active {
-  background: var(--accent);
-  color: #fff;
-}
-
 /* Timer */
 
 .tm {

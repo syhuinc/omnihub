@@ -3,22 +3,30 @@ import { useRouter } from '../app/Router';
 import { getToolById } from './registry';
 import { Calculator } from './calculator/Calculator';
 import { UnitConverter } from './unit-converter/UnitConverter';
-import { TimerStopwatch } from './timer-stopwatch/TimerStopwatch';
+import { Timer } from './timer/Timer';
+import { Stopwatch } from './stopwatch/Stopwatch';
 import { Notes } from './notes/Notes';
 import { Checklist } from './checklist/Checklist';
 import { ExpenseTracker } from './expense-tracker/ExpenseTracker';
 import { Budget } from './budget/Budget';
-import { TipSplit } from './tip-split/TipSplit';
+import { TipCalculator } from './tip-calculator/TipCalculator';
+import { SplitBill } from './split-bill/SplitBill';
+import { AgeCalculator } from './age-date/AgeCalculator';
+import { DateCalculator } from './age-date/DateCalculator';
 
 const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
   calculator: Calculator,
   'unit-converter': UnitConverter,
-  'timer-stopwatch': TimerStopwatch,
+  timer: Timer,
+  stopwatch: Stopwatch,
   notes: Notes,
   checklist: Checklist,
   'expense-tracker': ExpenseTracker,
   budget: Budget,
-  'tip-split': TipSplit,
+  'tip-calculator': TipCalculator,
+  'split-bill': SplitBill,
+  'age-calculator': AgeCalculator,
+  'date-calculator': DateCalculator,
 };
 
 export function ToolRoute({ toolId }: { toolId: string }) {
