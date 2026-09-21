@@ -3,11 +3,11 @@ import type { IconName } from './components/Icon';
 export type ToolCategory = 'essentials' | 'productivity' | 'finance' | 'more';
 
 /**
- * How a tool opens: 'sheet' slides up from the bottom (quick, one-off actions),
- * 'modal' opens centered (small focused calculators), 'page' pushes a full
- * page from the top like a normal screen (content-heavy, list-based tools).
+ * How a tool opens: 'sheet' slides up from the bottom over a dimmed
+ * backdrop (quick, one-off tools), 'page' pushes a full page like a
+ * normal screen (content-heavy, list-based tools).
  */
-export type ToolPresentation = 'page' | 'sheet' | 'modal';
+export type ToolPresentation = 'page' | 'sheet';
 
 export interface ToolMeta {
   id: string;

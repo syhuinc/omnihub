@@ -41,7 +41,7 @@ export const TOOLS: ToolMeta[] = [
       'data',
       'mb to gb',
     ],
-    presentation: 'modal',
+    presentation: 'sheet',
   },
   {
     id: 'timer',
@@ -51,7 +51,7 @@ export const TOOLS: ToolMeta[] = [
     color: 'var(--purple)',
     icon: 'timer',
     keywords: ['countdown', 'alarm', 'time', 'clock'],
-    presentation: 'modal',
+    presentation: 'sheet',
   },
   {
     id: 'stopwatch',
@@ -61,7 +61,7 @@ export const TOOLS: ToolMeta[] = [
     color: 'var(--pink)',
     icon: 'timer',
     keywords: ['stopwatch', 'lap', 'time', 'clock', 'race'],
-    presentation: 'modal',
+    presentation: 'sheet',
   },
   {
     id: 'random-generator',
@@ -71,7 +71,7 @@ export const TOOLS: ToolMeta[] = [
     color: 'var(--teal)',
     icon: 'dice',
     keywords: ['dice', 'coin', 'flip', 'random', 'pick', 'choose', 'lottery', 'roll'],
-    presentation: 'modal',
+    presentation: 'sheet',
   },
   {
     id: 'notes',
@@ -101,7 +101,7 @@ export const TOOLS: ToolMeta[] = [
     color: 'var(--orange)',
     icon: 'cake',
     keywords: ['age', 'how old', 'birthday', 'birthdate'],
-    presentation: 'modal',
+    presentation: 'sheet',
   },
   {
     id: 'date-calculator',
@@ -111,7 +111,7 @@ export const TOOLS: ToolMeta[] = [
     color: 'var(--blue)',
     icon: 'calendar',
     keywords: ['date', 'days between', 'add days', 'subtract days', 'difference'],
-    presentation: 'modal',
+    presentation: 'sheet',
   },
   {
     id: 'expense-tracker',
@@ -141,7 +141,7 @@ export const TOOLS: ToolMeta[] = [
     color: 'var(--red)',
     icon: 'receipt',
     keywords: ['tip', 'gratuity', 'restaurant', 'how much to tip'],
-    presentation: 'modal',
+    presentation: 'sheet',
   },
   {
     id: 'split-bill',
@@ -151,7 +151,7 @@ export const TOOLS: ToolMeta[] = [
     color: 'var(--pink)',
     icon: 'receipt',
     keywords: ['split', 'bill', 'how much do i owe', 'divide bill', 'share bill'],
-    presentation: 'modal',
+    presentation: 'sheet',
   },
 ];
 

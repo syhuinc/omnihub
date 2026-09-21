@@ -48,15 +48,13 @@ export function ToolRoute({ toolId }: { toolId: string }) {
     );
   }
 
-  const presentation = tool?.presentation ?? 'page';
-
-  if (presentation === 'page') {
-    return <ToolComponent />;
+  if (tool?.presentation === 'sheet') {
+    return (
+      <ToolOverlay>
+        <ToolComponent />
+      </ToolOverlay>
+    );
   }
 
-  return (
-    <ToolOverlay variant={presentation}>
-      <ToolComponent />
-    </ToolOverlay>
-  );
+  return <ToolComponent />;
 }
