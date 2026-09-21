@@ -1,0 +1,121 @@
+.bg__summary {
+  margin: 0 20px 20px;
+  padding: 18px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+}
+
+.bg__summary-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.bg__summary-item span {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.bg__summary-item strong {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.bg__summary-divider {
+  width: 1px;
+  height: 36px;
+  background: var(--border);
+}
+
+.bg__over {
+  color: var(--red) !important;
+}
+
+.bg__list {
+  list-style: none;
+  margin: 0;
+  padding: 0 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bg__card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px;
+}
+
+.bg__card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.bg__card-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.bg__limit-btn {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  padding: 6px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-active);
+  min-height: 30px;
+}
+
+.bg__limit-input {
+  width: 90px;
+  text-align: right;
+  background: var(--bg-active);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  color: var(--text-primary);
+  font-size: 13px;
+  outline: none;
+}
+
+.bg__track {
+  height: 8px;
+  background: var(--bg-active);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.bg__bar {
+  height: 100%;
+  border-radius: var(--radius-pill);
+  transition: width 0.2s ease;
+}
+
+.bg__card-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.bg__over-label {
+  color: var(--red);
+  font-weight: 700;
+}

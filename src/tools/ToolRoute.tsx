@@ -7,6 +7,7 @@ import { TimerStopwatch } from './timer-stopwatch/TimerStopwatch';
 import { Notes } from './notes/Notes';
 import { Checklist } from './checklist/Checklist';
 import { ExpenseTracker } from './expense-tracker/ExpenseTracker';
+import { Budget } from './budget/Budget';
 
 const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
   calculator: Calculator,
@@ -15,6 +16,7 @@ const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
   notes: Notes,
   checklist: Checklist,
   'expense-tracker': ExpenseTracker,
+  budget: Budget,
 };
 
 export function ToolRoute({ toolId }: { toolId: string }) {
