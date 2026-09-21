@@ -15,4 +15,11 @@ npm run dev
 npm run build
 ```
 
-See `docs/android-build.md` (added once Capacitor is set up) for signed AAB build steps.
+## Android
+
+```
+npm run android:sync   # build web app + sync into the native Android project
+npm run android:open   # open android/ in Android Studio
+```
+
+See [`docs/android-build.md`](docs/android-build.md) for signed AAB build steps and a Play Store checklist.

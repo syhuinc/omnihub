@@ -2,6 +2,13 @@ node_modules
 dist
 dist-ssr
 *.local
-android
-ios
 .DS_Store
+
+# Android build outputs (native project itself is committed)
+android/app/build/
+android/build/
+android/.gradle/
+android/local.properties
+android/captures/
+android/app/release/
+ios

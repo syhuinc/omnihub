@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { App as CapacitorApp } from '@capacitor/app';
 import { BottomNav } from './BottomNav';
 import { RouterProvider, useRouter } from './Router';
 import { Home } from '../screens/Home/Home';
@@ -25,8 +26,23 @@ function Screen() {
 }
 
 function Shell() {
-  const { path } = useRouter();
+  const { path, navigate, back } = useRouter();
   const showNav = TOP_LEVEL_PATHS.has(path);
+
+  useEffect(() => {
+    const listener = CapacitorApp.addListener('backButton', () => {
+      if (!TOP_LEVEL_PATHS.has(path)) {
+        back();
+      } else if (path !== '/') {
+        navigate('/', { replace: true });
+      } else {
+        CapacitorApp.exitApp();
+      }
+    });
+    return () => {
+      listener.then((l) => l.remove());
+    };
+  }, [path, navigate, back]);
 
   return (
     <div className="app-shell">
