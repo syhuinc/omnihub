@@ -4,10 +4,10 @@ import { TimerView } from '../timer-stopwatch/TimerView';
 import '../timer-stopwatch/TimerStopwatch.css';
 
 export function Timer() {
-  const { navigate } = useRouter();
+  const { back } = useRouter();
   return (
     <div className="screen">
-      <ScreenHeader title="Timer" onBack={() => navigate('/tools')} />
+      <ScreenHeader title="Timer" onBack={back} />
       <TimerView />
     </div>
   );

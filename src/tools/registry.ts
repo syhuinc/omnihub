@@ -16,6 +16,7 @@ export const TOOLS: ToolMeta[] = [
     color: 'var(--green)',
     icon: 'calculator',
     keywords: ['calculate', 'math', 'add', 'subtract', 'multiply', 'divide', 'sum'],
+    presentation: 'sheet',
   },
   {
     id: 'unit-converter',
@@ -40,6 +41,7 @@ export const TOOLS: ToolMeta[] = [
       'data',
       'mb to gb',
     ],
+    presentation: 'modal',
   },
   {
     id: 'timer',
@@ -49,6 +51,7 @@ export const TOOLS: ToolMeta[] = [
     color: 'var(--purple)',
     icon: 'timer',
     keywords: ['countdown', 'alarm', 'time', 'clock'],
+    presentation: 'modal',
   },
   {
     id: 'stopwatch',
@@ -58,6 +61,7 @@ export const TOOLS: ToolMeta[] = [
     color: 'var(--pink)',
     icon: 'timer',
     keywords: ['stopwatch', 'lap', 'time', 'clock', 'race'],
+    presentation: 'modal',
   },
   {
     id: 'random-generator',
@@ -67,6 +71,7 @@ export const TOOLS: ToolMeta[] = [
     color: 'var(--teal)',
     icon: 'dice',
     keywords: ['dice', 'coin', 'flip', 'random', 'pick', 'choose', 'lottery', 'roll'],
+    presentation: 'modal',
   },
   {
     id: 'notes',
@@ -76,6 +81,7 @@ export const TOOLS: ToolMeta[] = [
     color: 'var(--pink)',
     icon: 'note',
     keywords: ['note', 'write', 'memo', 'text', 'idea'],
+    presentation: 'page',
   },
   {
     id: 'checklist',
@@ -85,6 +91,7 @@ export const TOOLS: ToolMeta[] = [
     color: 'var(--yellow)',
     icon: 'checklist',
     keywords: ['checklist', 'todo', 'to-do', 'list', 'tasks', 'shopping list'],
+    presentation: 'page',
   },
   {
     id: 'age-calculator',
@@ -94,6 +101,7 @@ export const TOOLS: ToolMeta[] = [
     color: 'var(--orange)',
     icon: 'cake',
     keywords: ['age', 'how old', 'birthday', 'birthdate'],
+    presentation: 'modal',
   },
   {
     id: 'date-calculator',
@@ -103,6 +111,7 @@ export const TOOLS: ToolMeta[] = [
     color: 'var(--blue)',
     icon: 'calendar',
     keywords: ['date', 'days between', 'add days', 'subtract days', 'difference'],
+    presentation: 'modal',
   },
   {
     id: 'expense-tracker',
@@ -112,6 +121,7 @@ export const TOOLS: ToolMeta[] = [
     color: 'var(--orange)',
     icon: 'wallet',
     keywords: ['expense', 'spending', 'money', 'track', 'purchase', 'cost'],
+    presentation: 'page',
   },
   {
     id: 'budget',
@@ -121,6 +131,7 @@ export const TOOLS: ToolMeta[] = [
     color: 'var(--teal)',
     icon: 'budget',
     keywords: ['budget', 'limit', 'monthly', 'save', 'savings'],
+    presentation: 'page',
   },
   {
     id: 'tip-calculator',
@@ -130,6 +141,7 @@ export const TOOLS: ToolMeta[] = [
     color: 'var(--red)',
     icon: 'receipt',
     keywords: ['tip', 'gratuity', 'restaurant', 'how much to tip'],
+    presentation: 'modal',
   },
   {
     id: 'split-bill',
@@ -139,6 +151,7 @@ export const TOOLS: ToolMeta[] = [
     color: 'var(--pink)',
     icon: 'receipt',
     keywords: ['split', 'bill', 'how much do i owe', 'divide bill', 'share bill'],
+    presentation: 'modal',
   },
 ];
 

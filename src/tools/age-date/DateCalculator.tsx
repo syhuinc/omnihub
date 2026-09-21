@@ -17,7 +17,7 @@ function formatFriendly(date: Date): string {
 }
 
 export function DateCalculator() {
-  const { navigate } = useRouter();
+  const { back } = useRouter();
   const [mode, setMode] = useState<Mode>('difference');
   const today = useMemo(() => new Date(), []);
 
@@ -48,7 +48,7 @@ export function DateCalculator() {
 
   return (
     <div className="screen">
-      <ScreenHeader title="Date Calculator" onBack={() => navigate('/tools')} />
+      <ScreenHeader title="Date Calculator" onBack={back} />
 
       <div className="ad__switch">
         <button

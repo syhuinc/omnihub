@@ -13,7 +13,7 @@ function newList(): ChecklistType {
 }
 
 export function Checklist() {
-  const { navigate } = useRouter();
+  const { back } = useRouter();
   const [lists, setLists] = useState<ChecklistType[]>(() => storageGet(StorageKeys.checklists, []));
   const [draft, setDraft] = useState<ChecklistType | null>(null);
   const [openId, setOpenId] = useState<string | null>(null);
@@ -67,7 +67,7 @@ export function Checklist() {
 
   return (
     <div className="screen">
-      <ScreenHeader title="Checklist" onBack={() => navigate('/tools')} />
+      <ScreenHeader title="Checklist" onBack={back} />
 
       <div className="cl__content">
         {sortedLists.length === 0 ? (

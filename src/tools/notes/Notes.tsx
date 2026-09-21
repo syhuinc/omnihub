@@ -19,7 +19,7 @@ function preview(body: string): string {
 }
 
 export function Notes() {
-  const { navigate } = useRouter();
+  const { back } = useRouter();
   const [notes, setNotes] = useState<Note[]>(() => storageGet(StorageKeys.notes, []));
   const [draft, setDraft] = useState<Note | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -90,7 +90,7 @@ export function Notes() {
 
   return (
     <div className="screen">
-      <ScreenHeader title="Notes" onBack={() => navigate('/tools')} />
+      <ScreenHeader title="Notes" onBack={back} />
 
       <div className="notes__search">
         <SearchBar value={query} onChange={setQuery} placeholder="Search notes..." />

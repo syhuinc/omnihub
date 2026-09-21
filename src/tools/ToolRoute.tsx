@@ -1,6 +1,7 @@
 import { ScreenHeader } from '../components/ScreenHeader';
 import { useRouter } from '../app/Router';
 import { getToolById } from './registry';
+import { ToolOverlay } from './ToolOverlay';
 import { Calculator } from './calculator/Calculator';
 import { UnitConverter } from './unit-converter/UnitConverter';
 import { Timer } from './timer/Timer';
@@ -36,16 +37,26 @@ export function ToolRoute({ toolId }: { toolId: string }) {
   const tool = getToolById(toolId);
   const ToolComponent = TOOL_COMPONENTS[toolId];
 
-  if (ToolComponent) {
+  if (!ToolComponent) {
+    return (
+      <div className="screen">
+        <ScreenHeader title={tool?.name ?? 'Tool'} onBack={() => navigate('/tools')} />
+        <div className="screen__empty">
+          <p>This tool isn't built yet — coming very soon.</p>
+        </div>
+      </div>
+    );
+  }
+
+  const presentation = tool?.presentation ?? 'page';
+
+  if (presentation === 'page') {
     return <ToolComponent />;
   }
 
   return (
-    <div className="screen">
-      <ScreenHeader title={tool?.name ?? 'Tool'} onBack={() => navigate('/tools')} />
-      <div className="screen__empty">
-        <p>This tool isn't built yet — coming very soon.</p>
-      </div>
-    </div>
+    <ToolOverlay variant={presentation}>
+      <ToolComponent />
+    </ToolOverlay>
   );
 }

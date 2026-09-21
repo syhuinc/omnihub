@@ -9,7 +9,7 @@ import './Calculator.css';
 const MAX_HISTORY = 50;
 
 export function Calculator() {
-  const { navigate } = useRouter();
+  const { back } = useRouter();
   const [display, setDisplay] = useState('0');
   const [storedValue, setStoredValue] = useState<number | null>(null);
   const [operator, setOperator] = useState<Operator | null>(null);
@@ -110,7 +110,7 @@ export function Calculator() {
     <div className="screen">
       <ScreenHeader
         title="Calculator"
-        onBack={() => navigate('/tools')}
+        onBack={back}
         action={
           <button
             type="button"

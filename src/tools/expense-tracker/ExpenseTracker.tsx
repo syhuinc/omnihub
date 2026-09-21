@@ -14,7 +14,7 @@ function formatMoney(amount: number): string {
 }
 
 export function ExpenseTracker() {
-  const { navigate } = useRouter();
+  const { back } = useRouter();
   const [expenses, setExpenses] = useState<Expense[]>(() => storageGet(StorageKeys.expenses, []));
   const [monthKey, setMonthKey] = useState(currentMonthKey());
   const [adding, setAdding] = useState(false);
@@ -58,7 +58,7 @@ export function ExpenseTracker() {
 
   return (
     <div className="screen">
-      <ScreenHeader title="Expense Tracker" onBack={() => navigate('/tools')} />
+      <ScreenHeader title="Expense Tracker" onBack={back} />
 
       <div className="et__month-nav">
         <button type="button" onClick={() => setMonthKey(shiftMonthKey(monthKey, -1))} aria-label="Previous month">

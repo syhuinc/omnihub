@@ -26,6 +26,13 @@ function greeting(): string {
   return 'Good evening';
 }
 
+interface HomeSections {
+  recommended: boolean;
+  quickActions: boolean;
+}
+
+const DEFAULT_SECTIONS: HomeSections = { recommended: true, quickActions: true };
+
 export function Home() {
   const { navigate } = useRouter();
   const [query, setQuery] = useState('');
@@ -33,6 +40,22 @@ export function Home() {
     storageGet(StorageKeys.pinnedTools, DEFAULT_PINNED),
   );
   const [editingPinned, setEditingPinned] = useState(false);
+  const [sections, setSections] = useState<HomeSections>(() =>
+    storageGet(StorageKeys.homeSections, DEFAULT_SECTIONS),
+  );
+
+  function hideSection(key: keyof HomeSections) {
+    const next = { ...sections, [key]: false };
+    setSections(next);
+    storageSet(StorageKeys.homeSections, next);
+  }
+
+  function restoreSections() {
+    setSections(DEFAULT_SECTIONS);
+    storageSet(StorageKeys.homeSections, DEFAULT_SECTIONS);
+  }
+
+  const hasHiddenSections = !sections.recommended || !sections.quickActions;
 
   const pinnedTools = pinnedIds.map(getToolById).filter((t): t is ToolMeta => !!t);
   const recommended = TOOLS.filter((tool) => !pinnedIds.includes(tool.id)).slice(0, 4);
@@ -139,35 +162,61 @@ export function Home() {
             )}
           </div>
 
-          <div className="home__section">
-            <div className="home__section-header">
-              <h2>Recommended for You</h2>
-            </div>
-            <div className="home__grid">
-              {recommended.map((tool) => (
-                <ToolTile key={tool.id} tool={tool} onClick={() => openTool(tool.id)} />
-              ))}
-            </div>
-          </div>
-
-          <div className="home__section">
-            <div className="home__section-header">
-              <h2>Quick Actions</h2>
-            </div>
-            <div className="home__quick-actions">
-              {QUICK_ACTIONS.map((action) => (
+          {sections.recommended && (
+            <div className="home__section">
+              <div className="home__section-header">
+                <h2>Recommended for You</h2>
                 <button
-                  key={action.label}
                   type="button"
-                  className="home__quick-action"
-                  onClick={() => openTool(action.toolId)}
+                  className="home__section-close"
+                  onClick={() => hideSection('recommended')}
+                  aria-label="Hide Recommended for You"
                 >
-                  <Icon name={action.icon} size={18} />
-                  {action.label}
+                  <Icon name="x" size={14} strokeWidth={2.5} />
                 </button>
-              ))}
+              </div>
+              <div className="home__grid">
+                {recommended.map((tool) => (
+                  <ToolTile key={tool.id} tool={tool} onClick={() => openTool(tool.id)} />
+                ))}
+              </div>
             </div>
-          </div>
+          )}
+
+          {sections.quickActions && (
+            <div className="home__section">
+              <div className="home__section-header">
+                <h2>Quick Actions</h2>
+                <button
+                  type="button"
+                  className="home__section-close"
+                  onClick={() => hideSection('quickActions')}
+                  aria-label="Hide Quick Actions"
+                >
+                  <Icon name="x" size={14} strokeWidth={2.5} />
+                </button>
+              </div>
+              <div className="home__quick-actions">
+                {QUICK_ACTIONS.map((action) => (
+                  <button
+                    key={action.label}
+                    type="button"
+                    className="home__quick-action"
+                    onClick={() => openTool(action.toolId)}
+                  >
+                    <Icon name={action.icon} size={18} />
+                    {action.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {hasHiddenSections && (
+            <button type="button" className="home__restore-sections" onClick={restoreSections}>
+              Show hidden sections
+            </button>
+          )}
         </>
       )}
     </div>

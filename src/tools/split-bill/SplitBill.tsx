@@ -12,7 +12,7 @@ function formatMoney(amount: number): string {
 }
 
 export function SplitBill() {
-  const { navigate } = useRouter();
+  const { back } = useRouter();
   const [billText, setBillText] = useState('');
   const [tipPercent, setTipPercent] = useState(0);
   const [people, setPeople] = useState(2);
@@ -32,7 +32,7 @@ export function SplitBill() {
 
   return (
     <div className="screen">
-      <ScreenHeader title="Split Bill" onBack={() => navigate('/tools')} />
+      <ScreenHeader title="Split Bill" onBack={back} />
 
       <div className="sb__body">
         <div className="sb__field">

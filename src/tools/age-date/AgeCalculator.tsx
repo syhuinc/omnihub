@@ -5,7 +5,7 @@ import { ageBreakdown, nextBirthday, parseISODate, toISODate } from './dateMath'
 import './AgeDate.css';
 
 export function AgeCalculator() {
-  const { navigate } = useRouter();
+  const { back } = useRouter();
   const [birthISO, setBirthISO] = useState('');
   const today = useMemo(() => new Date(), []);
 
@@ -18,7 +18,7 @@ export function AgeCalculator() {
 
   return (
     <div className="screen">
-      <ScreenHeader title="Age Calculator" onBack={() => navigate('/tools')} />
+      <ScreenHeader title="Age Calculator" onBack={back} />
 
       <div className="ad__body">
         <div className="ad__field">

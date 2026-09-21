@@ -11,7 +11,7 @@ function formatMoney(amount: number): string {
 }
 
 export function TipCalculator() {
-  const { navigate } = useRouter();
+  const { back } = useRouter();
   const [billText, setBillText] = useState('');
   const [tipPercent, setTipPercent] = useState(15);
   const [customTip, setCustomTip] = useState('');
@@ -27,7 +27,7 @@ export function TipCalculator() {
 
   return (
     <div className="screen">
-      <ScreenHeader title="Tip Calculator" onBack={() => navigate('/tools')} />
+      <ScreenHeader title="Tip Calculator" onBack={back} />
 
       <div className="tc__body">
         <div className="tc__field">

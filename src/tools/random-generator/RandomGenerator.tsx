@@ -13,7 +13,7 @@ function randomInt(min: number, max: number): number {
 }
 
 export function RandomGenerator() {
-  const { navigate } = useRouter();
+  const { back } = useRouter();
   const [mode, setMode] = useState<Mode>('dice');
 
   // Dice
@@ -78,7 +78,7 @@ export function RandomGenerator() {
 
   return (
     <div className="screen">
-      <ScreenHeader title="Random Generator" onBack={() => navigate('/tools')} />
+      <ScreenHeader title="Random Generator" onBack={back} />
 
       <div className="rg__tabs">
         {(['dice', 'coin', 'number', 'list'] as Mode[]).map((m) => (

@@ -15,7 +15,7 @@ function formatMoney(amount: number): string {
 }
 
 export function Budget() {
-  const { navigate } = useRouter();
+  const { back } = useRouter();
   const [budgets, setBudgets] = useState<Budgets>(() => storageGet(StorageKeys.budgets, {}));
   const [expenses] = useState<Expense[]>(() => storageGet(StorageKeys.expenses, []));
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -55,7 +55,7 @@ export function Budget() {
 
   return (
     <div className="screen">
-      <ScreenHeader title="Budget" subtitle={formatMonthLabel(monthKey)} onBack={() => navigate('/tools')} />
+      <ScreenHeader title="Budget" subtitle={formatMonthLabel(monthKey)} onBack={back} />
 
       <div className="bg__summary">
         <div className="bg__summary-item">

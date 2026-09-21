@@ -12,7 +12,7 @@ function formatNumber(value: number): string {
 }
 
 export function UnitConverter() {
-  const { navigate } = useRouter();
+  const { back } = useRouter();
   const [categoryId, setCategoryId] = useState(UNIT_CATEGORIES[0].id);
   const category = UNIT_CATEGORIES.find((c) => c.id === categoryId)!;
   const [fromUnitId, setFromUnitId] = useState(category.units[0].id);
@@ -40,7 +40,7 @@ export function UnitConverter() {
 
   return (
     <div className="screen">
-      <ScreenHeader title="Unit Converter" onBack={() => navigate('/tools')} />
+      <ScreenHeader title="Unit Converter" onBack={back} />
 
       <div className="uc__tabs">
         {UNIT_CATEGORIES.map((cat) => (

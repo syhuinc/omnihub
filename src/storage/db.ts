@@ -9,6 +9,7 @@ export const StorageKeys = {
   expenses: `${PREFIX}expenses`,
   budgets: `${PREFIX}budgets`,
   randomLists: `${PREFIX}random.lists`,
+  homeSections: `${PREFIX}home.sections`,
 } as const;
 
 export function storageGet<T>(key: string, fallback: T): T {
