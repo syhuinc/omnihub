@@ -8,6 +8,7 @@ import { Notes } from './notes/Notes';
 import { Checklist } from './checklist/Checklist';
 import { ExpenseTracker } from './expense-tracker/ExpenseTracker';
 import { Budget } from './budget/Budget';
+import { TipSplit } from './tip-split/TipSplit';
 
 const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
   calculator: Calculator,
@@ -17,6 +18,7 @@ const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
   checklist: Checklist,
   'expense-tracker': ExpenseTracker,
   budget: Budget,
+  'tip-split': TipSplit,
 };
 
 export function ToolRoute({ toolId }: { toolId: string }) {
