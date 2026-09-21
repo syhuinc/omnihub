@@ -1,0 +1,188 @@
+.pf__body {
+  padding: 0 20px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.pf__section-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 10px;
+}
+
+.pf__theme-toggle {
+  display: flex;
+  gap: 10px;
+}
+
+.pf__theme-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.pf__theme-btn--active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.pf__card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.pf__row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  text-align: left;
+  min-height: 48px;
+}
+
+.pf__row--static {
+  justify-content: space-between;
+}
+
+.pf__row-icon {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-active);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pf__row-icon--danger {
+  background: color-mix(in srgb, var(--red) 18%, transparent);
+  color: var(--red);
+}
+
+.pf__row-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pf__row-text strong {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.pf__row-text span {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.pf__row-value {
+  font-size: 14px;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.pf__row-chevron {
+  flex-shrink: 0;
+  color: var(--text-tertiary);
+}
+
+.pf__row--danger .pf__row-text strong {
+  color: var(--red);
+}
+
+.pf__divider {
+  height: 1px;
+  background: var(--border);
+  margin: 0 16px;
+}
+
+.pf__file-input {
+  display: none;
+}
+
+.pf__status {
+  margin-top: 10px;
+  font-size: 13px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+}
+
+.pf__status--success {
+  background: color-mix(in srgb, var(--green) 15%, transparent);
+  color: var(--green);
+}
+
+.pf__status--error {
+  background: color-mix(in srgb, var(--red) 15%, transparent);
+  color: var(--red);
+}
+
+.pf__confirm {
+  padding: 16px;
+}
+
+.pf__confirm p {
+  font-size: 13px;
+  color: var(--text-primary);
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+
+.pf__confirm-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.pf__confirm-actions button {
+  flex: 1;
+  min-height: 40px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 600;
+  background: var(--bg-active);
+  color: var(--text-primary);
+}
+
+.pf__confirm-delete {
+  background: var(--red) !important;
+  color: #fff !important;
+}
+
+.pf__privacy {
+  display: flex;
+  gap: 12px;
+  padding: 16px;
+}
+
+.pf__privacy-icon {
+  flex-shrink: 0;
+  color: var(--green);
+}
+
+.pf__privacy p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
