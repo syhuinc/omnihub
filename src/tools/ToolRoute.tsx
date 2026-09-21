@@ -13,6 +13,7 @@ import { TipCalculator } from './tip-calculator/TipCalculator';
 import { SplitBill } from './split-bill/SplitBill';
 import { AgeCalculator } from './age-date/AgeCalculator';
 import { DateCalculator } from './age-date/DateCalculator';
+import { RandomGenerator } from './random-generator/RandomGenerator';
 
 const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
   calculator: Calculator,
@@ -27,6 +28,7 @@ const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
   'split-bill': SplitBill,
   'age-calculator': AgeCalculator,
   'date-calculator': DateCalculator,
+  'random-generator': RandomGenerator,
 };
 
 export function ToolRoute({ toolId }: { toolId: string }) {
