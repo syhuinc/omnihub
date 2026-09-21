@@ -1,0 +1,141 @@
+.calc__history-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+}
+
+.calc__display {
+  padding: 24px 24px 16px;
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 96px;
+  justify-content: flex-end;
+}
+
+.calc__expression {
+  font-size: 15px;
+  color: var(--text-secondary);
+  min-height: 20px;
+}
+
+.calc__value {
+  font-size: 44px;
+  font-weight: 600;
+  color: var(--text-primary);
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.calc__pad {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-auto-rows: 1fr;
+  gap: 10px;
+  padding: 0 20px 20px;
+}
+
+.calc__key {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--text-primary);
+  min-height: 56px;
+}
+
+.calc__key:active {
+  background: var(--bg-active);
+}
+
+.calc__key--fn {
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 18px;
+}
+
+.calc__key--op {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  font-weight: 600;
+}
+
+.calc__key--eq {
+  background: var(--green);
+  border-color: var(--green);
+  color: #fff;
+  font-weight: 600;
+}
+
+.calc__history {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 8px 20px 20px;
+}
+
+.calc__empty {
+  color: var(--text-secondary);
+  font-size: 14px;
+  padding-top: 24px;
+  text-align: center;
+}
+
+.calc__history-list {
+  list-style: none;
+  margin: 0 0 16px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+}
+
+.calc__history-item {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  padding: 14px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  text-align: right;
+}
+
+.calc__history-expr {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.calc__history-result {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.calc__clear-history {
+  align-self: center;
+  padding: 10px 20px;
+  min-height: 40px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  color: var(--red);
+  font-size: 14px;
+  font-weight: 600;
+}
