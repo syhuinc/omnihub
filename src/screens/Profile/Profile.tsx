@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { ScreenHeader } from '../../components/ScreenHeader';
 import { Icon } from '../../components/Icon';
 import { storageGet, storageSet, StorageKeys, exportBackup, importBackup, clearAllData } from '../../storage/db';
+import { hapticWarning } from '../../haptics';
 import './Profile.css';
 
 type Theme = 'dark' | 'light';
@@ -55,6 +56,7 @@ export function Profile() {
   }
 
   function handleClearData() {
+    hapticWarning();
     clearAllData();
     window.location.reload();
   }

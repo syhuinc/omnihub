@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ScreenHeader } from '../../components/ScreenHeader';
 import { Icon } from '../../components/Icon';
+import { hapticSelect, hapticSuccess } from '../../haptics';
 import type { Checklist, ChecklistItem } from './types';
 
 interface ChecklistDetailProps {
@@ -27,7 +28,13 @@ export function ChecklistDetail({ list, onChange, onDelete, onClose }: Checklist
   }
 
   function toggleItem(id: string) {
-    update({ items: list.items.map((i) => (i.id === id ? { ...i, checked: !i.checked } : i)) });
+    const items = list.items.map((i) => (i.id === id ? { ...i, checked: !i.checked } : i));
+    update({ items });
+    if (items.length > 0 && items.every((i) => i.checked)) {
+      hapticSuccess();
+    } else {
+      hapticSelect();
+    }
   }
 
   function removeItem(id: string) {

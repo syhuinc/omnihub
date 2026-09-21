@@ -8,6 +8,7 @@ import { Pro } from '../screens/Pro/Pro';
 import { Profile } from '../screens/Profile/Profile';
 import { ToolRoute } from '../tools/ToolRoute';
 import { storageGet, StorageKeys } from '../storage/db';
+import { hapticTap } from '../haptics';
 import './App.css';
 
 const TOP_LEVEL_PATHS = new Set(['/', '/tools', '/pro', '/profile']);
@@ -58,6 +59,16 @@ function App() {
   useEffect(() => {
     const theme = storageGet<'dark' | 'light'>(StorageKeys.theme, 'dark');
     document.documentElement.dataset.theme = theme;
+  }, []);
+
+  useEffect(() => {
+    function onPointerDown(e: PointerEvent) {
+      const target = e.target as HTMLElement;
+      const button = target.closest('button');
+      if (button && !button.disabled) hapticTap();
+    }
+    document.addEventListener('pointerdown', onPointerDown);
+    return () => document.removeEventListener('pointerdown', onPointerDown);
   }, []);
 
   return (

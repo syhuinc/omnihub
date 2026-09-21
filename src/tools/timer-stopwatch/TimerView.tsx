@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { formatClock, pad, playBeep } from './time';
+import { hapticSuccess } from '../../haptics';
 
 type Status = 'idle' | 'running' | 'paused' | 'finished';
 
@@ -39,6 +40,7 @@ export function TimerView() {
       setStatus('finished');
       setRemainingAtPause(0);
       playBeep();
+      hapticSuccess();
     }
   }, [status, remaining]);
 

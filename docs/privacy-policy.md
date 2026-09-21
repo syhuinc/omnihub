@@ -23,7 +23,7 @@ Everything you enter into Omni Hub — notes, checklists, expenses, budgets, cal
 
 ## Permissions
 
-Omni Hub requests **no special Android permissions**. It does not access your camera, microphone, contacts, location, storage beyond its own app sandbox, or any other device feature.
+Omni Hub requests only the **Vibrate** permission, used for haptic feedback (tap and completion vibrations). It does not access your camera, microphone, contacts, location, storage beyond its own app sandbox, or any other device feature.
 
 ## Children's privacy
 
