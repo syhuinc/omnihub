@@ -3,10 +3,12 @@ import { useRouter } from '../app/Router';
 import { getToolById } from './registry';
 import { Calculator } from './calculator/Calculator';
 import { UnitConverter } from './unit-converter/UnitConverter';
+import { TimerStopwatch } from './timer-stopwatch/TimerStopwatch';
 
 const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
   calculator: Calculator,
   'unit-converter': UnitConverter,
+  'timer-stopwatch': TimerStopwatch,
 };
 
 export function ToolRoute({ toolId }: { toolId: string }) {
