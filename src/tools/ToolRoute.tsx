@@ -5,12 +5,14 @@ import { Calculator } from './calculator/Calculator';
 import { UnitConverter } from './unit-converter/UnitConverter';
 import { TimerStopwatch } from './timer-stopwatch/TimerStopwatch';
 import { Notes } from './notes/Notes';
+import { Checklist } from './checklist/Checklist';
 
 const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
   calculator: Calculator,
   'unit-converter': UnitConverter,
   'timer-stopwatch': TimerStopwatch,
   notes: Notes,
+  checklist: Checklist,
 };
 
 export function ToolRoute({ toolId }: { toolId: string }) {
