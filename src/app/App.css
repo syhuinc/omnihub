@@ -11,12 +11,14 @@
 
 .app-shell__content {
   flex: 1;
+  display: flex;
+  flex-direction: column;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
 
 .screen {
-  min-height: 100%;
+  flex: 1 0 auto;
   display: flex;
   flex-direction: column;
   padding-bottom: 24px;
@@ -43,4 +45,25 @@
   text-align: center;
   color: var(--text-secondary);
   font-size: 14px;
+}
+
+/* Quick tools (calculator, converters, timers…) enter with a slide up
+   from the bottom edge instead of the default fade, since that's how
+   they were opened — but once settled they're a normal full screen,
+   not a floating panel. */
+.tool-slide-in {
+  display: contents;
+}
+
+.tool-slide-in .screen {
+  animation: tool-slide-in-anim 0.26s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+@keyframes tool-slide-in-anim {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
 }

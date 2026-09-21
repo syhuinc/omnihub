@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { ScreenHeader } from '../../components/ScreenHeader';
 import { Icon } from '../../components/Icon';
 import { useRouter } from '../../app/Router';
 import { storageGet, storageSet, StorageKeys } from '../../storage/db';
@@ -107,21 +106,20 @@ export function Calculator() {
   }
 
   return (
-    <div className="screen">
-      <ScreenHeader
-        title="Calculator"
-        onBack={back}
-        action={
-          <button
-            type="button"
-            className="calc__history-toggle"
-            onClick={() => setShowHistory((v) => !v)}
-            aria-label="Toggle history"
-          >
-            <Icon name={showHistory ? 'x' : 'history'} size={18} />
-          </button>
-        }
-      />
+    <div className="screen calc-screen">
+      <div className="calc__topbar">
+        <button type="button" className="calc__icon-btn" onClick={back} aria-label="Back">
+          <Icon name="back" size={22} />
+        </button>
+        <button
+          type="button"
+          className="calc__icon-btn"
+          onClick={() => setShowHistory((v) => !v)}
+          aria-label="Toggle history"
+        >
+          <Icon name={showHistory ? 'x' : 'history'} size={20} />
+        </button>
+      </div>
 
       {showHistory ? (
         <div className="calc__history">
@@ -157,7 +155,7 @@ export function Calculator() {
           </div>
 
           <div className="calc__pad">
-            <button type="button" className="calc__key calc__key--fn" onClick={clearAll}>
+            <button type="button" className="calc__key calc__key--clear" onClick={clearAll}>
               AC
             </button>
             <button type="button" className="calc__key calc__key--fn" onClick={toggleSign}>

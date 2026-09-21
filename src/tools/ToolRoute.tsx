@@ -1,7 +1,6 @@
 import { ScreenHeader } from '../components/ScreenHeader';
 import { useRouter } from '../app/Router';
 import { getToolById } from './registry';
-import { ToolOverlay } from './ToolOverlay';
 import { Calculator } from './calculator/Calculator';
 import { UnitConverter } from './unit-converter/UnitConverter';
 import { Timer } from './timer/Timer';
@@ -50,9 +49,9 @@ export function ToolRoute({ toolId }: { toolId: string }) {
 
   if (tool?.presentation === 'sheet') {
     return (
-      <ToolOverlay>
+      <div className="tool-slide-in">
         <ToolComponent />
-      </ToolOverlay>
+      </div>
     );
   }
 
