@@ -9,6 +9,7 @@
     "lint": "oxlint",
     "preview": "vite preview",
     "android:sync": "npm run build && npx cap sync android",
+    "assets:generate": "npx capacitor-assets generate --android --iconBackgroundColor '#080b12' --iconBackgroundColorDark '#080b12' && node scripts/fix-adaptive-icon-inset.js",
     "android:open": "npx cap open android"
   },
   "dependencies": {
