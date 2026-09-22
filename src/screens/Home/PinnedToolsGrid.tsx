@@ -20,6 +20,8 @@ export function PinnedToolsGrid({ tools, editing, onOpen, onRemove, onReorder }:
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const itemRefs = useRef(new Map<string, HTMLDivElement>());
+  const activeIdRef = useRef<string | null>(null);
+  const activePointerIdRef = useRef<number | null>(null);
   // The dragged tile's translate(dx, dy) is relative to wherever it's naturally laid out right
   // now — which moves whenever a swap re-slots it in the grid. startRef is rebased to the
   // pointer's current position on every swap so dx/dy (and the CSS transform) restart from
@@ -44,62 +46,59 @@ export function PinnedToolsGrid({ tools, editing, onOpen, onRemove, onReorder }:
     setOrder(next);
   }
 
-  function handlePointerDown(e: ReactPointerEvent, id: string) {
+  function handlePointerDown(e: ReactPointerEvent<HTMLDivElement>, id: string) {
     if (!editing) return;
+    e.preventDefault();
+    e.currentTarget.setPointerCapture(e.pointerId);
+    activeIdRef.current = id;
+    activePointerIdRef.current = e.pointerId;
     startRef.current = { x: e.clientX, y: e.clientY };
     movedRef.current = false;
+  }
 
-    function onMove(moveEvent: PointerEvent) {
-      const dx = moveEvent.clientX - startRef.current.x;
-      const dy = moveEvent.clientY - startRef.current.y;
+  function handlePointerMove(e: ReactPointerEvent<HTMLDivElement>, id: string) {
+    if (activeIdRef.current !== id || activePointerIdRef.current !== e.pointerId) return;
 
-      if (!movedRef.current) {
-        if (Math.abs(dx) < DRAG_START_THRESHOLD && Math.abs(dy) < DRAG_START_THRESHOLD) return;
-        movedRef.current = true;
-        setDraggingId(id);
-      }
-      setDragOffset({ x: dx, y: dy });
+    const dx = e.clientX - startRef.current.x;
+    const dy = e.clientY - startRef.current.y;
 
-      // Hit-test using the pointer's actual position, not the dragged tile's computed center —
-      // that avoids ever needing the dragged tile's own (transform-affected) rect at all.
-      for (const [otherId, el] of itemRefs.current) {
-        if (otherId === id) continue;
-        const r = el.getBoundingClientRect();
-        if (
-          moveEvent.clientX >= r.left &&
-          moveEvent.clientX <= r.right &&
-          moveEvent.clientY >= r.top &&
-          moveEvent.clientY <= r.bottom
-        ) {
-          const from = orderRef.current.indexOf(id);
-          const to = orderRef.current.indexOf(otherId);
-          if (from === -1 || to === -1) break;
-          const next = [...orderRef.current];
-          next.splice(from, 1);
-          next.splice(to, 0, id);
-          setOrderAndPersist(next);
-          // Rebase: the tile just got re-slotted to a new natural position, so restart the
-          // translate offset from here instead of jumping by the whole slot distance.
-          startRef.current = { x: moveEvent.clientX, y: moveEvent.clientY };
-          setDragOffset({ x: 0, y: 0 });
-          break;
-        }
+    if (!movedRef.current) {
+      if (Math.abs(dx) < DRAG_START_THRESHOLD && Math.abs(dy) < DRAG_START_THRESHOLD) return;
+      movedRef.current = true;
+      setDraggingId(id);
+    }
+    setDragOffset({ x: dx, y: dy });
+
+    // Hit-test using the pointer's actual position, not the dragged tile's computed center —
+    // that avoids ever needing the dragged tile's own (transform-affected) rect at all.
+    for (const [otherId, el] of itemRefs.current) {
+      if (otherId === id) continue;
+      const r = el.getBoundingClientRect();
+      if (e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom) {
+        const from = orderRef.current.indexOf(id);
+        const to = orderRef.current.indexOf(otherId);
+        if (from === -1 || to === -1) break;
+        const next = [...orderRef.current];
+        next.splice(from, 1);
+        next.splice(to, 0, id);
+        setOrderAndPersist(next);
+        // Rebase: the tile just got re-slotted to a new natural position, so restart the
+        // translate offset from here instead of jumping by the whole slot distance.
+        startRef.current = { x: e.clientX, y: e.clientY };
+        setDragOffset({ x: 0, y: 0 });
+        break;
       }
     }
+  }
 
-    function onUp() {
-      window.removeEventListener('pointermove', onMove);
-      window.removeEventListener('pointerup', onUp);
-      window.removeEventListener('pointercancel', onUp);
-      if (movedRef.current) onReorder(orderRef.current);
-      setDraggingId(null);
-      setDragOffset({ x: 0, y: 0 });
-      movedRef.current = false;
-    }
-
-    window.addEventListener('pointermove', onMove);
-    window.addEventListener('pointerup', onUp);
-    window.addEventListener('pointercancel', onUp);
+  function handlePointerEnd(e: ReactPointerEvent<HTMLDivElement>, id: string) {
+    if (activeIdRef.current !== id || activePointerIdRef.current !== e.pointerId) return;
+    if (movedRef.current) onReorder(orderRef.current);
+    setDraggingId(null);
+    setDragOffset({ x: 0, y: 0 });
+    movedRef.current = false;
+    activeIdRef.current = null;
+    activePointerIdRef.current = null;
   }
 
   const toolMap = new Map(tools.map((t) => [t.id, t]));
@@ -121,6 +120,9 @@ export function PinnedToolsGrid({ tools, editing, onOpen, onRemove, onReorder }:
               : undefined
           }
           onPointerDown={(e) => handlePointerDown(e, tool.id)}
+          onPointerMove={(e) => handlePointerMove(e, tool.id)}
+          onPointerUp={(e) => handlePointerEnd(e, tool.id)}
+          onPointerCancel={(e) => handlePointerEnd(e, tool.id)}
         >
           <ToolTile
             tool={tool}

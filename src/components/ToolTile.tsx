@@ -95,7 +95,8 @@ export function ToolTile({ tool, onClick, onRemove, onLongPress, showPinBadge, p
           onClick={onTogglePin}
           aria-label={pinned ? `Unpin ${tool.name}` : `Pin ${tool.name}`}
         >
-          <Icon name="pin" size={13} />
+          <Icon name="pin" size={14} />
+          {pinned ? 'Unpin' : 'Pin'}
         </button>
       )}
     </div>
