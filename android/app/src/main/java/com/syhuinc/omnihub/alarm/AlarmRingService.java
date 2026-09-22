@@ -138,7 +138,11 @@ public class AlarmRingService extends Service {
                 .setContentIntent(fullScreenPi)
                 .addAction(android.R.drawable.ic_menu_close_clear_cancel, "Stop", stopPi)
                 .setOngoing(true)
-                .setAutoCancel(false);
+                .setAutoCancel(false)
+                // setOngoing(true) is meant to block swipe-dismiss, but some OEM notification
+                // shades allow it anyway - if that happens here, treat it exactly like tapping
+                // Stop instead of leaving the ringtone running with no visible way to reach it.
+                .setDeleteIntent(stopPi);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             ServiceCompat.startForeground(
