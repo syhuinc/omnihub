@@ -45,21 +45,21 @@
   <h1>Privacy Policy for Omni Hub</h1>
   <p class="updated">Last updated: 2026</p>
 
-  <p>Omni Hub is an offline-first utility app. Everything works fully on your device with no account needed. Signing in with Google is entirely optional and only unlocks syncing your Notes and Vault across your own devices — nothing else changes, and nothing is shared, sold, or used for ads or analytics either way.</p>
+  <p>Omni Hub is an offline-first utility app. Everything works fully on your device with no account needed. Signing in with Google is entirely optional and only unlocks syncing some of your data across your own devices — nothing else changes, and nothing is shared, sold, or used for ads or analytics either way.</p>
 
   <h2>What we collect</h2>
   <p><strong>If you never sign in:</strong> nothing. Omni Hub makes no network requests, uses no analytics, tracking, or advertising SDKs, and never transmits anything, because it never leaves your device.</p>
   <p><strong>If you choose to sign in with Google</strong> (Profile ▸ Cloud Sync), to sync your data across your own devices:</p>
   <ul>
     <li>Firebase Authentication (a Google service) receives your Google account's basic profile — name, email address, and profile photo — to identify you as the signed-in user. Omni Hub doesn't see or store your Google password.</li>
-    <li>Your <strong>Notes</strong> content (titles and text) is stored in Cloud Firestore (also a Google service), scoped to your account, so it can sync to your other signed-in devices.</li>
+    <li>These tools' content syncs to Cloud Firestore (also a Google service), scoped to your account, so it can reach your other signed-in devices: <strong>Notes</strong> (titles and text), <strong>Checklist</strong> (list names and items), <strong>Expense Tracker</strong> (amounts, categories, notes, dates), <strong>Subscription Calculator</strong>, and <strong>Debt Tracker</strong> (amounts and names/notes you enter).</li>
     <li>Your <strong>Vault</strong> notes sync too, but only as the same PIN-encrypted ciphertext already stored on your device — see <a href="#vault">Vault</a> below for exactly what that means.</li>
-    <li><strong>Alarms</strong> do not sync yet. They remain device-only regardless of sign-in status.</li>
+    <li><strong>Alarms</strong> and <strong>Budget</strong> limits do not sync yet. They remain device-only regardless of sign-in status.</li>
   </ul>
   <p>No advertising, analytics, or tracking SDKs are used, and nothing collected is ever sold or shared with third parties beyond the Google/Firebase infrastructure used to provide sync itself.</p>
 
   <h2>Where your data lives</h2>
-  <p>Everything you enter into Omni Hub — notes, checklists, expenses, budgets, calculator history, pinned tools, and app settings — is stored <strong>on your device</strong> at minimum, using standard local browser storage (<code>localStorage</code>). Notes and Vault content is additionally copied to Google's Firebase servers only if, and for as long as, you're signed in.</p>
+  <p>Everything you enter into Omni Hub — notes, checklists, expenses, budgets, calculator history, pinned tools, and app settings — is stored <strong>on your device</strong> at minimum, using standard local browser storage (<code>localStorage</code>). The tools listed above are additionally copied to Google's Firebase servers only if, and for as long as, you're signed in.</p>
   <ul>
     <li>You can export a backup of this data at any time from <strong>Profile ▸ Export Backup</strong>, which saves a JSON file to your device that only you control.</li>
     <li>You can delete all local data at any time from <strong>Profile ▸ Clear All Data</strong>.</li>
