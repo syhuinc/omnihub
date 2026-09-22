@@ -1,8 +1,9 @@
 @import './theme/theme.css';
 
 #root {
-  min-height: 100svh;
-  min-height: 100vh;
+  height: 100svh;
+  height: 100vh;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }

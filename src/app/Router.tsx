@@ -18,6 +18,13 @@ function currentPath(): string {
   return window.location.hash.slice(1) || '/';
 }
 
+/** The screen "back" should return to, independent of how the user actually navigated in. */
+function parentPath(path: string): string {
+  if (path.startsWith('/tools/')) return '/tools';
+  if (path === '/vault') return '/pro';
+  return '/';
+}
+
 export function RouterProvider({ children }: { children: ReactNode }) {
   const [path, setPath] = useState(currentPath);
 
@@ -41,7 +48,7 @@ export function RouterProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const back = () => window.history.back();
+  const back = () => navigate(parentPath(path), { replace: true });
 
   return (
     <RouterContext.Provider value={{ path, navigate, back }}>
