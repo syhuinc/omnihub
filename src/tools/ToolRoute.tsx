@@ -15,6 +15,12 @@ import { AgeCalculator } from './age-date/AgeCalculator';
 import { DateCalculator } from './age-date/DateCalculator';
 import { RandomGenerator } from './random-generator/RandomGenerator';
 import { Alarm } from './alarm/Alarm';
+import { PercentageCalculator } from './percentage-calculator/PercentageCalculator';
+import { ScientificCalculator } from './scientific-calculator/ScientificCalculator';
+import { TimeZone } from './time-zone/TimeZone';
+import { TimeDifference } from './time-difference/TimeDifference';
+import { SubscriptionCalculator } from './subscription-calculator/SubscriptionCalculator';
+import { DebtCalculator } from './debt-calculator/DebtCalculator';
 
 const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
   calculator: Calculator,
@@ -31,6 +37,12 @@ const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
   'age-calculator': AgeCalculator,
   'date-calculator': DateCalculator,
   'random-generator': RandomGenerator,
+  'percentage-calculator': PercentageCalculator,
+  'scientific-calculator': ScientificCalculator,
+  'time-zone': TimeZone,
+  'time-difference': TimeDifference,
+  'subscription-calculator': SubscriptionCalculator,
+  'debt-calculator': DebtCalculator,
 };
 
 export function ToolRoute({ toolId }: { toolId: string }) {

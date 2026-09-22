@@ -18,6 +18,8 @@ export const StorageKeys = {
   alarmCustomSounds: `${PREFIX}alarm.customSounds`,
   alarmCategoryDefaultSounds: `${PREFIX}alarm.categoryDefaultSounds`,
   toolSuggestions: `${PREFIX}tools.suggestions`,
+  subscriptions: `${PREFIX}subscriptions`,
+  timeZoneCities: `${PREFIX}timeZone.cities`,
 } as const;
 
 export function storageGet<T>(key: string, fallback: T): T {

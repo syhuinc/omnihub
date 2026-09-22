@@ -50,7 +50,13 @@ export type IconName =
   | 'stop'
   | 'music'
   | 'lightbulb'
-  | 'sort';
+  | 'sort'
+  | 'percent'
+  | 'function'
+  | 'globe'
+  | 'clock'
+  | 'repeat'
+  | 'card';
 
 interface IconProps {
   name: IconName;
@@ -190,6 +196,20 @@ const paths: Record<IconName, React.ReactNode> = {
   ),
   sort: (
     <path d="M7 4v16 M7 4 4 7m3-3 3 3 M17 20V4m0 16-3-3m3 3 3-3" />
+  ),
+  percent: (
+    <path d="M19 5 5 19 M6.5 9a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5ZM17.5 20a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" />
+  ),
+  function: <path d="M8 21c2-6 2-13 2-16a3 3 0 0 1 3-3 M5 10h6 M13 21l7-8m-7 0 7 8" />,
+  globe: (
+    <path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z M3 12h18 M12 3a13.5 13.5 0 0 1 0 18 13.5 13.5 0 0 1 0-18Z" />
+  ),
+  clock: <path d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20Z M12 6v6l4 2" />,
+  repeat: (
+    <path d="M17 2l4 4-4 4 M21 6H8a5 5 0 0 0-5 5v1 M7 22l-4-4 4-4 M3 18h13a5 5 0 0 0 5-5v-1" />
+  ),
+  card: (
+    <path d="M3 6h18a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1Z M2 10h20 M6 15h4" />
   ),
 };
 
