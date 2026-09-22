@@ -36,7 +36,8 @@
    opaque since it sits directly beside the swipe-to-delete red backdrop, and
    any transparency there lets that red show through at the shared edge. */
 .alarm__card--disabled .alarm__card-main,
-.alarm__card--disabled .alarm__switch {
+.alarm__card--disabled .alarm__switch,
+.alarm__card--disabled .alarm__checkbox {
   opacity: 0.5;
 }
 
@@ -117,6 +118,32 @@
   align-items: center;
   justify-content: center;
   color: var(--text-tertiary);
+}
+
+.alarm__header-btn {
+  min-height: 36px;
+  padding: 0 4px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+.alarm__checkbox {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 7px;
+  border: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
+
+.alarm__checkbox--checked {
+  background: var(--accent-gradient);
+  border-color: transparent;
 }
 
 .alarm__crash-log {

@@ -3,11 +3,13 @@ import { ScreenHeader } from '../../components/ScreenHeader';
 import { Icon } from '../../components/Icon';
 import { SwipeToDelete } from '../../components/SwipeToDelete';
 import { useRouter } from '../../app/Router';
+import { useBackHandler } from '../../app/useBackHandler';
 import { AlarmPlugin, type AlarmRecord } from '../../alarm/plugin';
 import { formatTime, REPEAT_LABELS } from '../../alarm/types';
 import { hapticSelect, hapticWarning } from '../../haptics';
 import { AlarmEditor } from './AlarmEditor';
 import { CrashLogView } from './CrashLogView';
+import { RingtonePicker } from './RingtonePicker';
 import './Alarm.css';
 
 export function Alarm() {
@@ -18,6 +20,9 @@ export function Alarm() {
   const [creatingNew, setCreatingNew] = useState(false);
   const [showCrashLog, setShowCrashLog] = useState(false);
   const [openSwipeId, setOpenSwipeId] = useState<string | null>(null);
+  const [selecting, setSelecting] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [showBulkSound, setShowBulkSound] = useState(false);
 
   async function refresh() {
     const { alarms: list } = await AlarmPlugin.list();
@@ -28,6 +33,23 @@ export function Alarm() {
   useEffect(() => {
     refresh();
   }, []);
+
+  function exitSelecting() {
+    setSelecting(false);
+    setSelectedIds(new Set());
+  }
+
+  useBackHandler(exitSelecting, selecting);
+
+  function toggleSelected(id: string) {
+    hapticSelect();
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
 
   async function toggleEnabled(alarm: AlarmRecord) {
     hapticSelect();
@@ -74,21 +96,56 @@ export function Alarm() {
     return <CrashLogView onClose={() => setShowCrashLog(false)} />;
   }
 
+  if (showBulkSound) {
+    return (
+      <RingtonePicker
+        mode="bulk"
+        alarmIds={[...selectedIds]}
+        onSelect={() => {
+          setShowBulkSound(false);
+          exitSelecting();
+          refresh();
+        }}
+        onClose={() => setShowBulkSound(false)}
+      />
+    );
+  }
+
   return (
     <div className="screen">
       <ScreenHeader
         title="Alarm"
-        subtitle="Wakes you even if the app is closed"
-        onBack={back}
+        subtitle={selecting ? `${selectedIds.size} selected` : 'Wakes you even if the app is closed'}
+        onBack={selecting ? exitSelecting : back}
         action={
-          <button
-            type="button"
-            className="alarm__debug-btn"
-            onClick={() => setShowCrashLog(true)}
-            aria-label="View crash log"
-          >
-            <Icon name="info" size={20} />
-          </button>
+          selecting ? (
+            <>
+              {selectedIds.size > 0 && (
+                <button type="button" className="alarm__header-btn" onClick={() => setShowBulkSound(true)}>
+                  Change Sound
+                </button>
+              )}
+              <button type="button" className="alarm__header-btn" onClick={exitSelecting}>
+                Cancel
+              </button>
+            </>
+          ) : (
+            <>
+              {alarms.length > 0 && (
+                <button type="button" className="alarm__header-btn" onClick={() => setSelecting(true)}>
+                  Select
+                </button>
+              )}
+              <button
+                type="button"
+                className="alarm__debug-btn"
+                onClick={() => setShowCrashLog(true)}
+                aria-label="View crash log"
+              >
+                <Icon name="info" size={20} />
+              </button>
+            </>
+          )
         }
       />
 
@@ -97,24 +154,31 @@ export function Alarm() {
           <p className="alarm__empty">No alarms yet. Tap + to create one.</p>
         ) : (
           <ul className="alarm__list">
-            {alarms.map((a) => (
-              <li key={a.id}>
-                <SwipeToDelete
-                  id={a.id}
-                  openId={openSwipeId}
-                  onOpenChange={setOpenSwipeId}
-                  onDelete={() => handleDelete(a.id)}
-                  deleteLabel="Delete"
-                >
-                  <div className={`alarm__card${a.enabled ? '' : ' alarm__card--disabled'}`}>
-                    <button type="button" className="alarm__card-main" onClick={() => setEditingId(a.id)}>
-                      <span className="alarm__card-time">{formatTime(a.hour, a.minute)}</span>
-                      <span className="alarm__card-meta">
-                        {a.label ? `${a.label} · ` : ''}
-                        {REPEAT_LABELS[a.repeatMode]}
-                        {a.backupEnabled ? ' · Backup' : ''}
-                      </span>
+            {alarms.map((a) => {
+              const card = (
+                <div className={`alarm__card${a.enabled ? '' : ' alarm__card--disabled'}`}>
+                  <button
+                    type="button"
+                    className="alarm__card-main"
+                    onClick={() => (selecting ? toggleSelected(a.id) : setEditingId(a.id))}
+                  >
+                    <span className="alarm__card-time">{formatTime(a.hour, a.minute)}</span>
+                    <span className="alarm__card-meta">
+                      {a.label ? `${a.label} · ` : ''}
+                      {REPEAT_LABELS[a.repeatMode]}
+                      {a.backupEnabled ? ' · Backup' : ''}
+                    </span>
+                  </button>
+                  {selecting ? (
+                    <button
+                      type="button"
+                      className={`alarm__checkbox${selectedIds.has(a.id) ? ' alarm__checkbox--checked' : ''}`}
+                      onClick={() => toggleSelected(a.id)}
+                      aria-label={selectedIds.has(a.id) ? 'Deselect alarm' : 'Select alarm'}
+                    >
+                      {selectedIds.has(a.id) && <Icon name="check" size={14} strokeWidth={3} />}
                     </button>
+                  ) : (
                     <button
                       type="button"
                       className={`alarm__switch${a.enabled ? ' alarm__switch--on' : ''}`}
@@ -125,17 +189,37 @@ export function Alarm() {
                     >
                       <span className="alarm__switch-knob" />
                     </button>
-                  </div>
-                </SwipeToDelete>
-              </li>
-            ))}
+                  )}
+                </div>
+              );
+
+              return (
+                <li key={a.id}>
+                  {selecting ? (
+                    card
+                  ) : (
+                    <SwipeToDelete
+                      id={a.id}
+                      openId={openSwipeId}
+                      onOpenChange={setOpenSwipeId}
+                      onDelete={() => handleDelete(a.id)}
+                      deleteLabel="Delete"
+                    >
+                      {card}
+                    </SwipeToDelete>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         )}
       </div>
 
-      <button type="button" className="alarm__fab" onClick={() => setCreatingNew(true)} aria-label="New alarm">
-        <Icon name="plus" size={24} />
-      </button>
+      {!selecting && (
+        <button type="button" className="alarm__fab" onClick={() => setCreatingNew(true)} aria-label="New alarm">
+          <Icon name="plus" size={24} />
+        </button>
+      )}
     </div>
   );
 }

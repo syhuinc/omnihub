@@ -16,14 +16,16 @@ import { CategoryDefaultsScreen } from './CategoryDefaultsScreen';
 import './RingtonePicker.css';
 
 interface RingtonePickerProps {
-  mode?: 'select' | 'setDefault';
+  mode?: 'select' | 'setDefault' | 'bulk';
   category?: TimeCategory;
   excludeAlarmId?: string | null;
+  /** Required when mode is 'bulk' — the alarms to apply the chosen sound to directly. */
+  alarmIds?: string[];
   onSelect: (sound: { uri: string | null; name: string | null }) => void;
   onClose: () => void;
 }
 
-export function RingtonePicker({ mode = 'select', category, excludeAlarmId, onSelect, onClose }: RingtonePickerProps) {
+export function RingtonePicker({ mode = 'select', category, excludeAlarmId, alarmIds, onSelect, onClose }: RingtonePickerProps) {
   const [sounds, setSounds] = useState<RingtoneEntry[]>([]);
   const [customSounds, setCustomSounds] = useState<RingtoneEntry[]>(loadCustomSounds());
   const [favorites, setFavorites] = useState<string[]>(loadFavoriteUris());
@@ -94,6 +96,18 @@ export function RingtonePicker({ mode = 'select', category, excludeAlarmId, onSe
 
     if (mode === 'setDefault') {
       if (category) setCategoryDefault(category, sound);
+      hapticSuccess();
+      onSelect(chosen);
+      return;
+    }
+
+    if (mode === 'bulk') {
+      const { alarms } = await AlarmPlugin.list();
+      for (const id of alarmIds ?? []) {
+        const alarm = alarms.find((a) => a.id === id);
+        if (!alarm) continue;
+        await AlarmPlugin.schedule({ ...alarm, soundUri: chosen.uri, soundName: chosen.name });
+      }
       hapticSuccess();
       onSelect(chosen);
       return;
@@ -194,7 +208,13 @@ export function RingtonePicker({ mode = 'select', category, excludeAlarmId, onSe
   return (
     <div className="screen">
       <ScreenHeader
-        title={mode === 'setDefault' && category ? `Default — ${category[0].toUpperCase()}${category.slice(1)}` : 'Choose Sound'}
+        title={
+          mode === 'setDefault' && category
+            ? `Default — ${category[0].toUpperCase()}${category.slice(1)}`
+            : mode === 'bulk'
+              ? `Choose Sound for ${alarmIds?.length ?? 0} Alarm${alarmIds?.length === 1 ? '' : 's'}`
+              : 'Choose Sound'
+        }
         onBack={onClose}
         action={
           mode === 'select' && (
