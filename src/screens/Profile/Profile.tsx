@@ -13,6 +13,7 @@ export function Profile() {
   const [theme, setTheme] = useState<Theme>(() => storageGet(StorageKeys.theme, 'dark'));
   const [importStatus, setImportStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [confirmingClear, setConfirmingClear] = useState(false);
+  const [confirmingSignOut, setConfirmingSignOut] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   function applyTheme(next: Theme) {
@@ -93,14 +94,35 @@ export function Profile() {
                   </span>
                 </div>
                 <div className="pf__divider" />
-                <button type="button" className="pf__row pf__row--danger" onClick={signOut}>
-                  <span className="pf__row-icon pf__row-icon--danger">
-                    <Icon name="x" size={18} />
-                  </span>
-                  <span className="pf__row-text">
-                    <strong>Sign Out</strong>
-                  </span>
-                </button>
+                {!confirmingSignOut ? (
+                  <button type="button" className="pf__row pf__row--danger" onClick={() => setConfirmingSignOut(true)}>
+                    <span className="pf__row-icon pf__row-icon--danger">
+                      <Icon name="x" size={18} />
+                    </span>
+                    <span className="pf__row-text">
+                      <strong>Sign Out</strong>
+                    </span>
+                  </button>
+                ) : (
+                  <div className="pf__confirm">
+                    <p>Sign out of your Google account? Your data stays on this device, but it'll stop syncing until you sign back in.</p>
+                    <div className="pf__confirm-actions">
+                      <button type="button" onClick={() => setConfirmingSignOut(false)}>
+                        Cancel
+                      </button>
+                      <button
+                        type="button"
+                        className="pf__confirm-delete"
+                        onClick={() => {
+                          setConfirmingSignOut(false);
+                          signOut();
+                        }}
+                      >
+                        Sign Out
+                      </button>
+                    </div>
+                  </div>
+                )}
               </>
             ) : (
               <button type="button" className="pf__row" onClick={signInWithGoogle} disabled={signingIn}>
