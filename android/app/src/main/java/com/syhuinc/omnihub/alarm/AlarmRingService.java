@@ -22,6 +22,9 @@ import android.os.Vibrator;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.ServiceCompat;
 
+import com.syhuinc.omnihub.flashalert.FlashAlertPrefs;
+import com.syhuinc.omnihub.flashalert.TorchBlinker;
+
 public class AlarmRingService extends Service {
     private static final String CHANNEL_ID = "omnihub_alarm_ring";
     private static final int NOTIFICATION_ID = 991;
@@ -83,6 +86,7 @@ public class AlarmRingService extends Service {
         acquireWakeLock();
         startRingtone(alarm);
         startVibration();
+        startFlashBlink();
 
         autoStopHandler.removeCallbacks(autoStopRunnable);
         autoStopHandler.postDelayed(autoStopRunnable, MAX_RING_MS);
@@ -225,6 +229,12 @@ public class AlarmRingService extends Service {
         }
     }
 
+    private void startFlashBlink() {
+        if (FlashAlertPrefs.isAlarmEnabled(this)) {
+            TorchBlinker.startContinuous(this, TorchBlinker.SOURCE_ALARM, 300, 300);
+        }
+    }
+
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -234,6 +244,7 @@ public class AlarmRingService extends Service {
         if (ringtone != null && ringtone.isPlaying()) ringtone.stop();
         ringtone = null;
         if (vibrator != null) vibrator.cancel();
+        TorchBlinker.stop(this, TorchBlinker.SOURCE_ALARM);
         if (wakeLock != null && wakeLock.isHeld()) wakeLock.release();
         ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE);
     }
