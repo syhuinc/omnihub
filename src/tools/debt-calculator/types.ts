@@ -7,4 +7,6 @@ export interface DebtEntry {
   direction: DebtDirection;
   note?: string;
   createdAt: number;
+  updatedAt: number;
+  deletedAt?: number;
 }

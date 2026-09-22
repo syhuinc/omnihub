@@ -3,6 +3,7 @@ import { ScreenHeader } from '../../components/ScreenHeader';
 import { Icon } from '../../components/Icon';
 import { useRouter } from '../../app/Router';
 import { storageGet, storageSet, StorageKeys } from '../../storage/db';
+import { useCloudSync } from '../../cloud/useCloudSync';
 import { ChecklistDetail } from './ChecklistDetail';
 import type { Checklist as ChecklistType } from './types';
 import './Checklist.css';
@@ -18,10 +19,12 @@ export function Checklist() {
   const [draft, setDraft] = useState<ChecklistType | null>(null);
   const [openId, setOpenId] = useState<string | null>(null);
 
-  function persist(next: ChecklistType[]) {
+  function rawPersist(next: ChecklistType[]) {
     setLists(next);
     storageSet(StorageKeys.checklists, next);
   }
+
+  const { persist } = useCloudSync('checklists', lists, rawPersist);
 
   const sortedLists = [...lists].sort((a, b) => b.updatedAt - a.updatedAt);
   const openList = openId ? (draft?.id === openId ? draft : lists.find((l) => l.id === openId)) : null;

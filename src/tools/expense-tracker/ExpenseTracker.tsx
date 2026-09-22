@@ -3,6 +3,7 @@ import { ScreenHeader } from '../../components/ScreenHeader';
 import { Icon } from '../../components/Icon';
 import { useRouter } from '../../app/Router';
 import { storageGet, storageSet, StorageKeys } from '../../storage/db';
+import { useCloudSync } from '../../cloud/useCloudSync';
 import { AddExpense } from './AddExpense';
 import { EXPENSE_CATEGORIES, getCategory } from './categories';
 import { currentMonthKey, formatMonthLabel, shiftMonthKey } from './month';
@@ -19,10 +20,12 @@ export function ExpenseTracker() {
   const [monthKey, setMonthKey] = useState(currentMonthKey());
   const [adding, setAdding] = useState(false);
 
-  function persist(next: Expense[]) {
+  function rawPersist(next: Expense[]) {
     setExpenses(next);
     storageSet(StorageKeys.expenses, next);
   }
+
+  const { persist } = useCloudSync('expenses', expenses, rawPersist);
 
   const monthExpenses = useMemo(
     () => expenses.filter((e) => e.dateISO.slice(0, 7) === monthKey).sort((a, b) => (a.dateISO < b.dateISO ? 1 : -1)),

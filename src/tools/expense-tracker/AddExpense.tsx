@@ -24,7 +24,7 @@ export function AddExpense({ onSave, onClose }: AddExpenseProps) {
   function buildExpense(): Expense | null {
     const numeric = parseFloat(amount);
     if (!amount || Number.isNaN(numeric) || numeric <= 0) return null;
-    return { id: `${Date.now()}`, amount: numeric, categoryId, note: note.trim(), dateISO };
+    return { id: `${Date.now()}`, amount: numeric, categoryId, note: note.trim(), dateISO, updatedAt: Date.now() };
   }
 
   function save() {

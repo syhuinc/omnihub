@@ -6,4 +6,6 @@ export interface Subscription {
   amount: number;
   cycle: BillingCycle;
   createdAt: number;
+  updatedAt: number;
+  deletedAt?: number;
 }

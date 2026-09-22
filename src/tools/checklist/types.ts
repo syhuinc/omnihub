@@ -10,4 +10,5 @@ export interface Checklist {
   items: ChecklistItem[];
   createdAt: number;
   updatedAt: number;
+  deletedAt?: number;
 }

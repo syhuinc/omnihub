@@ -4,6 +4,7 @@ import { Icon } from '../../components/Icon';
 import { SwipeToDelete } from '../../components/SwipeToDelete';
 import { useRouter } from '../../app/Router';
 import { storageGet, storageSet, StorageKeys } from '../../storage/db';
+import { useCloudSync } from '../../cloud/useCloudSync';
 import type { DebtDirection, DebtEntry } from './types';
 import './DebtCalculator.css';
 
@@ -21,21 +22,25 @@ export function DebtCalculator() {
   const [direction, setDirection] = useState<DebtDirection>('owed_to_me');
   const [openSwipeId, setOpenSwipeId] = useState<string | null>(null);
 
-  function persist(next: DebtEntry[]) {
+  function rawPersist(next: DebtEntry[]) {
     setDebts(next);
     storageSet(StorageKeys.debts, next);
   }
 
+  const { persist } = useCloudSync('debts', debts, rawPersist);
+
   function addDebt() {
     const amount = parseFloat(amountText);
     if (!person.trim() || !amount || amount <= 0) return;
+    const now = Date.now();
     const entry: DebtEntry = {
-      id: `${Date.now()}`,
+      id: `${now}`,
       person: person.trim(),
       amount,
       direction,
       note: note.trim() || undefined,
-      createdAt: Date.now(),
+      createdAt: now,
+      updatedAt: now,
     };
     persist([entry, ...debts]);
     setPerson('');

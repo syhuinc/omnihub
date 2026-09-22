@@ -4,6 +4,7 @@ import { Icon } from '../../components/Icon';
 import { SwipeToDelete } from '../../components/SwipeToDelete';
 import { useRouter } from '../../app/Router';
 import { storageGet, storageSet, StorageKeys } from '../../storage/db';
+import { useCloudSync } from '../../cloud/useCloudSync';
 import type { BillingCycle, Subscription } from './types';
 import './SubscriptionCalculator.css';
 
@@ -26,15 +27,18 @@ export function SubscriptionCalculator() {
   const [cycle, setCycle] = useState<BillingCycle>('monthly');
   const [openSwipeId, setOpenSwipeId] = useState<string | null>(null);
 
-  function persist(next: Subscription[]) {
+  function rawPersist(next: Subscription[]) {
     setSubs(next);
     storageSet(StorageKeys.subscriptions, next);
   }
 
+  const { persist } = useCloudSync('subscriptions', subs, rawPersist);
+
   function addSubscription() {
     const amount = parseFloat(amountText);
     if (!name.trim() || !amount || amount <= 0) return;
-    const sub: Subscription = { id: `${Date.now()}`, name: name.trim(), amount, cycle, createdAt: Date.now() };
+    const now = Date.now();
+    const sub: Subscription = { id: `${now}`, name: name.trim(), amount, cycle, createdAt: now, updatedAt: now };
     persist([sub, ...subs]);
     setName('');
     setAmountText('');

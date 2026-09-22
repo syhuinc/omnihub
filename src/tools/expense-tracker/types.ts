@@ -4,4 +4,6 @@ export interface Expense {
   categoryId: string;
   note: string;
   dateISO: string;
+  updatedAt: number;
+  deletedAt?: number;
 }
