@@ -1,0 +1,268 @@
+import { useEffect, useState } from 'react';
+import { ScreenHeader } from '../../components/ScreenHeader';
+import { Icon, type IconName } from '../../components/Icon';
+import { AlarmPlugin, type AlarmRecord } from '../../alarm/plugin';
+import { formatTime, type RepeatMode, type TimeCategory, REPEAT_LABELS } from '../../alarm/types';
+import { loadPresets, addPreset, removePreset } from '../../alarm/presets';
+import { hapticSelect, hapticSuccess, hapticWarning } from '../../haptics';
+import './Alarm.css';
+
+const CATEGORIES: { id: TimeCategory; label: string; icon: IconName }[] = [
+  { id: 'morning', label: 'Morning', icon: 'sunrise' },
+  { id: 'afternoon', label: 'Afternoon', icon: 'sun' },
+  { id: 'evening', label: 'Evening', icon: 'sunset' },
+  { id: 'night', label: 'Night', icon: 'moon' },
+];
+
+const REPEAT_MODES: RepeatMode[] = ['today', 'daily', 'weekend', 'weekdays'];
+
+function to24HourInputValue(hour: number, minute: number): string {
+  return `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+}
+
+interface AlarmEditorProps {
+  alarmId: string | null;
+  onClose: () => void;
+  onDelete?: () => void;
+}
+
+export function AlarmEditor({ alarmId, onClose, onDelete }: AlarmEditorProps) {
+  const [loaded, setLoaded] = useState(alarmId === null);
+  const [hour, setHour] = useState(7);
+  const [minute, setMinute] = useState(0);
+  const [label, setLabel] = useState('');
+  const [repeatMode, setRepeatMode] = useState<RepeatMode>('today');
+  const [soundUri, setSoundUri] = useState<string | null>(null);
+  const [soundName, setSoundName] = useState<string | null>(null);
+  const [openCategory, setOpenCategory] = useState<TimeCategory | null>(null);
+  const [editingPresets, setEditingPresets] = useState(false);
+  const [presets, setPresets] = useState(loadPresets());
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+
+  useEffect(() => {
+    if (alarmId === null) return;
+    AlarmPlugin.list().then(({ alarms }) => {
+      const existing = alarms.find((a: AlarmRecord) => a.id === alarmId);
+      if (existing) {
+        setHour(existing.hour);
+        setMinute(existing.minute);
+        setLabel(existing.label);
+        setRepeatMode(existing.repeatMode);
+        setSoundUri(existing.soundUri);
+        setSoundName(existing.soundName);
+      }
+      setLoaded(true);
+    });
+  }, [alarmId]);
+
+  function pickPreset(category: TimeCategory, h: number, m: number) {
+    hapticSelect();
+    setHour(h);
+    setMinute(m);
+    setOpenCategory(category);
+  }
+
+  function handleCustomTimeChange(value: string) {
+    const [h, m] = value.split(':').map((n) => parseInt(n, 10));
+    if (!Number.isNaN(h) && !Number.isNaN(m)) {
+      setHour(h);
+      setMinute(m);
+    }
+  }
+
+  function handleAddCurrentAsPreset(category: TimeCategory) {
+    const next = addPreset(category, { hour, minute });
+    setPresets(next);
+    hapticSuccess();
+  }
+
+  function handleRemovePreset(category: TimeCategory, h: number, m: number) {
+    const next = removePreset(category, { hour: h, minute: m });
+    setPresets(next);
+    hapticWarning();
+  }
+
+  async function handlePickRingtone() {
+    const result = await AlarmPlugin.pickRingtone();
+    if (!result.cancelled) {
+      setSoundUri(result.uri ?? null);
+      setSoundName(result.name ?? null);
+    }
+  }
+
+  async function handleSave() {
+    let granted = true;
+    try {
+      const check = await AlarmPlugin.checkNotificationPermission();
+      granted = check.granted;
+      if (!granted) {
+        const req = await AlarmPlugin.requestNotificationPermission();
+        granted = req.granted;
+      }
+    } catch {
+      // web fallback / unsupported platform — proceed anyway
+    }
+
+    await AlarmPlugin.schedule({
+      id: alarmId ?? undefined,
+      hour,
+      minute,
+      label: label.trim(),
+      repeatMode,
+      enabled: true,
+      soundUri,
+      soundName,
+    });
+    hapticSuccess();
+    onClose();
+  }
+
+  if (!loaded) {
+    return <div className="screen" />;
+  }
+
+  return (
+    <div className="screen">
+      <ScreenHeader
+        title={alarmId ? 'Edit Alarm' : 'New Alarm'}
+        onBack={onClose}
+        action={
+          onDelete && (
+            <button
+              type="button"
+              className="alarm-editor__icon-btn"
+              onClick={() => setConfirmingDelete(true)}
+              aria-label="Delete alarm"
+            >
+              <Icon name="trash" size={18} />
+            </button>
+          )
+        }
+      />
+
+      {confirmingDelete && (
+        <div className="alarm-editor__confirm">
+          <p>Delete this alarm? This can't be undone.</p>
+          <div className="alarm-editor__confirm-actions">
+            <button type="button" onClick={() => setConfirmingDelete(false)}>
+              Cancel
+            </button>
+            <button
+              type="button"
+              className="alarm-editor__confirm-delete"
+              onClick={() => onDelete && onDelete()}
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      )}
+
+      <div className="alarm-editor__body">
+        <div className="alarm-editor__time-display">{formatTime(hour, minute)}</div>
+        <input
+          type="time"
+          className="alarm-editor__time-input"
+          value={to24HourInputValue(hour, minute)}
+          onChange={(e) => handleCustomTimeChange(e.target.value)}
+        />
+
+        <div className="alarm-editor__section-header">
+          <h2>Quick Pick</h2>
+          <button
+            type="button"
+            className="alarm-editor__edit-presets"
+            onClick={() => setEditingPresets((v) => !v)}
+          >
+            {editingPresets ? 'Done' : 'Edit'}
+          </button>
+        </div>
+
+        <div className="alarm-editor__categories">
+          {CATEGORIES.map((cat) => (
+            <button
+              key={cat.id}
+              type="button"
+              className={`alarm-editor__category${openCategory === cat.id ? ' alarm-editor__category--open' : ''}`}
+              onClick={() => setOpenCategory(openCategory === cat.id ? null : cat.id)}
+            >
+              <Icon name={cat.icon} size={22} />
+              <span>{cat.label}</span>
+            </button>
+          ))}
+        </div>
+
+        {openCategory && (
+          <div className="alarm-editor__presets">
+            {presets[openCategory].map((p) => (
+              <div key={`${p.hour}:${p.minute}`} className="alarm-editor__preset-chip-wrap">
+                <button
+                  type="button"
+                  className={`alarm-editor__preset-chip${hour === p.hour && minute === p.minute ? ' alarm-editor__preset-chip--active' : ''}`}
+                  onClick={() => pickPreset(openCategory, p.hour, p.minute)}
+                >
+                  {formatTime(p.hour, p.minute)}
+                </button>
+                {editingPresets && (
+                  <button
+                    type="button"
+                    className="alarm-editor__preset-remove"
+                    onClick={() => handleRemovePreset(openCategory, p.hour, p.minute)}
+                    aria-label={`Remove ${formatTime(p.hour, p.minute)} preset`}
+                  >
+                    <Icon name="x" size={11} strokeWidth={3} />
+                  </button>
+                )}
+              </div>
+            ))}
+            {editingPresets && (
+              <button
+                type="button"
+                className="alarm-editor__preset-chip alarm-editor__preset-chip--add"
+                onClick={() => handleAddCurrentAsPreset(openCategory)}
+              >
+                <Icon name="plus" size={13} /> Add {formatTime(hour, minute)}
+              </button>
+            )}
+          </div>
+        )}
+
+        <h2 className="alarm-editor__section-title">Repeat</h2>
+        <div className="alarm-editor__repeat-row">
+          {REPEAT_MODES.map((mode) => (
+            <button
+              key={mode}
+              type="button"
+              className={`alarm-editor__repeat-chip${repeatMode === mode ? ' alarm-editor__repeat-chip--active' : ''}`}
+              onClick={() => {
+                hapticSelect();
+                setRepeatMode(mode);
+              }}
+            >
+              {REPEAT_LABELS[mode]}
+            </button>
+          ))}
+        </div>
+
+        <h2 className="alarm-editor__section-title">Label</h2>
+        <input
+          type="text"
+          className="alarm-editor__label-input"
+          placeholder="Alarm"
+          value={label}
+          onChange={(e) => setLabel(e.target.value)}
+        />
+
+        <h2 className="alarm-editor__section-title">Sound</h2>
+        <button type="button" className="alarm-editor__sound-row" onClick={handlePickRingtone}>
+          <span>{soundName || 'Default Alarm'}</span>
+          <Icon name="chevron-right" size={18} />
+        </button>
+
+        <button type="button" className="alarm-editor__save" onClick={handleSave}>
+          Save Alarm
+        </button>
+      </div>
+    </div>
+  );
+}

@@ -66,7 +66,14 @@
   <p>Notes, photos, and files you save in the <strong>Vault</strong> are additionally encrypted on your device with a key derived from your PIN before being stored — notes alongside your other app data, and photos/files in a separate local database (<code>IndexedDB</code>) sized for larger content, still only on your device. Your PIN is never stored — only used to derive that key each time you unlock — so if you forget it, Vault content cannot be recovered and the Vault must be reset. Opening or saving a Vault photo/file decrypts a temporary copy for that action (e.g. to view an image or save it to your Downloads folder); that copy is no longer encrypted once it leaves the Vault. Vault photos and files are not included in the main <strong>Profile ▸ Export Backup</strong> file; use <strong>Vault ▸ Photos &amp; Files ▸ Export</strong> instead, which decrypts them into a plain <code>.zip</code> file on your device — that zip is unencrypted, since it needs to be readable outside the app, so store or share it with the same care you'd give the original photos/files. Use <strong>Vault ▸ Photos &amp; Files ▸ Import</strong> to bring that zip back in (e.g. after reinstalling), which re-encrypts everything as it's added.</p>
 
   <h2>Permissions</h2>
-  <p>Omni Hub requests only the <strong>Vibrate</strong> permission, used for haptic feedback (tap and completion vibrations). It does not access your camera, microphone, contacts, location, storage beyond its own app sandbox, or any other device feature.</p>
+  <p>Omni Hub does not access your camera, microphone, contacts, location, storage beyond its own app sandbox, or any other device feature. It requests these permissions, all used only to make features on-device work, never to collect or transmit data:</p>
+  <ul>
+    <li><strong>Vibrate</strong> — haptic feedback (tap and completion vibrations).</li>
+    <li><strong>Alarms, notifications, and background wake permissions</strong> (schedule alarms, post notifications, run in the foreground briefly while an alarm rings, keep the device awake for that, show the ringing screen over the lock screen, and restart alarms after the device reboots) — all used solely by the <strong>Alarm</strong> feature, so an alarm you set still rings even if Omni Hub is closed. None of this involves any network access or leaves your device.</li>
+  </ul>
+
+  <h2>Alarm</h2>
+  <p>Alarms you create are stored on your device (both in the app's own storage and, separately, in Android's system alarm scheduler so they still fire when the app isn't open) and are used only to ring at the time you set. No alarm data is ever transmitted anywhere. If you pick a custom ringtone, Omni Hub only stores a reference to the sound file already on your device — it doesn't copy or transmit the audio itself.</p>
 
   <h2>Children's privacy</h2>
   <p>Because Omni Hub collects no data from anyone, it does not knowingly collect data from children, and there is nothing to collect regardless of age.</p>

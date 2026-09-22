@@ -13,6 +13,7 @@ export const StorageKeys = {
   vaultSalt: `${PREFIX}vault.salt`,
   vaultCanary: `${PREFIX}vault.canary`,
   vaultNotes: `${PREFIX}vault.notes`,
+  alarmPresets: `${PREFIX}alarm.presets`,
 } as const;
 
 export function storageGet<T>(key: string, fallback: T): T {

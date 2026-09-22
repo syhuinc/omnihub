@@ -14,12 +14,14 @@ import { SplitBill } from './split-bill/SplitBill';
 import { AgeCalculator } from './age-date/AgeCalculator';
 import { DateCalculator } from './age-date/DateCalculator';
 import { RandomGenerator } from './random-generator/RandomGenerator';
+import { Alarm } from './alarm/Alarm';
 
 const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
   calculator: Calculator,
   'unit-converter': UnitConverter,
   timer: Timer,
   stopwatch: Stopwatch,
+  alarm: Alarm,
   notes: Notes,
   checklist: Checklist,
   'expense-tracker': ExpenseTracker,

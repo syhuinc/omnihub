@@ -25,7 +25,14 @@ Notes, photos, and files you save in the **Vault** are additionally encrypted on
 
 ## Permissions
 
-Omni Hub requests only the **Vibrate** permission, used for haptic feedback (tap and completion vibrations). It does not access your camera, microphone, contacts, location, storage beyond its own app sandbox, or any other device feature.
+Omni Hub does not access your camera, microphone, contacts, location, storage beyond its own app sandbox, or any other device feature. It requests these permissions, all used only to make features on-device work, never to collect or transmit data:
+
+- **Vibrate** — haptic feedback (tap and completion vibrations).
+- **Alarms, notifications, and background wake permissions** (schedule alarms, post notifications, run in the foreground briefly while an alarm rings, keep the device awake for that, show the ringing screen over the lock screen, and restart alarms after the device reboots) — all used solely by the **Alarm** feature, so an alarm you set still rings even if Omni Hub is closed. None of this involves any network access or leaves your device.
+
+## Alarm
+
+Alarms you create are stored on your device (both in the app's own storage and, separately, in Android's system alarm scheduler so they still fire when the app isn't open) and are used only to ring at the time you set. No alarm data is ever transmitted anywhere. If you pick a custom ringtone, Omni Hub only stores a reference to the sound file already on your device — it doesn't copy or transmit the audio itself.
 
 ## Children's privacy
 

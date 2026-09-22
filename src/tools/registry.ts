@@ -64,6 +64,16 @@ export const TOOLS: ToolMeta[] = [
     presentation: 'sheet',
   },
   {
+    id: 'alarm',
+    name: 'Alarm',
+    shortDescription: 'Wakes you even with the app closed',
+    category: 'essentials',
+    color: 'var(--red)',
+    icon: 'bell',
+    keywords: ['alarm', 'wake', 'wake up', 'clock', 'ring', 'snooze', 'morning'],
+    presentation: 'page',
+  },
+  {
     id: 'random-generator',
     name: 'Random Generator',
     shortDescription: 'Dice, coin, number, pick from list',

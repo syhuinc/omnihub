@@ -28,8 +28,49 @@
             android:grantUriPermissions="true">
             <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/file_paths" />
         </provider>
+
+        <activity
+            android:name=".alarm.AlarmRingingActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:launchMode="singleInstance"
+            android:showOnLockScreen="true"
+            android:theme="@style/AppTheme.NoActionBarLaunch" />
+
+        <service
+            android:name=".alarm.AlarmRingService"
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback" />
+
+        <receiver
+            android:name=".alarm.AlarmReceiver"
+            android:exported="false" />
+
+        <receiver
+            android:name=".alarm.BootReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+            </intent-filter>
+        </receiver>
     </application>
 
-    <!-- Omni Hub is fully offline. VIBRATE is the only permission used, for haptic feedback. -->
+    <!--
+      Omni Hub is otherwise fully offline. These are for the Alarm feature only, so alarms can
+      fire even when the app is closed:
+      - RECEIVE_BOOT_COMPLETED / WAKE_LOCK / FOREGROUND_SERVICE(_MEDIA_PLAYBACK): re-arm alarms
+        after reboot and keep the device awake long enough to ring.
+      - POST_NOTIFICATIONS / USE_FULL_SCREEN_INTENT: show the full-screen ringing screen reliably,
+        including over the lock screen.
+      No exact-alarm permission is needed: alarms are scheduled via AlarmManager.setAlarmClock(),
+      which Android exempts from that requirement since it's meant for user-facing alarm clocks.
+    -->
     <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
 </manifest>

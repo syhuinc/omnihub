@@ -42,7 +42,9 @@ export type IconName =
   | 'lock'
   | 'unlock'
   | 'image'
-  | 'file';
+  | 'file'
+  | 'sunrise'
+  | 'sunset';
 
 interface IconProps {
   name: IconName;
@@ -162,6 +164,12 @@ const paths: Record<IconName, React.ReactNode> = {
   ),
   file: (
     <path d="M6 3h9l5 5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z M14 3v5h5" />
+  ),
+  sunrise: (
+    <path d="M12 3v5 M4.2 12H2m20 0h-2.2 M5.6 8.6 4.1 7.1m14.3 1.5 1.5-1.5 M6 18a6 6 0 0 1 12 0 M2 18h20 M9 18a3 3 0 0 1 6 0" />
+  ),
+  sunset: (
+    <path d="M12 21v-5 M4.2 11H2m20 0h-2.2 M5.6 7.6 4.1 6.1m14.3 1.5 1.5-1.5 M6 16a6 6 0 0 1 12 0 M2 16h20 M9 16a3 3 0 0 1 6 0" />
   ),
 };
 
