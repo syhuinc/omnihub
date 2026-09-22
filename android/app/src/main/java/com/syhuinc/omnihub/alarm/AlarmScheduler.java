@@ -23,8 +23,12 @@ public class AlarmScheduler {
     public static final String EXTRA_IS_BACKUP = "is_backup";
     public static final String EXTRA_BACKUP_INDEX = "backup_index";
 
-    /** Cascading backup offsets from the moment the main alarm fires: +5, +10, +30 min. */
-    private static final long[] BACKUP_OFFSETS_MS = { 5 * 60_000L, 10 * 60_000L, 30 * 60_000L };
+    /**
+     * Upper bound on how many backups an alarm can carry (matches the editor's UI cap). Always
+     * cancel up to this many on disarm/dismiss, regardless of the alarm's *current* offset count
+     * - it may have been armed under a larger count before the user edited it down.
+     */
+    private static final int MAX_BACKUPS = 5;
 
     public static boolean canScheduleExactAlarms(Context ctx) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return true;
@@ -77,24 +81,30 @@ public class AlarmScheduler {
     }
 
     /**
-     * Arms the three cascading backup rings at fixed offsets from the moment the main alarm
-     * just fired. Called from AlarmReceiver right when the main alarm goes off - if the user
-     * dismisses or snoozes (main or any backup) before one of these fires, cancelBackups()
-     * cancels the rest. Silently does nothing if the alarm doesn't have backups enabled.
+     * Arms the alarm's cascading backup rings at its own configured offsets (alarm.backupOffsetsMin,
+     * minutes after the moment the main alarm fires; up to MAX_BACKUPS, sorted ascending). Called
+     * from AlarmReceiver right when the main alarm goes off - if the user dismisses or snoozes
+     * (main or any backup) before one of these fires, cancelBackups() cancels the rest. Silently
+     * does nothing if the alarm doesn't have backups enabled.
      */
     public static void scheduleBackups(Context ctx, AlarmData alarm, long firedAtMillis) {
         if (!alarm.backupEnabled) return;
         AlarmManager am = (AlarmManager) ctx.getSystemService(Context.ALARM_SERVICE);
         if (am == null) return;
 
+        int[] offsets = alarm.backupOffsetsMin != null && alarm.backupOffsetsMin.length > 0
+                ? alarm.backupOffsetsMin
+                : AlarmData.DEFAULT_BACKUP_OFFSETS_MIN;
+
         int flags = PendingIntent.FLAG_UPDATE_CURRENT;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             flags |= PendingIntent.FLAG_IMMUTABLE;
         }
 
-        for (int i = 0; i < BACKUP_OFFSETS_MS.length; i++) {
+        int count = Math.min(offsets.length, MAX_BACKUPS);
+        for (int i = 0; i < count; i++) {
             int backupIndex = i + 1;
-            long triggerAt = firedAtMillis + BACKUP_OFFSETS_MS[i];
+            long triggerAt = firedAtMillis + offsets[i] * 60_000L;
 
             Intent showIntent = new Intent(ctx, com.syhuinc.omnihub.MainActivity.class);
             PendingIntent showPi = PendingIntent.getActivity(
@@ -119,7 +129,7 @@ public class AlarmScheduler {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             flags |= PendingIntent.FLAG_IMMUTABLE;
         }
-        for (int backupIndex = 1; backupIndex <= BACKUP_OFFSETS_MS.length; backupIndex++) {
+        for (int backupIndex = 1; backupIndex <= MAX_BACKUPS; backupIndex++) {
             am.cancel(backupPendingIntent(ctx, alarmId, backupIndex, flags));
         }
     }

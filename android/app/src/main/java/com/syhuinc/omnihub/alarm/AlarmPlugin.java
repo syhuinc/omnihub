@@ -26,6 +26,8 @@ import com.getcapacitor.annotation.Permission;
 
 import org.json.JSONException;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -38,6 +40,10 @@ import com.syhuinc.omnihub.CrashLogger;
         }
 )
 public class AlarmPlugin extends Plugin {
+
+    private static final int MAX_BACKUPS = 5;
+    private static final int MIN_BACKUP_OFFSET_MIN = 1;
+    private static final int MAX_BACKUP_OFFSET_MIN = 180;
 
     private Ringtone previewRingtone;
     private final Handler previewHandler = new Handler(Looper.getMainLooper());
@@ -66,6 +72,7 @@ public class AlarmPlugin extends Plugin {
         alarm.soundUri = call.getString("soundUri", null);
         alarm.soundName = call.getString("soundName", null);
         alarm.backupEnabled = call.getBoolean("backupEnabled", false);
+        alarm.backupOffsetsMin = parseBackupOffsets(call.getArray("backupOffsetsMin"));
         alarm.createdAt = System.currentTimeMillis();
 
         AlarmStore.upsert(getContext(), alarm);
@@ -80,6 +87,27 @@ public class AlarmPlugin extends Plugin {
         ret.put("id", alarm.id);
         ret.put("armed", armed);
         call.resolve(ret);
+    }
+
+    /** Clamps each value to [1,180] min, dedupes, sorts ascending, caps at MAX_BACKUPS entries. */
+    private int[] parseBackupOffsets(JSArray arr) {
+        if (arr == null || arr.length() == 0) return AlarmData.DEFAULT_BACKUP_OFFSETS_MIN;
+        List<Integer> values = new ArrayList<>();
+        for (int i = 0; i < arr.length() && values.size() < MAX_BACKUPS; i++) {
+            int v;
+            try {
+                v = arr.getInt(i);
+            } catch (JSONException e) {
+                continue;
+            }
+            v = Math.max(MIN_BACKUP_OFFSET_MIN, Math.min(MAX_BACKUP_OFFSET_MIN, v));
+            if (!values.contains(v)) values.add(v);
+        }
+        if (values.isEmpty()) return AlarmData.DEFAULT_BACKUP_OFFSETS_MIN;
+        Collections.sort(values);
+        int[] result = new int[values.size()];
+        for (int i = 0; i < result.length; i++) result[i] = values.get(i);
+        return result;
     }
 
     @PluginMethod

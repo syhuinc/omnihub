@@ -73,6 +73,7 @@ public class AlarmRingingActivity extends Activity {
         snoozed.soundUri = alarm.soundUri;
         snoozed.soundName = alarm.soundName;
         snoozed.backupEnabled = alarm.backupEnabled;
+        snoozed.backupOffsetsMin = alarm.backupOffsetsMin;
         snoozed.createdAt = System.currentTimeMillis();
 
         Calendar c = Calendar.getInstance();

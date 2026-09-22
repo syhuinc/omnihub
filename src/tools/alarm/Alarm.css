@@ -416,6 +416,76 @@
   line-height: 1.4;
 }
 
+.alarm-editor__backup-offsets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.alarm-editor__backup-offset-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 10px 0 14px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.alarm-editor__backup-offset-chip input {
+  width: 34px;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  -moz-appearance: textfield;
+}
+
+.alarm-editor__backup-offset-chip input::-webkit-outer-spin-button,
+.alarm-editor__backup-offset-chip input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.alarm-editor__backup-offset-chip span {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.alarm-editor__backup-offset-chip button {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-tertiary);
+  background: var(--bg-active);
+}
+
+.alarm-editor__backup-offset-add {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 36px;
+  padding: 0 14px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-elevated);
+  border: 1px dashed var(--border);
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+}
+
 .alarm-editor__save {
   margin-top: 32px;
   min-height: 52px;

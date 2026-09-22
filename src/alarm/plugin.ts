@@ -1,6 +1,11 @@
 import { registerPlugin, WebPlugin } from '@capacitor/core';
 import type { RepeatMode } from './types';
 
+export const DEFAULT_BACKUP_OFFSETS_MIN = [5, 10, 30];
+export const MAX_BACKUP_OFFSETS = 5;
+export const MIN_BACKUP_OFFSET_MIN = 1;
+export const MAX_BACKUP_OFFSET_MIN = 180;
+
 export interface AlarmRecord {
   id: string;
   hour: number;
@@ -11,6 +16,7 @@ export interface AlarmRecord {
   soundUri: string | null;
   soundName: string | null;
   backupEnabled: boolean;
+  backupOffsetsMin: number[];
   createdAt: number;
 }
 
@@ -24,6 +30,7 @@ export interface ScheduleOptions {
   soundUri?: string | null;
   soundName?: string | null;
   backupEnabled?: boolean;
+  backupOffsetsMin?: number[];
 }
 
 export interface RingtoneEntry {
@@ -64,6 +71,7 @@ class AlarmPluginWeb extends WebPlugin implements AlarmPluginInterface {
       soundUri: options.soundUri ?? null,
       soundName: options.soundName ?? null,
       backupEnabled: options.backupEnabled ?? false,
+      backupOffsetsMin: options.backupOffsetsMin?.length ? options.backupOffsetsMin : DEFAULT_BACKUP_OFFSETS_MIN,
       createdAt: Date.now(),
     });
     return { id, armed: true };

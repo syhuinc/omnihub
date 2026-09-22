@@ -1,7 +1,14 @@
 import { useEffect, useState } from 'react';
 import { ScreenHeader } from '../../components/ScreenHeader';
 import { Icon, type IconName } from '../../components/Icon';
-import { AlarmPlugin, type AlarmRecord } from '../../alarm/plugin';
+import {
+  AlarmPlugin,
+  type AlarmRecord,
+  DEFAULT_BACKUP_OFFSETS_MIN,
+  MAX_BACKUP_OFFSETS,
+  MIN_BACKUP_OFFSET_MIN,
+  MAX_BACKUP_OFFSET_MIN,
+} from '../../alarm/plugin';
 import { formatTime, type RepeatMode, type TimeCategory, REPEAT_LABELS } from '../../alarm/types';
 import { loadPresets, addPreset, removePreset } from '../../alarm/presets';
 import { loadCategoryDefaults } from '../../alarm/ringtones';
@@ -38,6 +45,7 @@ export function AlarmEditor({ alarmId, onClose, onDelete }: AlarmEditorProps) {
   const [soundUri, setSoundUri] = useState<string | null>(null);
   const [soundName, setSoundName] = useState<string | null>(null);
   const [backupEnabled, setBackupEnabled] = useState(false);
+  const [backupOffsets, setBackupOffsets] = useState<number[]>(DEFAULT_BACKUP_OFFSETS_MIN);
   const [openCategory, setOpenCategory] = useState<TimeCategory | null>(null);
   const [editingPresets, setEditingPresets] = useState(false);
   const [presets, setPresets] = useState(loadPresets());
@@ -65,6 +73,7 @@ export function AlarmEditor({ alarmId, onClose, onDelete }: AlarmEditorProps) {
         setSoundUri(existing.soundUri);
         setSoundName(existing.soundName);
         setBackupEnabled(existing.backupEnabled);
+        setBackupOffsets(existing.backupOffsetsMin?.length ? existing.backupOffsetsMin : DEFAULT_BACKUP_OFFSETS_MIN);
       }
       setLoaded(true);
     });
@@ -107,6 +116,26 @@ export function AlarmEditor({ alarmId, onClose, onDelete }: AlarmEditorProps) {
     hapticWarning();
   }
 
+  function handleBackupOffsetChange(index: number, value: string) {
+    const n = parseInt(value, 10);
+    if (Number.isNaN(n)) return;
+    const clamped = Math.max(MIN_BACKUP_OFFSET_MIN, Math.min(MAX_BACKUP_OFFSET_MIN, n));
+    setBackupOffsets((prev) => prev.map((v, i) => (i === index ? clamped : v)));
+  }
+
+  function handleRemoveBackupOffset(index: number) {
+    hapticWarning();
+    setBackupOffsets((prev) => prev.filter((_, i) => i !== index));
+  }
+
+  function handleAddBackupOffset() {
+    hapticSelect();
+    setBackupOffsets((prev) => {
+      const last = prev[prev.length - 1] ?? 5;
+      return [...prev, Math.min(MAX_BACKUP_OFFSET_MIN, last + 10)];
+    });
+  }
+
   async function handleSave() {
     try {
       const check = await AlarmPlugin.checkNotificationPermission();
@@ -139,6 +168,7 @@ export function AlarmEditor({ alarmId, onClose, onDelete }: AlarmEditorProps) {
       soundUri,
       soundName,
       backupEnabled,
+      backupOffsetsMin: [...backupOffsets].sort((a, b) => a - b),
     });
 
     if (!armed) {
@@ -326,7 +356,7 @@ export function AlarmEditor({ alarmId, onClose, onDelete }: AlarmEditorProps) {
         <div className="alarm-editor__backup-row">
           <div className="alarm-editor__backup-text">
             <span>Ring again if ignored</span>
-            <p>If you don't dismiss or snooze, we'll ring again at +5, +10, and +30 min.</p>
+            <p>If you don't dismiss or snooze, we'll ring again after each of these.</p>
           </div>
           <button
             type="button"
@@ -342,6 +372,42 @@ export function AlarmEditor({ alarmId, onClose, onDelete }: AlarmEditorProps) {
             <span className="alarm__switch-knob" />
           </button>
         </div>
+
+        {backupEnabled && (
+          <div className="alarm-editor__backup-offsets">
+            {backupOffsets.map((offset, index) => (
+              <div key={index} className="alarm-editor__backup-offset-chip">
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  min={MIN_BACKUP_OFFSET_MIN}
+                  max={MAX_BACKUP_OFFSET_MIN}
+                  value={offset}
+                  onChange={(e) => handleBackupOffsetChange(index, e.target.value)}
+                />
+                <span>min</span>
+                {backupOffsets.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveBackupOffset(index)}
+                    aria-label={`Remove ${offset} minute backup`}
+                  >
+                    <Icon name="x" size={11} strokeWidth={3} />
+                  </button>
+                )}
+              </div>
+            ))}
+            {backupOffsets.length < MAX_BACKUP_OFFSETS && (
+              <button
+                type="button"
+                className="alarm-editor__backup-offset-add"
+                onClick={handleAddBackupOffset}
+              >
+                <Icon name="plus" size={13} /> Add
+              </button>
+            )}
+          </div>
+        )}
 
         <button type="button" className="alarm-editor__save" onClick={handleSave}>
           Save Alarm
