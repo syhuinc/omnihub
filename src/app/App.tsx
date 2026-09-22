@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { App as CapacitorApp } from '@capacitor/app';
 import { BottomNav } from './BottomNav';
 import { RouterProvider, useRouter } from './Router';
+import { runTopBackHandler } from './useBackHandler';
 import { Home } from '../screens/Home/Home';
 import { Tools } from '../screens/Tools/Tools';
 import { Pro } from '../screens/Pro/Pro';
@@ -34,6 +35,7 @@ function Shell() {
 
   useEffect(() => {
     const listener = CapacitorApp.addListener('backButton', () => {
+      if (runTopBackHandler()) return;
       if (!TOP_LEVEL_PATHS.has(path)) {
         back();
       } else if (path !== '/') {

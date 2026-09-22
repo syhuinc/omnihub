@@ -16,6 +16,7 @@ export function Alarm() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [creatingNew, setCreatingNew] = useState(false);
   const [showCrashLog, setShowCrashLog] = useState(false);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   async function refresh() {
     const { alarms: list } = await AlarmPlugin.list();
@@ -49,6 +50,9 @@ export function Alarm() {
   async function handleDelete(id: string) {
     hapticWarning();
     await AlarmPlugin.cancel({ id });
+    setConfirmDeleteId(null);
+    setCreatingNew(false);
+    setEditingId(null);
     refresh();
   }
 
@@ -93,29 +97,57 @@ export function Alarm() {
           <p className="alarm__empty">No alarms yet. Tap + to create one.</p>
         ) : (
           <ul className="alarm__list">
-            {alarms.map((a) => (
-              <li key={a.id}>
-                <div className={`alarm__card${a.enabled ? '' : ' alarm__card--disabled'}`}>
-                  <button type="button" className="alarm__card-main" onClick={() => setEditingId(a.id)}>
-                    <span className="alarm__card-time">{formatTime(a.hour, a.minute)}</span>
-                    <span className="alarm__card-meta">
-                      {a.label ? `${a.label} · ` : ''}
-                      {REPEAT_LABELS[a.repeatMode]}
-                    </span>
-                  </button>
-                  <button
-                    type="button"
-                    className={`alarm__switch${a.enabled ? ' alarm__switch--on' : ''}`}
-                    onClick={() => toggleEnabled(a)}
-                    role="switch"
-                    aria-checked={a.enabled}
-                    aria-label={a.enabled ? 'Disable alarm' : 'Enable alarm'}
-                  >
-                    <span className="alarm__switch-knob" />
-                  </button>
-                </div>
-              </li>
-            ))}
+            {alarms.map((a) =>
+              confirmDeleteId === a.id ? (
+                <li key={a.id}>
+                  <div className="alarm__card alarm__card--confirm">
+                    <span className="alarm__card-confirm-text">Delete this alarm?</span>
+                    <div className="alarm__card-confirm-actions">
+                      <button type="button" onClick={() => setConfirmDeleteId(null)}>
+                        Cancel
+                      </button>
+                      <button
+                        type="button"
+                        className="alarm__card-confirm-delete"
+                        onClick={() => handleDelete(a.id)}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                </li>
+              ) : (
+                <li key={a.id}>
+                  <div className={`alarm__card${a.enabled ? '' : ' alarm__card--disabled'}`}>
+                    <button type="button" className="alarm__card-main" onClick={() => setEditingId(a.id)}>
+                      <span className="alarm__card-time">{formatTime(a.hour, a.minute)}</span>
+                      <span className="alarm__card-meta">
+                        {a.label ? `${a.label} · ` : ''}
+                        {REPEAT_LABELS[a.repeatMode]}
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      className="alarm__card-delete"
+                      onClick={() => setConfirmDeleteId(a.id)}
+                      aria-label="Delete alarm"
+                    >
+                      <Icon name="trash" size={17} />
+                    </button>
+                    <button
+                      type="button"
+                      className={`alarm__switch${a.enabled ? ' alarm__switch--on' : ''}`}
+                      onClick={() => toggleEnabled(a)}
+                      role="switch"
+                      aria-checked={a.enabled}
+                      aria-label={a.enabled ? 'Disable alarm' : 'Enable alarm'}
+                    >
+                      <span className="alarm__switch-knob" />
+                    </button>
+                  </div>
+                </li>
+              )
+            )}
           </ul>
         )}
       </div>

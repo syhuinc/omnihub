@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { ScreenHeader } from '../../components/ScreenHeader';
 import { AlarmPlugin } from '../../alarm/plugin';
 import { hapticSelect, hapticWarning } from '../../haptics';
+import { useBackHandler } from '../../app/useBackHandler';
 
 interface CrashLogViewProps {
   onClose: () => void;
@@ -11,6 +12,8 @@ export function CrashLogView({ onClose }: CrashLogViewProps) {
   const [log, setLog] = useState('');
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
+
+  useBackHandler(onClose, true);
 
   async function refresh() {
     setLoading(true);

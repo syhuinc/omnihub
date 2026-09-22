@@ -5,6 +5,7 @@ import { AlarmPlugin, type AlarmRecord } from '../../alarm/plugin';
 import { formatTime, type RepeatMode, type TimeCategory, REPEAT_LABELS } from '../../alarm/types';
 import { loadPresets, addPreset, removePreset } from '../../alarm/presets';
 import { hapticSelect, hapticSuccess, hapticWarning } from '../../haptics';
+import { useBackHandler } from '../../app/useBackHandler';
 import './Alarm.css';
 
 const CATEGORIES: { id: TimeCategory; label: string; icon: IconName }[] = [
@@ -39,6 +40,14 @@ export function AlarmEditor({ alarmId, onClose, onDelete }: AlarmEditorProps) {
   const [presets, setPresets] = useState(loadPresets());
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [needsExactAlarmPermission, setNeedsExactAlarmPermission] = useState(false);
+
+  useBackHandler(() => {
+    if (confirmingDelete) {
+      setConfirmingDelete(false);
+    } else {
+      onClose();
+    }
+  }, true);
 
   useEffect(() => {
     if (alarmId === null) return;

@@ -60,6 +60,50 @@
   white-space: nowrap;
 }
 
+.alarm__card-delete {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-tertiary);
+}
+
+.alarm__card--confirm {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.alarm__card-confirm-text {
+  font-size: 14px;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.alarm__card-confirm-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.alarm__card-confirm-actions button {
+  min-height: 36px;
+  padding: 0 14px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  background: var(--bg-active);
+  color: var(--text-primary);
+}
+
+.alarm__card-confirm-delete {
+  background: var(--red) !important;
+  color: #fff !important;
+}
+
 .alarm__switch {
   flex-shrink: 0;
   width: 46px;
