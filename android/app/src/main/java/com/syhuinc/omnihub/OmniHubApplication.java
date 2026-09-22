@@ -6,6 +6,10 @@ public class OmniHubApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        CrashLogger.install(this);
+        try {
+            CrashLogger.install(this);
+        } catch (Exception ignored) {
+            // installing the crash logger must never itself prevent the app from starting
+        }
     }
 }

@@ -31,6 +31,16 @@
         </provider>
 
         <activity
+            android:name=".CrashLogActivity"
+            android:label="Omni Hub Debug"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
             android:name=".alarm.AlarmRingingActivity"
             android:exported="false"
             android:excludeFromRecents="true"
