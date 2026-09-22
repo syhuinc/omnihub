@@ -14,6 +14,9 @@ export const StorageKeys = {
   vaultCanary: `${PREFIX}vault.canary`,
   vaultNotes: `${PREFIX}vault.notes`,
   alarmPresets: `${PREFIX}alarm.presets`,
+  alarmFavoriteSounds: `${PREFIX}alarm.favoriteSounds`,
+  alarmCustomSounds: `${PREFIX}alarm.customSounds`,
+  alarmCategoryDefaultSounds: `${PREFIX}alarm.categoryDefaultSounds`,
 } as const;
 
 export function storageGet<T>(key: string, fallback: T): T {

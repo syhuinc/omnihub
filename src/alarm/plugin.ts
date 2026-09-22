@@ -26,6 +26,12 @@ export interface ScheduleOptions {
   backupEnabled?: boolean;
 }
 
+export interface RingtoneEntry {
+  uri: string;
+  name: string;
+  isDefault?: boolean;
+}
+
 export interface AlarmPluginInterface {
   schedule(options: ScheduleOptions): Promise<{ id: string; armed: boolean }>;
   cancel(options: { id: string }): Promise<void>;
@@ -35,6 +41,10 @@ export interface AlarmPluginInterface {
   checkExactAlarmPermission(): Promise<{ granted: boolean }>;
   requestExactAlarmPermission(): Promise<void>;
   pickRingtone(): Promise<{ cancelled: boolean; uri?: string; name?: string }>;
+  listRingtones(): Promise<{ sounds: RingtoneEntry[] }>;
+  previewSound(options: { uri: string | null }): Promise<void>;
+  stopPreview(): Promise<void>;
+  importCustomAudio(): Promise<{ cancelled: boolean; uri?: string; name?: string }>;
   getCrashLog(): Promise<{ log: string }>;
   clearCrashLog(): Promise<void>;
 }
@@ -84,6 +94,29 @@ class AlarmPluginWeb extends WebPlugin implements AlarmPluginInterface {
   }
 
   async pickRingtone(): Promise<{ cancelled: boolean; uri?: string; name?: string }> {
+    return { cancelled: true };
+  }
+
+  async listRingtones(): Promise<{ sounds: RingtoneEntry[] }> {
+    return {
+      sounds: [
+        { uri: 'web-default', name: 'Default Alarm', isDefault: true },
+        { uri: 'web-chime', name: 'Chime' },
+        { uri: 'web-bells', name: 'Bells' },
+        { uri: 'web-classic', name: 'Classic Buzzer' },
+      ],
+    };
+  }
+
+  async previewSound(): Promise<void> {
+    // no-op in browser
+  }
+
+  async stopPreview(): Promise<void> {
+    // no-op in browser
+  }
+
+  async importCustomAudio(): Promise<{ cancelled: boolean; uri?: string; name?: string }> {
     return { cancelled: true };
   }
 

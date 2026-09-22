@@ -44,7 +44,11 @@ export type IconName =
   | 'image'
   | 'file'
   | 'sunrise'
-  | 'sunset';
+  | 'sunset'
+  | 'star'
+  | 'play'
+  | 'stop'
+  | 'music';
 
 interface IconProps {
   name: IconName;
@@ -170,6 +174,14 @@ const paths: Record<IconName, React.ReactNode> = {
   ),
   sunset: (
     <path d="M12 21v-5 M4.2 11H2m20 0h-2.2 M5.6 7.6 4.1 6.1m14.3 1.5 1.5-1.5 M6 16a6 6 0 0 1 12 0 M2 16h20 M9 16a3 3 0 0 1 6 0" />
+  ),
+  star: (
+    <path d="m12 3 2.7 5.9 6.3.7-4.7 4.4 1.3 6.3L12 17.3 6.4 20.3l1.3-6.3-4.7-4.4 6.3-.7Z" />
+  ),
+  play: <path d="M7 4.5v15l13-7.5Z" />,
+  stop: <path d="M6 6h12v12H6Z" />,
+  music: (
+    <path d="M9 18V5l11-2v13 M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z M20 16a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
   ),
 };
 

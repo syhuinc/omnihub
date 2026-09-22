@@ -2,9 +2,16 @@ package com.syhuinc.omnihub.alarm;
 
 import android.Manifest;
 import android.content.Intent;
+import android.database.Cursor;
+import android.media.AudioAttributes;
+import android.media.AudioManager;
+import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
+import android.provider.OpenableColumns;
 
 import androidx.activity.result.ActivityResult;
 
@@ -31,6 +38,10 @@ import com.syhuinc.omnihub.CrashLogger;
         }
 )
 public class AlarmPlugin extends Plugin {
+
+    private Ringtone previewRingtone;
+    private final Handler previewHandler = new Handler(Looper.getMainLooper());
+    private Runnable previewStopRunnable;
 
     @PluginMethod
     public void schedule(PluginCall call) {
@@ -175,6 +186,133 @@ public class AlarmPlugin extends Plugin {
             getContext().startActivity(intent);
         }
         call.resolve();
+    }
+
+    @PluginMethod
+    public void listRingtones(PluginCall call) {
+        JSArray arr = new JSArray();
+        try {
+            RingtoneManager rm = new RingtoneManager(getContext());
+            rm.setType(RingtoneManager.TYPE_ALARM);
+            Cursor cursor = rm.getCursor();
+            Uri defaultUri = RingtoneManager.getActualDefaultRingtoneUri(getContext(), RingtoneManager.TYPE_ALARM);
+            while (cursor.moveToNext()) {
+                int position = cursor.getPosition();
+                Uri uri = rm.getRingtoneUri(position);
+                if (uri == null) continue;
+                JSObject entry = new JSObject();
+                entry.put("uri", uri.toString());
+                entry.put("name", cursor.getString(RingtoneManager.TITLE_COLUMN_INDEX));
+                entry.put("isDefault", defaultUri != null && uri.equals(defaultUri));
+                arr.put(entry);
+            }
+        } catch (Exception e) {
+            call.reject("Failed to list ringtones", e);
+            return;
+        }
+        JSObject ret = new JSObject();
+        ret.put("sounds", arr);
+        call.resolve(ret);
+    }
+
+    @PluginMethod
+    public void previewSound(PluginCall call) {
+        String uriStr = call.getString("uri");
+        stopPreviewInternal();
+
+        Uri uri = (uriStr == null || uriStr.isEmpty())
+                ? RingtoneManager.getActualDefaultRingtoneUri(getContext(), RingtoneManager.TYPE_ALARM)
+                : Uri.parse(uriStr);
+        if (uri == null) {
+            call.resolve();
+            return;
+        }
+
+        try {
+            previewRingtone = RingtoneManager.getRingtone(getContext(), uri);
+            if (previewRingtone != null) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    previewRingtone.setAudioAttributes(new AudioAttributes.Builder()
+                            .setUsage(AudioAttributes.USAGE_ALARM)
+                            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                            .build());
+                } else {
+                    previewRingtone.setStreamType(AudioManager.STREAM_ALARM);
+                }
+                previewRingtone.play();
+                // Safety auto-stop so a forgotten preview doesn't keep playing indefinitely.
+                previewStopRunnable = this::stopPreviewInternal;
+                previewHandler.postDelayed(previewStopRunnable, 12_000);
+            }
+        } catch (Exception ignored) {
+            // some URIs/devices can throw; nothing else to do but skip the preview
+        }
+        call.resolve();
+    }
+
+    @PluginMethod
+    public void stopPreview(PluginCall call) {
+        stopPreviewInternal();
+        call.resolve();
+    }
+
+    private void stopPreviewInternal() {
+        if (previewStopRunnable != null) {
+            previewHandler.removeCallbacks(previewStopRunnable);
+            previewStopRunnable = null;
+        }
+        if (previewRingtone != null && previewRingtone.isPlaying()) {
+            previewRingtone.stop();
+        }
+        previewRingtone = null;
+    }
+
+    @PluginMethod
+    public void importCustomAudio(PluginCall call) {
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("audio/*");
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+        startActivityForResult(call, intent, "onCustomAudioPicked");
+    }
+
+    @ActivityCallback
+    private void onCustomAudioPicked(PluginCall call, ActivityResult result) {
+        if (call == null) return;
+        Intent data = result.getData();
+        Uri uri = data != null ? data.getData() : null;
+
+        JSObject ret = new JSObject();
+        if (uri == null) {
+            ret.put("cancelled", true);
+            call.resolve(ret);
+            return;
+        }
+
+        try {
+            getContext().getContentResolver()
+                    .takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        } catch (SecurityException ignored) {
+            // Some providers don't support persistable permission - playback may fail after
+            // the app or device restarts, but works for the current session either way.
+        }
+
+        String name = queryDisplayName(uri);
+        ret.put("cancelled", false);
+        ret.put("uri", uri.toString());
+        ret.put("name", name != null ? name : "Custom audio");
+        call.resolve(ret);
+    }
+
+    private String queryDisplayName(Uri uri) {
+        try (Cursor cursor = getContext().getContentResolver().query(uri, null, null, null, null)) {
+            if (cursor != null && cursor.moveToFirst()) {
+                int idx = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                if (idx >= 0) return cursor.getString(idx);
+            }
+        } catch (Exception ignored) {
+        }
+        return null;
     }
 
     @PluginMethod

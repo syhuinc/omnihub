@@ -4,8 +4,10 @@ import { Icon, type IconName } from '../../components/Icon';
 import { AlarmPlugin, type AlarmRecord } from '../../alarm/plugin';
 import { formatTime, type RepeatMode, type TimeCategory, REPEAT_LABELS } from '../../alarm/types';
 import { loadPresets, addPreset, removePreset } from '../../alarm/presets';
+import { loadCategoryDefaults } from '../../alarm/ringtones';
 import { hapticSelect, hapticSuccess, hapticWarning } from '../../haptics';
 import { useBackHandler } from '../../app/useBackHandler';
+import { RingtonePicker } from './RingtonePicker';
 import './Alarm.css';
 
 const CATEGORIES: { id: TimeCategory; label: string; icon: IconName }[] = [
@@ -41,6 +43,7 @@ export function AlarmEditor({ alarmId, onClose, onDelete }: AlarmEditorProps) {
   const [presets, setPresets] = useState(loadPresets());
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [needsExactAlarmPermission, setNeedsExactAlarmPermission] = useState(false);
+  const [showRingtonePicker, setShowRingtonePicker] = useState(false);
 
   useBackHandler(() => {
     if (confirmingDelete) {
@@ -48,7 +51,7 @@ export function AlarmEditor({ alarmId, onClose, onDelete }: AlarmEditorProps) {
     } else {
       onClose();
     }
-  }, true);
+  }, !showRingtonePicker);
 
   useEffect(() => {
     if (alarmId === null) return;
@@ -72,6 +75,16 @@ export function AlarmEditor({ alarmId, onClose, onDelete }: AlarmEditorProps) {
     setHour(h);
     setMinute(m);
     setOpenCategory(category);
+
+    // Apply the category's default sound, but only if the user hasn't already picked one
+    // explicitly - a category tap shouldn't clobber a sound they chose themselves.
+    if (soundUri === null) {
+      const categoryDefault = loadCategoryDefaults()[category];
+      if (categoryDefault) {
+        setSoundUri(categoryDefault.uri);
+        setSoundName(categoryDefault.name);
+      }
+    }
   }
 
   function handleCustomTimeChange(value: string) {
@@ -92,14 +105,6 @@ export function AlarmEditor({ alarmId, onClose, onDelete }: AlarmEditorProps) {
     const next = removePreset(category, { hour: h, minute: m });
     setPresets(next);
     hapticWarning();
-  }
-
-  async function handlePickRingtone() {
-    const result = await AlarmPlugin.pickRingtone();
-    if (!result.cancelled) {
-      setSoundUri(result.uri ?? null);
-      setSoundName(result.name ?? null);
-    }
   }
 
   async function handleSave() {
@@ -149,6 +154,20 @@ export function AlarmEditor({ alarmId, onClose, onDelete }: AlarmEditorProps) {
 
   if (!loaded) {
     return <div className="screen" />;
+  }
+
+  if (showRingtonePicker) {
+    return (
+      <RingtonePicker
+        excludeAlarmId={alarmId}
+        onClose={() => setShowRingtonePicker(false)}
+        onSelect={(sound) => {
+          setSoundUri(sound.uri);
+          setSoundName(sound.name);
+          setShowRingtonePicker(false);
+        }}
+      />
+    );
   }
 
   return (
@@ -298,7 +317,7 @@ export function AlarmEditor({ alarmId, onClose, onDelete }: AlarmEditorProps) {
         />
 
         <h2 className="alarm-editor__section-title">Sound</h2>
-        <button type="button" className="alarm-editor__sound-row" onClick={handlePickRingtone}>
+        <button type="button" className="alarm-editor__sound-row" onClick={() => setShowRingtonePicker(true)}>
           <span>{soundName || 'Default Alarm'}</span>
           <Icon name="chevron-right" size={18} />
         </button>
