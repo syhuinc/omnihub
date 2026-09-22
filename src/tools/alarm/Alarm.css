@@ -105,6 +105,52 @@
   box-shadow: 0 8px 20px -4px rgba(77, 124, 254, 0.5), 0 2px 6px rgba(0, 0, 0, 0.3);
 }
 
+.alarm__debug-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-tertiary);
+}
+
+.alarm__crash-log {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  color: var(--text-primary);
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.alarm__crash-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.alarm__crash-btn {
+  flex: 1;
+  min-height: 44px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 600;
+  background: var(--bg-active);
+  color: var(--text-primary);
+}
+
+.alarm__crash-btn--danger {
+  background: var(--red);
+  color: #fff;
+}
+
 /* Editor */
 
 .alarm-editor__icon-btn {

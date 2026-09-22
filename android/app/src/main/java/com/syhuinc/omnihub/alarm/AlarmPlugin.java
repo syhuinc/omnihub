@@ -22,6 +22,8 @@ import org.json.JSONException;
 import java.util.List;
 import java.util.UUID;
 
+import com.syhuinc.omnihub.CrashLogger;
+
 @CapacitorPlugin(
         name = "AlarmPlugin",
         permissions = {
@@ -152,5 +154,18 @@ public class AlarmPlugin extends Plugin {
             ret.put("name", ringtone != null ? ringtone.getTitle(getContext()) : "Custom");
         }
         call.resolve(ret);
+    }
+
+    @PluginMethod
+    public void getCrashLog(PluginCall call) {
+        JSObject ret = new JSObject();
+        ret.put("log", CrashLogger.read(getContext()));
+        call.resolve(ret);
+    }
+
+    @PluginMethod
+    public void clearCrashLog(PluginCall call) {
+        CrashLogger.clear(getContext());
+        call.resolve();
     }
 }

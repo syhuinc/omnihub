@@ -6,6 +6,7 @@ import { AlarmPlugin, type AlarmRecord } from '../../alarm/plugin';
 import { formatTime, REPEAT_LABELS } from '../../alarm/types';
 import { hapticSelect, hapticWarning } from '../../haptics';
 import { AlarmEditor } from './AlarmEditor';
+import { CrashLogView } from './CrashLogView';
 import './Alarm.css';
 
 export function Alarm() {
@@ -14,6 +15,7 @@ export function Alarm() {
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [creatingNew, setCreatingNew] = useState(false);
+  const [showCrashLog, setShowCrashLog] = useState(false);
 
   async function refresh() {
     const { alarms: list } = await AlarmPlugin.list();
@@ -51,9 +53,27 @@ export function Alarm() {
     );
   }
 
+  if (showCrashLog) {
+    return <CrashLogView onClose={() => setShowCrashLog(false)} />;
+  }
+
   return (
     <div className="screen">
-      <ScreenHeader title="Alarm" subtitle="Wakes you even if the app is closed" onBack={back} />
+      <ScreenHeader
+        title="Alarm"
+        subtitle="Wakes you even if the app is closed"
+        onBack={back}
+        action={
+          <button
+            type="button"
+            className="alarm__debug-btn"
+            onClick={() => setShowCrashLog(true)}
+            aria-label="View crash log"
+          >
+            <Icon name="info" size={20} />
+          </button>
+        }
+      />
 
       <div className="alarm__content">
         {loading ? null : alarms.length === 0 ? (

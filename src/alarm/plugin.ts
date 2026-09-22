@@ -31,6 +31,8 @@ export interface AlarmPluginInterface {
   checkNotificationPermission(): Promise<{ granted: boolean }>;
   requestNotificationPermission(): Promise<{ granted: boolean }>;
   pickRingtone(): Promise<{ cancelled: boolean; uri?: string; name?: string }>;
+  getCrashLog(): Promise<{ log: string }>;
+  clearCrashLog(): Promise<void>;
 }
 
 class AlarmPluginWeb extends WebPlugin implements AlarmPluginInterface {
@@ -70,6 +72,14 @@ class AlarmPluginWeb extends WebPlugin implements AlarmPluginInterface {
 
   async pickRingtone(): Promise<{ cancelled: boolean; uri?: string; name?: string }> {
     return { cancelled: true };
+  }
+
+  async getCrashLog(): Promise<{ log: string }> {
+    return { log: '' };
+  }
+
+  async clearCrashLog(): Promise<void> {
+    // no-op in browser
   }
 }
 
