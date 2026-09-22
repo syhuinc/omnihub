@@ -1,0 +1,141 @@
+.cp__body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 32px;
+}
+
+.cp__hint {
+  color: var(--text-secondary);
+  font-size: 14px;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.cp__hint-icon {
+  color: var(--text-secondary);
+}
+
+.cp__btn {
+  min-height: 48px;
+  padding: 0 28px;
+  border-radius: var(--radius-pill);
+  background: var(--accent-gradient);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  margin-top: 8px;
+}
+
+.cp__dial-wrap {
+  position: relative;
+  width: min(70vw, 260px);
+  aspect-ratio: 1;
+  margin-bottom: 8px;
+}
+
+.cp__dial {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: var(--bg-elevated);
+  border: 2px solid var(--border);
+  transition: transform 0.15s ease-out;
+}
+
+.cp__dial-label {
+  position: absolute;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.cp__dial-label--n {
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: var(--red);
+}
+
+.cp__dial-label--e {
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.cp__dial-label--s {
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.cp__dial-label--w {
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.cp__dial-tick {
+  position: absolute;
+  width: 2px;
+  height: 14px;
+  background: var(--text-tertiary);
+  left: 50%;
+  top: 6px;
+  transform-origin: 50% calc(50vw * 0.7 - 6px);
+}
+
+.cp__dial-tick--ne {
+  transform: translateX(-50%) rotate(45deg);
+}
+
+.cp__dial-tick--se {
+  transform: translateX(-50%) rotate(135deg);
+}
+
+.cp__dial-tick--sw {
+  transform: translateX(-50%) rotate(225deg);
+}
+
+.cp__dial-tick--nw {
+  transform: translateX(-50%) rotate(315deg);
+}
+
+.cp__needle {
+  position: absolute;
+  left: 50%;
+  top: 8%;
+  width: 4px;
+  height: 42%;
+  background: var(--accent);
+  border-radius: 2px;
+  transform: translateX(-50%);
+  transform-origin: 50% 100%;
+}
+
+.cp__needle::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-bottom: 12px solid var(--accent);
+}
+
+.cp__heading {
+  font-size: 40px;
+  font-weight: 700;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.cp__direction {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}

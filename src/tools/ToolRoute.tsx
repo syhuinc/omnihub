@@ -21,6 +21,10 @@ import { TimeZone } from './time-zone/TimeZone';
 import { TimeDifference } from './time-difference/TimeDifference';
 import { SubscriptionCalculator } from './subscription-calculator/SubscriptionCalculator';
 import { DebtCalculator } from './debt-calculator/DebtCalculator';
+import { Compass } from './compass/Compass';
+import { Flashlight } from './flashlight/Flashlight';
+import { QrScanner } from './qr-scanner/QrScanner';
+import { BarcodeScannerTool } from './barcode-scanner/BarcodeScannerTool';
 
 const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
   calculator: Calculator,
@@ -43,6 +47,10 @@ const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
   'time-difference': TimeDifference,
   'subscription-calculator': SubscriptionCalculator,
   'debt-calculator': DebtCalculator,
+  compass: Compass,
+  flashlight: Flashlight,
+  'qr-scanner': QrScanner,
+  'barcode-scanner': BarcodeScannerTool,
 };
 
 export function ToolRoute({ toolId }: { toolId: string }) {

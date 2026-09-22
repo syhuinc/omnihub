@@ -56,7 +56,11 @@ export type IconName =
   | 'globe'
   | 'clock'
   | 'repeat'
-  | 'card';
+  | 'card'
+  | 'scan'
+  | 'flashlight'
+  | 'compass'
+  | 'barcode';
 
 interface IconProps {
   name: IconName;
@@ -211,6 +215,16 @@ const paths: Record<IconName, React.ReactNode> = {
   card: (
     <path d="M3 6h18a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1Z M2 10h20 M6 15h4" />
   ),
+  scan: (
+    <path d="M4 8V5a1 1 0 0 1 1-1h3 M16 4h3a1 1 0 0 1 1 1v3 M20 16v3a1 1 0 0 1-1 1h-3 M8 20H5a1 1 0 0 1-1-1v-3 M4 12h16" />
+  ),
+  flashlight: (
+    <path d="M9 2h6l-1 5h1l-3 6-3-6h1Z M8 13h8v7a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2Z" />
+  ),
+  compass: (
+    <path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z M15.5 8.5l-2 5-5 2 2-5Z" />
+  ),
+  barcode: <path d="M4 4v16M7.5 4v16M10 4v16M13 4v16M16.5 4v16M20 4v16" />,
 };
 
 export function Icon({ name, size = 20, strokeWidth = 2, className, style }: IconProps) {

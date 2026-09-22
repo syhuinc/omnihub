@@ -1,0 +1,54 @@
+.fl {
+  transition: background-color 0.2s ease;
+}
+
+.fl--on {
+  background-color: #1a1a0a;
+}
+
+.fl__body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 32px;
+}
+
+.fl__toggle {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: var(--bg-elevated);
+  border: 3px solid var(--border);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.fl__toggle--on {
+  background: var(--yellow);
+  border-color: var(--yellow);
+  color: #1a1a0a;
+  box-shadow: 0 0 60px 10px color-mix(in srgb, var(--yellow) 55%, transparent);
+}
+
+.fl__status {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: 0.04em;
+}
+
+.fl__hint {
+  color: var(--text-secondary);
+  font-size: 14px;
+  text-align: center;
+}
+
+.fl__hint-icon {
+  color: var(--text-secondary);
+}

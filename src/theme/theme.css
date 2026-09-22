@@ -78,6 +78,16 @@ body {
   overscroll-behavior-y: none;
 }
 
+/* While a barcode/QR scan is active, the native camera preview renders behind the
+   WebView — everything down to #root needs to go transparent so it shows through. */
+html.scanner-active,
+html.scanner-active body,
+html.scanner-active #root,
+html.scanner-active .app-shell,
+html.scanner-active .app-shell__content {
+  background: transparent !important;
+}
+
 body {
   background: var(--bg-gradient);
   background-color: var(--bg);
