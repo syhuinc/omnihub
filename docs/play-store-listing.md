@@ -3,29 +3,33 @@
 ## Short description (max 80 characters)
 
 ```
-13 everyday tools in one app — 100% offline, no ads, no account needed.
+14 everyday tools in one app — works offline, no ads, sign-in optional.
 ```
 
-(74 characters)
+(73 characters)
 
 ## Full description (max 4000 characters)
 
 ```
-Omni Hub is a simple all-in-one toolbox for everyday tasks — calculator, notes, expenses, and more — all in one clean, fast app. No account, no ads, no internet connection required, ever.
+Omni Hub is a simple all-in-one toolbox for everyday tasks — calculator, notes, alarms, expenses, and more — all in one clean, fast app. No ads, no clutter, and everything works fully offline with no account required.
 
-EVERYTHING STAYS ON YOUR PHONE
-Omni Hub makes zero network requests. There's no sign-up, no tracking, no analytics, and nothing is ever uploaded anywhere. Everything you create is stored only on your device, and you're always in control: back up your data to a file whenever you like, or clear it all with one tap.
+WORKS OFFLINE, NO ACCOUNT NEEDED
+Omni Hub needs no sign-up and no internet connection to work. Everything you create is stored on your device, and you're always in control: back up your data to a file whenever you like, or clear it all with one tap. No ads, no tracking, no analytics.
 
-13 TOOLS, ALL OFFLINE
+OPTIONAL: SYNC ACROSS YOUR DEVICES
+Want your notes and private Vault available on more than one device? Sign in with Google, entirely optional, to sync them automatically. Your Vault stays end-to-end protected — only your already PIN-encrypted data ever leaves your device, and your PIN itself never does. Nothing is shared, sold, or used for ads.
+
+14 TOOLS, WORKS OFFLINE
 
 Essentials
 • Calculator — with a history of your past calculations
 • Unit Converter — length, weight, temperature, volume, speed, area, and data
 • Timer — a simple countdown with an alert when time's up
 • Stopwatch — with lap times
+• Alarm — reliable alarms with optional backup re-rings if you don't respond
 
 Productivity
-• Notes — write, edit, pin, and search your notes
+• Notes — write, edit, pin, and search your notes, with optional cross-device sync
 • Checklist — keep multiple lists, check items off, reorder them
 
 Finance
@@ -39,16 +43,18 @@ More
 • Date Calculator — find the days between two dates, or add/subtract days from a date
 • Random Generator — roll dice, flip a coin, generate a random number, or pick from a list
 
+Plus a private, PIN-locked Vault for notes, photos, and files you want extra protected.
+
 FIND WHAT YOU NEED, FAST
-Just start typing in the search bar — Omni Hub understands what you mean, not just tool names. Search "split" for the bill splitter, "how old" for the age calculator, "cm to inches" for the converter, and more. Pin your most-used tools to the Home screen and reorder them anytime.
+Just start typing in the search bar — Omni Hub understands what you mean, not just tool names. Search "split" for the bill splitter, "how old" for the age calculator, "cm to inches" for the converter, and more. Pin your most-used tools to the Home screen and drag to reorder them anytime.
 
 A CLEAN, FOCUSED APP
-Omni Hub is built to be fast and simple: no clutter, no bloated permissions, no accounts to manage. Switch between a dark or light theme, and everything just works — with or without a connection.
+Omni Hub is built to be fast and simple: no clutter, no bloated permissions, and nothing to manage unless you want cross-device sync. Switch between a dark or light theme, and everything just works.
 
 Download Omni Hub and get everyday things done, all in one place.
 ```
 
-(≈1,850 characters — well under the 4000 limit)
+(≈2,150 characters — well under the 4000 limit)
 
 ## Category
 
@@ -56,4 +62,4 @@ Download Omni Hub and get everyday things done, all in one place.
 
 ## Tags / keywords (for ASO, not shown to users directly)
 
-calculator, unit converter, timer, stopwatch, notes app, checklist, to-do list, expense tracker, budget planner, tip calculator, split bill, age calculator, date calculator, random generator, offline app, no ads, privacy
+calculator, unit converter, timer, stopwatch, alarm clock, notes app, checklist, to-do list, expense tracker, budget planner, tip calculator, split bill, age calculator, date calculator, random generator, offline app, private vault, no ads, privacy

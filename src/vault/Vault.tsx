@@ -1,8 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { Icon } from '../components/Icon';
 import { useRouter } from '../app/Router';
 import { useBackHandler } from '../app/useBackHandler';
+import { useAuth } from '../cloud/AuthContext';
+import { createSyncEngine, type SyncEngine } from '../cloud/sync';
 import { storageGet, storageSet, storageRemove, StorageKeys } from '../storage/db';
 import { hapticSuccess, hapticWarning } from '../haptics';
 import {
@@ -33,6 +35,7 @@ function newNote(): VaultNote {
 
 export function Vault() {
   const { back } = useRouter();
+  const { user } = useAuth();
   const [status, setStatus] = useState<Status>('loading');
   const [pinInput, setPinInput] = useState('');
   const [pendingPin, setPendingPin] = useState('');
@@ -45,6 +48,57 @@ export function Vault() {
   const [changingPin, setChangingPin] = useState(false);
   const [confirmingReset, setConfirmingReset] = useState(false);
   const [tab, setTab] = useState<Tab>('notes');
+
+  // Only the already-PIN-encrypted records ever leave the device — the key itself never does.
+  // Kept alongside `notes` (decrypted, for the UI) since that's what actually gets synced.
+  const encryptedRecordsRef = useRef<VaultNoteRecord[]>(storageGet(StorageKeys.vaultNotes, []));
+  const keyRef = useRef<CryptoKey | null>(null);
+  keyRef.current = key;
+  const syncEngineRef = useRef<SyncEngine<VaultNoteRecord> | null>(null);
+  const syncUidRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!user || !key) {
+      syncEngineRef.current = null;
+      syncUidRef.current = null;
+      return;
+    }
+    const engine = createSyncEngine<VaultNoteRecord>({
+      collection: 'vault',
+      getLocal: () => encryptedRecordsRef.current,
+      setLocal: (records) => {
+        void applyRemoteRecords(records);
+      },
+    });
+    syncEngineRef.current = engine;
+    syncUidRef.current = user.uid;
+    engine.start(user.uid);
+    return () => {
+      engine.stop();
+      syncEngineRef.current = null;
+      syncUidRef.current = null;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.uid, key]);
+
+  async function applyRemoteRecords(records: VaultNoteRecord[]) {
+    const activeKey = keyRef.current;
+    if (!activeKey) return;
+    encryptedRecordsRef.current = records;
+    storageSet(StorageKeys.vaultNotes, records);
+    const decrypted = await Promise.all(
+      records.map(async (r): Promise<VaultNote> => {
+        try {
+          const json = await decryptText(activeKey, { iv: r.iv, data: r.data });
+          const { title, body } = JSON.parse(json) as { title: string; body: string };
+          return { id: r.id, title, body, createdAt: r.createdAt, updatedAt: r.updatedAt };
+        } catch {
+          return { id: r.id, title: 'Could not decrypt', body: '', createdAt: r.createdAt, updatedAt: r.updatedAt };
+        }
+      }),
+    );
+    setNotes(decrypted);
+  }
 
   const hasNestedState = settingsOpen || (changingPin && (status === 'setupPin' || status === 'confirmPin'));
   useBackHandler(() => {
@@ -95,6 +149,7 @@ export function Vault() {
       await persistNotes(notes, derivedKey);
       if (key) await reencryptFiles(key, derivedKey);
     } else {
+      encryptedRecordsRef.current = [];
       storageSet(StorageKeys.vaultNotes, []);
       setNotes([]);
     }
@@ -124,6 +179,7 @@ export function Vault() {
     }
 
     const records = storageGet<VaultNoteRecord[]>(StorageKeys.vaultNotes, []);
+    encryptedRecordsRef.current = records;
     const decrypted = await Promise.all(
       records.map(async (r): Promise<VaultNote> => {
         try {
@@ -144,6 +200,7 @@ export function Vault() {
   }
 
   async function persistNotes(next: VaultNote[], activeKey: CryptoKey) {
+    const prevRecords = encryptedRecordsRef.current;
     setNotes(next);
     const records: VaultNoteRecord[] = await Promise.all(
       next.map(async (n) => {
@@ -151,7 +208,22 @@ export function Vault() {
         return { id: n.id, iv, data, createdAt: n.createdAt, updatedAt: n.updatedAt };
       }),
     );
+    encryptedRecordsRef.current = records;
     storageSet(StorageKeys.vaultNotes, records);
+
+    const engine = syncEngineRef.current;
+    const uid = syncUidRef.current;
+    if (engine && uid) {
+      const prevMap = new Map(prevRecords.map((r) => [r.id, r]));
+      const nextIds = new Set(records.map((r) => r.id));
+      for (const rec of records) {
+        const prev = prevMap.get(rec.id);
+        if (!prev || prev.updatedAt !== rec.updatedAt) engine.pushUpsert(uid, rec);
+      }
+      for (const [id] of prevMap) {
+        if (!nextIds.has(id)) engine.pushDelete(uid, id, Date.now());
+      }
+    }
   }
 
   async function reencryptFiles(oldKey: CryptoKey, newKey: CryptoKey) {
@@ -231,6 +303,17 @@ export function Vault() {
 
   function resetVault() {
     hapticWarning();
+    // Tombstone the cloud copies too — otherwise the next sync (with a new PIN, and so a new
+    // key) would pull these back in as undecryptable "Could not decrypt" entries, resurrecting
+    // exactly what "Delete Everything" is supposed to remove.
+    const engine = syncEngineRef.current;
+    const uid = syncUidRef.current;
+    if (engine && uid) {
+      for (const rec of encryptedRecordsRef.current) {
+        engine.pushDelete(uid, rec.id, Date.now());
+      }
+    }
+    encryptedRecordsRef.current = [];
     storageRemove(StorageKeys.vaultSalt);
     storageRemove(StorageKeys.vaultCanary);
     storageRemove(StorageKeys.vaultNotes);

@@ -41,45 +41,56 @@
 </style>
 </head>
 <body>
-  <span class="badge">🔒 Omni Hub collects no data</span>
+  <span class="badge">🔒 Offline-first — cloud sync is optional</span>
   <h1>Privacy Policy for Omni Hub</h1>
   <p class="updated">Last updated: 2026</p>
 
-  <p>Omni Hub is an offline utility app. This policy is short because there isn't much to say: <strong>Omni Hub does not collect any data.</strong></p>
+  <p>Omni Hub is an offline-first utility app. Everything works fully on your device with no account needed. Signing in with Google is entirely optional and only unlocks syncing your Notes and Vault across your own devices — nothing else changes, and nothing is shared, sold, or used for ads or analytics either way.</p>
 
   <h2>What we collect</h2>
-  <p>Nothing. Omni Hub:</p>
+  <p><strong>If you never sign in:</strong> nothing. Omni Hub makes no network requests, uses no analytics, tracking, or advertising SDKs, and never transmits anything, because it never leaves your device.</p>
+  <p><strong>If you choose to sign in with Google</strong> (Profile ▸ Cloud Sync), to sync your data across your own devices:</p>
   <ul>
-    <li>Makes <strong>no network requests</strong> of any kind</li>
-    <li>Has <strong>no user accounts</strong>, sign-in, or sign-up</li>
-    <li>Uses <strong>no analytics, tracking, or advertising SDKs</strong></li>
-    <li>Does <strong>not</strong> share, sell, or transmit any information, because it never leaves your device in the first place</li>
+    <li>Firebase Authentication (a Google service) receives your Google account's basic profile — name, email address, and profile photo — to identify you as the signed-in user. Omni Hub doesn't see or store your Google password.</li>
+    <li>Your <strong>Notes</strong> content (titles and text) is stored in Cloud Firestore (also a Google service), scoped to your account, so it can sync to your other signed-in devices.</li>
+    <li>Your <strong>Vault</strong> notes sync too, but only as the same PIN-encrypted ciphertext already stored on your device — see <a href="#vault">Vault</a> below for exactly what that means.</li>
+    <li><strong>Alarms</strong> do not sync yet. They remain device-only regardless of sign-in status.</li>
   </ul>
+  <p>No advertising, analytics, or tracking SDKs are used, and nothing collected is ever sold or shared with third parties beyond the Google/Firebase infrastructure used to provide sync itself.</p>
 
   <h2>Where your data lives</h2>
-  <p>Everything you enter into Omni Hub — notes, checklists, expenses, budgets, calculator history, pinned tools, and app settings — is stored <strong>only on your device</strong>, using standard local browser storage (<code>localStorage</code>). It is never sent anywhere.</p>
+  <p>Everything you enter into Omni Hub — notes, checklists, expenses, budgets, calculator history, pinned tools, and app settings — is stored <strong>on your device</strong> at minimum, using standard local browser storage (<code>localStorage</code>). Notes and Vault content is additionally copied to Google's Firebase servers only if, and for as long as, you're signed in.</p>
   <ul>
     <li>You can export a backup of this data at any time from <strong>Profile ▸ Export Backup</strong>, which saves a JSON file to your device that only you control.</li>
-    <li>You can delete all of it at any time from <strong>Profile ▸ Clear All Data</strong>.</li>
-    <li>Uninstalling the app deletes this data along with it.</li>
+    <li>You can delete all local data at any time from <strong>Profile ▸ Clear All Data</strong>.</li>
+    <li>Signing out (Profile ▸ Sign Out) stops syncing but does not delete what's already on your device or already synced to your account.</li>
+    <li>Uninstalling the app deletes local data along with it; it does not delete anything already synced to your account — sign in again after reinstalling to get it back.</li>
   </ul>
-  <p>Notes, photos, and files you save in the <strong>Vault</strong> are additionally encrypted on your device with a key derived from your PIN before being stored — notes alongside your other app data, and photos/files in a separate local database (<code>IndexedDB</code>) sized for larger content, still only on your device. Your PIN is never stored — only used to derive that key each time you unlock — so if you forget it, Vault content cannot be recovered and the Vault must be reset. Opening or saving a Vault photo/file decrypts a temporary copy for that action (e.g. to view an image or save it to your Downloads folder); that copy is no longer encrypted once it leaves the Vault. Vault photos and files are not included in the main <strong>Profile ▸ Export Backup</strong> file; use <strong>Vault ▸ Photos &amp; Files ▸ Export</strong> instead, which decrypts them into a plain <code>.zip</code> file on your device — that zip is unencrypted, since it needs to be readable outside the app, so store or share it with the same care you'd give the original photos/files. Use <strong>Vault ▸ Photos &amp; Files ▸ Import</strong> to bring that zip back in (e.g. after reinstalling), which re-encrypts everything as it's added.</p>
+
+  <h2 id="vault">Vault</h2>
+  <p>Notes, photos, and files you save in the <strong>Vault</strong> are additionally encrypted on your device with a key derived from your PIN before being stored — notes alongside your other app data, and photos/files in a separate local database (<code>IndexedDB</code>) sized for larger content.</p>
+  <p><strong>Your PIN, and any key derived from it, never leaves your device — not even if you sign in and sync.</strong> If you sign in, only the already-encrypted ciphertext of your Vault notes is copied to Firebase, in a form Omni Hub itself cannot read without your PIN; a second device only regains access to it by unlocking with the same PIN. Vault photos and files don't sync at all yet and stay device-only regardless of sign-in status.</p>
+  <p>Your PIN is never stored anywhere, on-device or in the cloud — only used to derive that key each time you unlock — so if you forget it, Vault content cannot be recovered and the Vault must be reset. Opening or saving a Vault photo/file decrypts a temporary copy for that action (e.g. to view an image or save it to your Downloads folder); that copy is no longer encrypted once it leaves the Vault. Vault photos and files are not included in the main <strong>Profile ▸ Export Backup</strong> file; use <strong>Vault ▸ Photos &amp; Files ▸ Export</strong> instead, which decrypts them into a plain <code>.zip</code> file on your device — that zip is unencrypted, since it needs to be readable outside the app, so store or share it with the same care you'd give the original photos/files. Use <strong>Vault ▸ Photos &amp; Files ▸ Import</strong> to bring that zip back in (e.g. after reinstalling), which re-encrypts everything as it's added.</p>
 
   <h2>Permissions</h2>
-  <p>Omni Hub does not access your camera, microphone, contacts, location, storage beyond its own app sandbox, or any other device feature. It requests these permissions, all used only to make features on-device work, never to collect or transmit data:</p>
+  <p>Omni Hub does not access your camera, microphone, contacts, or location. It requests these permissions, all used only to make features work, never to collect or transmit data beyond what's described above:</p>
   <ul>
+    <li><strong>Internet / network access</strong> — required only for the optional Google Sign-In and cloud sync described above. Unused unless you sign in.</li>
     <li><strong>Vibrate</strong> — haptic feedback (tap and completion vibrations).</li>
-    <li><strong>Alarms, notifications, and background wake permissions</strong> (schedule alarms, post notifications, run in the foreground briefly while an alarm rings, keep the device awake for that, show the ringing screen over the lock screen, and restart alarms after the device reboots) — all used solely by the <strong>Alarm</strong> feature, so an alarm you set still rings even if Omni Hub is closed. None of this involves any network access or leaves your device.</li>
+    <li><strong>Alarms, notifications, and background wake permissions</strong> (schedule alarms, post notifications, run in the foreground briefly while an alarm rings, keep the device awake for that, show the ringing screen over the lock screen, and restart alarms after the device reboots) — all used solely by the <strong>Alarm</strong> feature, so an alarm you set still rings even if Omni Hub is closed. None of this involves any network access.</li>
   </ul>
 
   <h2>Alarm</h2>
-  <p>Alarms you create are stored on your device (both in the app's own storage and, separately, in Android's system alarm scheduler so they still fire when the app isn't open) and are used only to ring at the time you set. No alarm data is ever transmitted anywhere. If you pick a custom ringtone, Omni Hub only stores a reference to the sound file already on your device — it doesn't copy or transmit the audio itself.</p>
+  <p>Alarms you create are stored on your device only (both in the app's own storage and, separately, in Android's system alarm scheduler so they still fire when the app isn't open) and are used only to ring at the time you set. Alarm data is never transmitted anywhere, including if you're signed in. If you pick a custom ringtone, Omni Hub only stores a reference to the sound file already on your device — it doesn't copy or transmit the audio itself.</p>
+
+  <h2>Third-party services</h2>
+  <p>Signing in and syncing uses Google's Firebase platform (Firebase Authentication and Cloud Firestore). Google's own privacy policy governs how Google handles data on their servers: <a href="https://policies.google.com/privacy">https://policies.google.com/privacy</a>.</p>
 
   <h2>Children's privacy</h2>
-  <p>Because Omni Hub collects no data from anyone, it does not knowingly collect data from children, and there is nothing to collect regardless of age.</p>
+  <p>Omni Hub does not knowingly collect data from children. Cloud sync requires deliberately signing in with a Google account, which is not directed at or targeted toward children.</p>
 
   <h2>Changes to this policy</h2>
-  <p>If this policy ever changes, the "Last updated" date above will change too. Given that the app is offline by design, we don't expect that to happen often.</p>
+  <p>If this policy ever changes, the "Last updated" date above will change too.</p>
 
   <h2>Contact</h2>
   <p>Questions about this policy can be sent to the developer contact listed on the Omni Hub Google Play Store listing.</p>

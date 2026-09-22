@@ -4,6 +4,7 @@ export interface VaultNoteRecord extends EncryptedPayload {
   id: string;
   createdAt: number;
   updatedAt: number;
+  deletedAt?: number;
 }
 
 export interface VaultNote {
