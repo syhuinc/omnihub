@@ -46,6 +46,7 @@ export function AlarmEditor({ alarmId, onClose, onDelete }: AlarmEditorProps) {
   const [soundName, setSoundName] = useState<string | null>(null);
   const [backupEnabled, setBackupEnabled] = useState(false);
   const [backupOffsets, setBackupOffsets] = useState<number[]>(DEFAULT_BACKUP_OFFSETS_MIN);
+  const [backupPersistOnDismiss, setBackupPersistOnDismiss] = useState(false);
   const [openCategory, setOpenCategory] = useState<TimeCategory | null>(null);
   const [editingPresets, setEditingPresets] = useState(false);
   const [presets, setPresets] = useState(loadPresets());
@@ -74,6 +75,7 @@ export function AlarmEditor({ alarmId, onClose, onDelete }: AlarmEditorProps) {
         setSoundName(existing.soundName);
         setBackupEnabled(existing.backupEnabled);
         setBackupOffsets(existing.backupOffsetsMin?.length ? existing.backupOffsetsMin : DEFAULT_BACKUP_OFFSETS_MIN);
+        setBackupPersistOnDismiss(existing.backupPersistOnDismiss);
       }
       setLoaded(true);
     });
@@ -128,11 +130,12 @@ export function AlarmEditor({ alarmId, onClose, onDelete }: AlarmEditorProps) {
     setBackupOffsets((prev) => prev.filter((_, i) => i !== index));
   }
 
-  function handleAddBackupOffset() {
+  function handleAddBackupOffset(incrementMin: number) {
     hapticSelect();
     setBackupOffsets((prev) => {
-      const last = prev[prev.length - 1] ?? 5;
-      return [...prev, Math.min(MAX_BACKUP_OFFSET_MIN, last + 10)];
+      const last = prev[prev.length - 1] ?? 0;
+      const next = Math.min(MAX_BACKUP_OFFSET_MIN, last + incrementMin);
+      return prev.includes(next) ? prev : [...prev, next];
     });
   }
 
@@ -169,6 +172,7 @@ export function AlarmEditor({ alarmId, onClose, onDelete }: AlarmEditorProps) {
       soundName,
       backupEnabled,
       backupOffsetsMin: [...backupOffsets].sort((a, b) => a - b),
+      backupPersistOnDismiss,
     });
 
     if (!armed) {
@@ -398,14 +402,52 @@ export function AlarmEditor({ alarmId, onClose, onDelete }: AlarmEditorProps) {
               </div>
             ))}
             {backupOffsets.length < MAX_BACKUP_OFFSETS && (
-              <button
-                type="button"
-                className="alarm-editor__backup-offset-add"
-                onClick={handleAddBackupOffset}
-              >
-                <Icon name="plus" size={13} /> Add
-              </button>
+              <>
+                <button
+                  type="button"
+                  className="alarm-editor__backup-offset-add"
+                  onClick={() => handleAddBackupOffset(3)}
+                >
+                  <Icon name="plus" size={13} /> 3 min
+                </button>
+                <button
+                  type="button"
+                  className="alarm-editor__backup-offset-add"
+                  onClick={() => handleAddBackupOffset(5)}
+                >
+                  <Icon name="plus" size={13} /> 5 min
+                </button>
+                <button
+                  type="button"
+                  className="alarm-editor__backup-offset-add"
+                  onClick={() => handleAddBackupOffset(10)}
+                >
+                  <Icon name="plus" size={13} /> 10 min
+                </button>
+              </>
             )}
+          </div>
+        )}
+
+        {backupEnabled && (
+          <div className="alarm-editor__backup-row alarm-editor__backup-row--persist">
+            <div className="alarm-editor__backup-text">
+              <span>Keep backups on Dismiss/Snooze</span>
+              <p>Backups keep ringing on schedule even after you dismiss or snooze this alarm.</p>
+            </div>
+            <button
+              type="button"
+              className={`alarm__switch${backupPersistOnDismiss ? ' alarm__switch--on' : ''}`}
+              onClick={() => {
+                hapticSelect();
+                setBackupPersistOnDismiss((v) => !v);
+              }}
+              role="switch"
+              aria-checked={backupPersistOnDismiss}
+              aria-label="Toggle keeping backups after dismiss or snooze"
+            >
+              <span className="alarm__switch-knob" />
+            </button>
           </div>
         )}
 

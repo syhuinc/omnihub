@@ -46,16 +46,18 @@ public class AlarmRingingActivity extends Activity {
             labelText.setText(label);
         }
 
+        boolean keepBackups = alarm != null && alarm.backupPersistOnDismiss;
+
         dismissButton.setOnClickListener(v -> {
             AlarmRingService.stopRinging(this);
-            if (alarmId != null) AlarmScheduler.cancelBackups(this, alarmId);
+            if (alarmId != null && !keepBackups) AlarmScheduler.cancelBackups(this, alarmId);
             finish();
         });
 
         snoozeButton.setOnClickListener(v -> {
             AlarmRingService.stopRinging(this);
             if (alarmId != null) {
-                AlarmScheduler.cancelBackups(this, alarmId);
+                if (!keepBackups) AlarmScheduler.cancelBackups(this, alarmId);
                 snooze(alarmId);
             }
             finish();
@@ -74,6 +76,7 @@ public class AlarmRingingActivity extends Activity {
         snoozed.soundName = alarm.soundName;
         snoozed.backupEnabled = alarm.backupEnabled;
         snoozed.backupOffsetsMin = alarm.backupOffsetsMin;
+        snoozed.backupPersistOnDismiss = alarm.backupPersistOnDismiss;
         snoozed.createdAt = System.currentTimeMillis();
 
         Calendar c = Calendar.getInstance();

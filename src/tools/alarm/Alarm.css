@@ -472,6 +472,10 @@
   background: var(--bg-active);
 }
 
+.alarm-editor__backup-row--persist {
+  margin-top: 10px;
+}
+
 .alarm-editor__backup-offset-add {
   display: flex;
   align-items: center;
