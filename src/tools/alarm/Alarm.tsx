@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ScreenHeader } from '../../components/ScreenHeader';
 import { Icon } from '../../components/Icon';
+import { SwipeToDelete } from '../../components/SwipeToDelete';
 import { useRouter } from '../../app/Router';
 import { AlarmPlugin, type AlarmRecord } from '../../alarm/plugin';
 import { formatTime, REPEAT_LABELS } from '../../alarm/types';
@@ -16,7 +17,7 @@ export function Alarm() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [creatingNew, setCreatingNew] = useState(false);
   const [showCrashLog, setShowCrashLog] = useState(false);
-  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [openSwipeId, setOpenSwipeId] = useState<string | null>(null);
 
   async function refresh() {
     const { alarms: list } = await AlarmPlugin.list();
@@ -50,7 +51,6 @@ export function Alarm() {
   async function handleDelete(id: string) {
     hapticWarning();
     await AlarmPlugin.cancel({ id });
-    setConfirmDeleteId(null);
     setCreatingNew(false);
     setEditingId(null);
     refresh();
@@ -97,27 +97,15 @@ export function Alarm() {
           <p className="alarm__empty">No alarms yet. Tap + to create one.</p>
         ) : (
           <ul className="alarm__list">
-            {alarms.map((a) =>
-              confirmDeleteId === a.id ? (
-                <li key={a.id}>
-                  <div className="alarm__card alarm__card--confirm">
-                    <span className="alarm__card-confirm-text">Delete this alarm?</span>
-                    <div className="alarm__card-confirm-actions">
-                      <button type="button" onClick={() => setConfirmDeleteId(null)}>
-                        Cancel
-                      </button>
-                      <button
-                        type="button"
-                        className="alarm__card-confirm-delete"
-                        onClick={() => handleDelete(a.id)}
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </div>
-                </li>
-              ) : (
-                <li key={a.id}>
+            {alarms.map((a) => (
+              <li key={a.id}>
+                <SwipeToDelete
+                  id={a.id}
+                  openId={openSwipeId}
+                  onOpenChange={setOpenSwipeId}
+                  onDelete={() => handleDelete(a.id)}
+                  deleteLabel="Delete"
+                >
                   <div className={`alarm__card${a.enabled ? '' : ' alarm__card--disabled'}`}>
                     <button type="button" className="alarm__card-main" onClick={() => setEditingId(a.id)}>
                       <span className="alarm__card-time">{formatTime(a.hour, a.minute)}</span>
@@ -125,14 +113,6 @@ export function Alarm() {
                         {a.label ? `${a.label} · ` : ''}
                         {REPEAT_LABELS[a.repeatMode]}
                       </span>
-                    </button>
-                    <button
-                      type="button"
-                      className="alarm__card-delete"
-                      onClick={() => setConfirmDeleteId(a.id)}
-                      aria-label="Delete alarm"
-                    >
-                      <Icon name="trash" size={17} />
                     </button>
                     <button
                       type="button"
@@ -145,9 +125,9 @@ export function Alarm() {
                       <span className="alarm__switch-knob" />
                     </button>
                   </div>
-                </li>
-              )
-            )}
+                </SwipeToDelete>
+              </li>
+            ))}
           </ul>
         )}
       </div>

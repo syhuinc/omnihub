@@ -2,8 +2,10 @@ import { useMemo, useState } from 'react';
 import { ScreenHeader } from '../../components/ScreenHeader';
 import { SearchBar } from '../../components/SearchBar';
 import { Icon } from '../../components/Icon';
+import { SwipeToDelete } from '../../components/SwipeToDelete';
 import { useRouter } from '../../app/Router';
 import { storageGet, storageSet, StorageKeys } from '../../storage/db';
+import { hapticWarning } from '../../haptics';
 import { NoteEditor } from './NoteEditor';
 import type { Note } from './types';
 import './Notes.css';
@@ -24,6 +26,7 @@ export function Notes() {
   const [draft, setDraft] = useState<Note | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [query, setQuery] = useState('');
+  const [openSwipeId, setOpenSwipeId] = useState<string | null>(null);
 
   function persist(next: Note[]) {
     setNotes(next);
@@ -82,6 +85,11 @@ export function Notes() {
     setEditingId(null);
   }
 
+  function deleteNote(id: string) {
+    hapticWarning();
+    persist(notes.filter((n) => n.id !== id));
+  }
+
   if (editingNote) {
     return (
       <NoteEditor note={editingNote} onChange={handleChange} onDelete={deleteEditing} onClose={closeEditor} />
@@ -105,13 +113,21 @@ export function Notes() {
           <ul className="notes__list">
             {visibleNotes.map((note) => (
               <li key={note.id}>
-                <button type="button" className="notes__card" onClick={() => openExisting(note)}>
-                  <div className="notes__card-header">
-                    <span className="notes__card-title">{note.title || 'Untitled'}</span>
-                    {note.pinned && <Icon name="pin" size={14} className="notes__pin-icon" />}
-                  </div>
-                  {note.body && <p className="notes__card-preview">{preview(note.body)}</p>}
-                </button>
+                <SwipeToDelete
+                  id={note.id}
+                  openId={openSwipeId}
+                  onOpenChange={setOpenSwipeId}
+                  onDelete={() => deleteNote(note.id)}
+                  deleteLabel="Delete"
+                >
+                  <button type="button" className="notes__card" onClick={() => openExisting(note)}>
+                    <div className="notes__card-header">
+                      <span className="notes__card-title">{note.title || 'Untitled'}</span>
+                      {note.pinned && <Icon name="pin" size={14} className="notes__pin-icon" />}
+                    </div>
+                    {note.body && <p className="notes__card-preview">{preview(note.body)}</p>}
+                  </button>
+                </SwipeToDelete>
               </li>
             ))}
           </ul>
