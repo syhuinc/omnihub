@@ -32,7 +32,11 @@
   padding: 14px 16px;
 }
 
-.alarm__card--disabled {
+/* Dim only the content, not the card box itself — the box needs to stay fully
+   opaque since it sits directly beside the swipe-to-delete red backdrop, and
+   any transparency there lets that red show through at the shared edge. */
+.alarm__card--disabled .alarm__card-main,
+.alarm__card--disabled .alarm__switch {
   opacity: 0.5;
 }
 
