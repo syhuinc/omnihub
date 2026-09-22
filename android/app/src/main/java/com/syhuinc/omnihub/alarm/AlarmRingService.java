@@ -12,7 +12,9 @@ import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.PowerManager;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
@@ -24,6 +26,18 @@ public class AlarmRingService extends Service {
     private static final String CHANNEL_ID = "omnihub_alarm_ring";
     private static final int NOTIFICATION_ID = 991;
 
+    /**
+     * Tapping "Stop" on the notification stops this specific ringing instance without needing
+     * the full-screen activity - the only other way to reach it, and one the user can end up
+     * completely unable to get back to (e.g. pressed Home while ringing; the activity is
+     * singleInstance with the back button swallowed, so the notification becomes the sole way
+     * back in). This is a second, independent path that doesn't depend on that activity at all.
+     */
+    public static final String ACTION_STOP = "com.syhuinc.omnihub.alarm.ACTION_STOP";
+
+    /** Absolute safety net: never ring longer than this even if every other stop path fails. */
+    private static final long MAX_RING_MS = 10 * 60 * 1000L;
+
     private static AlarmRingService activeInstance;
 
     private Ringtone ringtone;
@@ -32,6 +46,8 @@ public class AlarmRingService extends Service {
     private String currentAlarmId;
     private boolean currentIsBackup;
     private int currentBackupIndex;
+    private final Handler autoStopHandler = new Handler(Looper.getMainLooper());
+    private final Runnable autoStopRunnable = this::stopSelf;
 
     public static void stopRinging(Context ctx) {
         ctx.stopService(new Intent(ctx, AlarmRingService.class));
@@ -50,6 +66,13 @@ public class AlarmRingService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        if (intent != null && ACTION_STOP.equals(intent.getAction())) {
+            String stopAlarmId = intent.getStringExtra(AlarmScheduler.EXTRA_ALARM_ID);
+            cancelBackupsUnlessPersisted(stopAlarmId);
+            stopSelf();
+            return START_NOT_STICKY;
+        }
+
         String alarmId = intent != null ? intent.getStringExtra(AlarmScheduler.EXTRA_ALARM_ID) : null;
         currentAlarmId = alarmId;
         currentIsBackup = intent != null && intent.getBooleanExtra(AlarmScheduler.EXTRA_IS_BACKUP, false);
@@ -61,7 +84,29 @@ public class AlarmRingService extends Service {
         startRingtone(alarm);
         startVibration();
 
+        autoStopHandler.removeCallbacks(autoStopRunnable);
+        autoStopHandler.postDelayed(autoStopRunnable, MAX_RING_MS);
+
         return START_NOT_STICKY;
+    }
+
+    private void cancelBackupsUnlessPersisted(String alarmId) {
+        if (alarmId == null) return;
+        AlarmData a = AlarmStore.find(this, alarmId);
+        if (a == null || !a.backupPersistOnDismiss) {
+            AlarmScheduler.cancelBackups(this, alarmId);
+        }
+    }
+
+    /**
+     * Fires if the user swipes the whole app away from Recents while this is ringing. A
+     * foreground service like this one is independent of any Activity's task and would
+     * otherwise keep ringing indefinitely with no UI left to reach it.
+     */
+    @Override
+    public void onTaskRemoved(Intent rootIntent) {
+        super.onTaskRemoved(rootIntent);
+        stopSelf();
     }
 
     private void startForegroundWithNotification(AlarmData alarm) {
@@ -78,14 +123,20 @@ public class AlarmRingService extends Service {
         String label = alarm != null && alarm.label != null && !alarm.label.isEmpty() ? alarm.label : "Alarm";
         if (currentIsBackup) label = label + " (Backup " + currentBackupIndex + ")";
 
+        Intent stopIntent = new Intent(this, AlarmRingService.class);
+        stopIntent.setAction(ACTION_STOP);
+        stopIntent.putExtra(AlarmScheduler.EXTRA_ALARM_ID, currentAlarmId);
+        PendingIntent stopPi = PendingIntent.getService(this, 1, stopIntent, flags);
+
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
                 .setContentTitle(label)
-                .setContentText("Tap to open")
+                .setContentText("Tap to open, or use Stop below")
                 .setPriority(NotificationCompat.PRIORITY_MAX)
                 .setCategory(NotificationCompat.CATEGORY_ALARM)
                 .setFullScreenIntent(fullScreenPi, true)
                 .setContentIntent(fullScreenPi)
+                .addAction(android.R.drawable.ic_menu_close_clear_cancel, "Stop", stopPi)
                 .setOngoing(true)
                 .setAutoCancel(false);
 
@@ -173,6 +224,7 @@ public class AlarmRingService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        autoStopHandler.removeCallbacks(autoStopRunnable);
         if (activeInstance == this) activeInstance = null;
         currentAlarmId = null;
         if (ringtone != null && ringtone.isPlaying()) ringtone.stop();

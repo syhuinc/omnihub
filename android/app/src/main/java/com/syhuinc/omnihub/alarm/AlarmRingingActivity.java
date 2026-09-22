@@ -107,4 +107,14 @@ public class AlarmRingingActivity extends Activity {
     public void onBackPressed() {
         // Swallow back — an alarm shouldn't be dismissible by accident via the back gesture/button.
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Whatever tears this screen down - Dismiss/Snooze (already stopped it, harmless to
+        // repeat), the system reclaiming it, or any other path - the ringtone must never keep
+        // playing with this screen gone and no way back to it. Only silences the current ring;
+        // does not touch backups, since that's an explicit user decision made by the buttons.
+        AlarmRingService.stopRinging(this);
+    }
 }
