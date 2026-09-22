@@ -11,9 +11,9 @@ Omni Hub is an offline-first utility app. Everything works fully on your device 
 **If you choose to sign in with Google** (Profile ▸ Cloud Sync), to sync your data across your own devices:
 
 - Firebase Authentication (a Google service) receives your Google account's basic profile — name, email address, and profile photo — to identify you as the signed-in user. Omni Hub doesn't see or store your Google password.
-- These tools' content syncs to Cloud Firestore (also a Google service), scoped to your account, so it can reach your other signed-in devices: **Notes** (titles and text), **Checklist** (list names and items), **Expense Tracker** (amounts, categories, notes, dates), **Subscription Calculator**, and **Debt Tracker** (amounts and names/notes you enter).
+- These tools' content syncs to Cloud Firestore (also a Google service), scoped to your account, so it can reach your other signed-in devices: **Notes** (titles and text), **Checklist** (list names and items), **Expense Tracker** (amounts, categories, notes, dates), **Budget** (per-category limits), **Subscription Calculator**, and **Debt Tracker** (amounts and names/notes you enter).
 - Your **Vault** notes sync too, but only as the same PIN-encrypted ciphertext already stored on your device — see [Vault](#vault) below for exactly what that means.
-- **Alarms** and **Budget** limits do not sync yet. They remain device-only regardless of sign-in status.
+- **Alarms** do not sync yet. They remain device-only regardless of sign-in status.
 
 No advertising, analytics, or tracking SDKs are used, and nothing collected is ever sold or shared with third parties beyond the Google/Firebase infrastructure used to provide sync itself.
 
