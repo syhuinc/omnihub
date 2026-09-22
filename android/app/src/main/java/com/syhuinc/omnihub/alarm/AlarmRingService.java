@@ -189,32 +189,45 @@ public class AlarmRingService extends Service {
             } catch (Exception ignored) {
             }
         }
-        if (soundUri == null) {
-            soundUri = RingtoneManager.getActualDefaultRingtoneUri(this, RingtoneManager.TYPE_ALARM);
+
+        ringtone = tryGetRingtone(soundUri);
+        if (ringtone == null) {
+            // The custom soundUri didn't resolve on this device - Uri.parse() above never fails
+            // even on a URI nothing here can actually read, which is the common case for an
+            // alarm synced from another device using a custom audio file that only exists there.
+            // Fall back to the default alarm sound rather than ringing completely silently.
+            ringtone = tryGetRingtone(RingtoneManager.getActualDefaultRingtoneUri(this, RingtoneManager.TYPE_ALARM));
         }
-        if (soundUri == null) {
-            soundUri = RingtoneManager.getValidRingtoneUri(this);
+        if (ringtone == null) {
+            ringtone = tryGetRingtone(RingtoneManager.getValidRingtoneUri(this));
         }
-        if (soundUri == null) return;
+        if (ringtone == null) return;
 
         try {
-            ringtone = RingtoneManager.getRingtone(this, soundUri);
-            if (ringtone != null) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    ringtone.setAudioAttributes(new AudioAttributes.Builder()
-                            .setUsage(AudioAttributes.USAGE_ALARM)
-                            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                            .build());
-                } else {
-                    ringtone.setStreamType(AudioManager.STREAM_ALARM);
-                }
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                    ringtone.setLooping(true);
-                }
-                ringtone.play();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                ringtone.setAudioAttributes(new AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_ALARM)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                        .build());
+            } else {
+                ringtone.setStreamType(AudioManager.STREAM_ALARM);
             }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                ringtone.setLooping(true);
+            }
+            ringtone.play();
         } catch (Exception ignored) {
             // some devices/URIs can throw; ringing still shows the full-screen UI even without sound
+        }
+    }
+
+    /** Returns null instead of throwing/crashing when a URI can't be read as a ringtone on this device. */
+    private Ringtone tryGetRingtone(Uri uri) {
+        if (uri == null) return null;
+        try {
+            return RingtoneManager.getRingtone(this, uri);
+        } catch (Exception ignored) {
+            return null;
         }
     }
 

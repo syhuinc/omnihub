@@ -54,32 +54,26 @@ public class AlarmPlugin extends Plugin {
         String id = call.getString("id");
         Integer hour = call.getInt("hour");
         Integer minute = call.getInt("minute");
-        String repeatMode = call.getString("repeatMode", "today");
-        boolean enabled = call.getBoolean("enabled", true);
 
         if (hour == null || minute == null) {
             call.reject("hour and minute are required");
             return;
         }
 
-        AlarmData alarm = new AlarmData();
-        alarm.id = (id == null || id.isEmpty()) ? UUID.randomUUID().toString() : id;
-        alarm.hour = hour;
-        alarm.minute = minute;
-        alarm.label = call.getString("label", "");
-        alarm.repeatMode = repeatMode;
-        alarm.enabled = enabled;
-        alarm.soundUri = call.getString("soundUri", null);
-        alarm.soundName = call.getString("soundName", null);
-        alarm.backupEnabled = call.getBoolean("backupEnabled", false);
-        alarm.backupOffsetsMin = parseBackupOffsets(call.getArray("backupOffsetsMin"));
-        alarm.backupPersistOnSnooze = call.getBoolean("backupPersistOnSnooze", false);
-        alarm.backupPersistOnStop = call.getBoolean("backupPersistOnStop", false);
-        alarm.createdAt = System.currentTimeMillis();
+        String resolvedId = (id == null || id.isEmpty()) ? UUID.randomUUID().toString() : id;
+        AlarmData existing = AlarmStore.find(getContext(), resolvedId);
+
+        AlarmData alarm = buildAlarmFromCall(call, resolvedId, hour, minute);
+        // A genuine local edit (this method, called from the editor UI) always bumps updatedAt to
+        // now and keeps the original createdAt - applyFromSync below is the only other writer,
+        // and it does the opposite (preserves the incoming updatedAt) since it's applying
+        // something that already happened on another device, not a new edit happening now.
+        alarm.createdAt = existing != null ? existing.createdAt : System.currentTimeMillis();
+        alarm.updatedAt = System.currentTimeMillis();
 
         AlarmStore.upsert(getContext(), alarm);
         boolean armed = false;
-        if (enabled) {
+        if (alarm.enabled) {
             armed = AlarmScheduler.arm(getContext(), alarm);
         } else {
             AlarmScheduler.disarm(getContext(), alarm.id);
@@ -89,6 +83,60 @@ public class AlarmPlugin extends Plugin {
         ret.put("id", alarm.id);
         ret.put("armed", armed);
         call.resolve(ret);
+    }
+
+    /**
+     * Applies an alarm as it already exists on another signed-in device, via cloud sync -
+     * distinct from schedule() because it must preserve the incoming createdAt/updatedAt exactly
+     * rather than bumping updatedAt to now, which would otherwise make this device's copy look
+     * newer than it really is and break the merge/conflict logic in the JS sync layer.
+     */
+    @PluginMethod
+    public void applyFromSync(PluginCall call) {
+        String id = call.getString("id");
+        Integer hour = call.getInt("hour");
+        Integer minute = call.getInt("minute");
+        Double updatedAt = call.getDouble("updatedAt");
+
+        if (id == null || hour == null || minute == null || updatedAt == null) {
+            call.reject("id, hour, minute, and updatedAt are required");
+            return;
+        }
+
+        Double createdAt = call.getDouble("createdAt");
+        AlarmData alarm = buildAlarmFromCall(call, id, hour, minute);
+        alarm.createdAt = createdAt != null ? createdAt.longValue() : System.currentTimeMillis();
+        alarm.updatedAt = updatedAt.longValue();
+
+        AlarmStore.upsert(getContext(), alarm);
+        boolean armed = false;
+        if (alarm.enabled) {
+            armed = AlarmScheduler.arm(getContext(), alarm);
+        } else {
+            AlarmScheduler.disarm(getContext(), alarm.id);
+        }
+
+        JSObject ret = new JSObject();
+        ret.put("id", alarm.id);
+        ret.put("armed", armed);
+        call.resolve(ret);
+    }
+
+    private AlarmData buildAlarmFromCall(PluginCall call, String id, int hour, int minute) {
+        AlarmData alarm = new AlarmData();
+        alarm.id = id;
+        alarm.hour = hour;
+        alarm.minute = minute;
+        alarm.label = call.getString("label", "");
+        alarm.repeatMode = call.getString("repeatMode", "today");
+        alarm.enabled = call.getBoolean("enabled", true);
+        alarm.soundUri = call.getString("soundUri", null);
+        alarm.soundName = call.getString("soundName", null);
+        alarm.backupEnabled = call.getBoolean("backupEnabled", false);
+        alarm.backupOffsetsMin = parseBackupOffsets(call.getArray("backupOffsetsMin"));
+        alarm.backupPersistOnSnooze = call.getBoolean("backupPersistOnSnooze", false);
+        alarm.backupPersistOnStop = call.getBoolean("backupPersistOnStop", false);
+        return alarm;
     }
 
     /** Clamps each value to [1,180] min, dedupes, sorts ascending, caps at MAX_BACKUPS entries. */

@@ -8,8 +8,8 @@ export interface SyncItem {
 
 interface SyncEngineOptions<T extends SyncItem> {
   collection: string;
-  getLocal: () => T[];
-  setLocal: (items: T[]) => void;
+  getLocal: () => T[] | Promise<T[]>;
+  setLocal: (items: T[]) => void | Promise<void>;
 }
 
 export interface SyncEngine<T extends SyncItem> {
@@ -27,7 +27,7 @@ export function createSyncEngine<T extends SyncItem>(opts: SyncEngineOptions<T>)
   }
 
   async function initialMerge(uid: string) {
-    const localItems = opts.getLocal();
+    const localItems = await opts.getLocal();
     let remoteItems: T[] = [];
     try {
       const { snapshots } = await FirebaseFirestore.getCollection<T>({ reference: collectionPath(uid) });
@@ -53,7 +53,7 @@ export function createSyncEngine<T extends SyncItem>(opts: SyncEngineOptions<T>)
     }
 
     const visible = [...merged.values()].filter((i) => !i.deletedAt);
-    opts.setLocal(visible);
+    await opts.setLocal(visible);
 
     if (toPush.length) {
       try {
@@ -76,10 +76,10 @@ export function createSyncEngine<T extends SyncItem>(opts: SyncEngineOptions<T>)
     try {
       callbackId = await FirebaseFirestore.addCollectionSnapshotListener<T>(
         { reference: collectionPath(uid) },
-        (event) => {
+        async (event) => {
           if (!event) return;
           const remoteItems = event.snapshots.map((s) => s.data).filter((d): d is T => d != null);
-          const localItems = opts.getLocal();
+          const localItems = await opts.getLocal();
           const localMap = new Map(localItems.map((i) => [i.id, i]));
           let changed = false;
           for (const remote of remoteItems) {
@@ -96,7 +96,7 @@ export function createSyncEngine<T extends SyncItem>(opts: SyncEngineOptions<T>)
               }
             }
           }
-          if (changed) opts.setLocal([...localMap.values()].filter((i) => !i.deletedAt));
+          if (changed) await opts.setLocal([...localMap.values()].filter((i) => !i.deletedAt));
         },
       );
     } catch {

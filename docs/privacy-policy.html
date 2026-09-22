@@ -52,9 +52,8 @@
   <p><strong>If you choose to sign in with Google</strong> (Profile ▸ Cloud Sync), to sync your data across your own devices:</p>
   <ul>
     <li>Firebase Authentication (a Google service) receives your Google account's basic profile — name, email address, and profile photo — to identify you as the signed-in user. Omni Hub doesn't see or store your Google password.</li>
-    <li>These tools' content syncs to Cloud Firestore (also a Google service), scoped to your account, so it can reach your other signed-in devices: <strong>Notes</strong> (titles and text), <strong>Checklist</strong> (list names and items), <strong>Expense Tracker</strong> (amounts, categories, notes, dates), <strong>Budget</strong> (per-category limits), <strong>Subscription Calculator</strong>, and <strong>Debt Tracker</strong> (amounts and names/notes you enter).</li>
+    <li>These tools' content syncs to Cloud Firestore (also a Google service), scoped to your account, so it can reach your other signed-in devices: <strong>Notes</strong> (titles and text), <strong>Checklist</strong> (list names and items), <strong>Expense Tracker</strong> (amounts, categories, notes, dates), <strong>Budget</strong> (per-category limits), <strong>Subscription Calculator</strong>, <strong>Debt Tracker</strong> (amounts and names/notes you enter), and <strong>Alarms</strong> (time, label, repeat, sound choice, and backup settings — see <a href="#alarm">Alarm</a> below).</li>
     <li>Your <strong>Vault</strong> notes sync too, but only as the same PIN-encrypted ciphertext already stored on your device — see <a href="#vault">Vault</a> below for exactly what that means.</li>
-    <li><strong>Alarms</strong> do not sync yet. They remain device-only regardless of sign-in status.</li>
   </ul>
   <p>No advertising, analytics, or tracking SDKs are used, and nothing collected is ever sold or shared with third parties beyond the Google/Firebase infrastructure used to provide sync itself.</p>
 
@@ -83,8 +82,8 @@
     <li><strong>Notification access</strong> (optional, off by default, granted separately in Android Settings) — used only by the same "Flash Alerts" setting to detect that some other app posted a notification, so it can blink the flash. Omni Hub never reads, stores, or transmits any notification's content.</li>
   </ul>
 
-  <h2>Alarm</h2>
-  <p>Alarms you create are stored on your device only (both in the app's own storage and, separately, in Android's system alarm scheduler so they still fire when the app isn't open) and are used only to ring at the time you set. Alarm data is never transmitted anywhere, including if you're signed in. If you pick a custom ringtone, Omni Hub only stores a reference to the sound file already on your device — it doesn't copy or transmit the audio itself.</p>
+  <h2 id="alarm">Alarm</h2>
+  <p>Alarms you create are stored on your device (both in the app's own storage and, separately, in Android's system alarm scheduler so they still fire when the app isn't open) and are used only to ring at the time you set. If you're signed in, an alarm's time, label, repeat setting, chosen sound, and backup-ring settings sync the same way as the other tools listed above, so an alarm you set on one device also rings on your other signed-in devices; alarms don't sync at all if you're not signed in. If you pick a custom ringtone, Omni Hub only stores a reference to the sound file already on that device — it doesn't copy or transmit the audio itself, so a synced alarm using a custom sound falls back to the default alarm sound on a device that doesn't have that same file.</p>
 
   <h2>Third-party services</h2>
   <p>Signing in and syncing uses Google's Firebase platform (Firebase Authentication and Cloud Firestore). Google's own privacy policy governs how Google handles data on their servers: <a href="https://policies.google.com/privacy">https://policies.google.com/privacy</a>.</p>

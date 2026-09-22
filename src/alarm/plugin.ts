@@ -20,6 +20,7 @@ export interface AlarmRecord {
   backupPersistOnSnooze: boolean;
   backupPersistOnStop: boolean;
   createdAt: number;
+  updatedAt: number;
 }
 
 export interface ScheduleOptions {
@@ -37,6 +38,13 @@ export interface ScheduleOptions {
   backupPersistOnStop?: boolean;
 }
 
+/** Applies an alarm as it already exists on another signed-in device - see the native method's own doc comment. */
+export interface ApplyFromSyncOptions extends ScheduleOptions {
+  id: string;
+  createdAt: number;
+  updatedAt: number;
+}
+
 export interface RingtoneEntry {
   uri: string;
   name: string;
@@ -45,6 +53,7 @@ export interface RingtoneEntry {
 
 export interface AlarmPluginInterface {
   schedule(options: ScheduleOptions): Promise<{ id: string; armed: boolean }>;
+  applyFromSync(options: ApplyFromSyncOptions): Promise<{ id: string; armed: boolean }>;
   cancel(options: { id: string }): Promise<void>;
   list(): Promise<{ alarms: AlarmRecord[] }>;
   checkNotificationPermission(): Promise<{ granted: boolean }>;
@@ -65,6 +74,7 @@ class AlarmPluginWeb extends WebPlugin implements AlarmPluginInterface {
 
   async schedule(options: ScheduleOptions): Promise<{ id: string; armed: boolean }> {
     const id = options.id || `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const existing = this.alarms.get(id);
     this.alarms.set(id, {
       id,
       hour: options.hour,
@@ -78,9 +88,30 @@ class AlarmPluginWeb extends WebPlugin implements AlarmPluginInterface {
       backupOffsetsMin: options.backupOffsetsMin?.length ? options.backupOffsetsMin : DEFAULT_BACKUP_OFFSETS_MIN,
       backupPersistOnSnooze: options.backupPersistOnSnooze ?? false,
       backupPersistOnStop: options.backupPersistOnStop ?? false,
-      createdAt: Date.now(),
+      createdAt: existing?.createdAt ?? Date.now(),
+      updatedAt: Date.now(),
     });
     return { id, armed: true };
+  }
+
+  async applyFromSync(options: ApplyFromSyncOptions): Promise<{ id: string; armed: boolean }> {
+    this.alarms.set(options.id, {
+      id: options.id,
+      hour: options.hour,
+      minute: options.minute,
+      label: options.label ?? '',
+      repeatMode: options.repeatMode,
+      enabled: options.enabled ?? true,
+      soundUri: options.soundUri ?? null,
+      soundName: options.soundName ?? null,
+      backupEnabled: options.backupEnabled ?? false,
+      backupOffsetsMin: options.backupOffsetsMin?.length ? options.backupOffsetsMin : DEFAULT_BACKUP_OFFSETS_MIN,
+      backupPersistOnSnooze: options.backupPersistOnSnooze ?? false,
+      backupPersistOnStop: options.backupPersistOnStop ?? false,
+      createdAt: options.createdAt,
+      updatedAt: options.updatedAt,
+    });
+    return { id: options.id, armed: true };
   }
 
   async cancel(options: { id: string }): Promise<void> {

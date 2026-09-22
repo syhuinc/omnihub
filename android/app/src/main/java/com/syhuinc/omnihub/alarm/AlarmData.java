@@ -22,6 +22,7 @@ public class AlarmData {
     public boolean backupPersistOnSnooze; // if true, Snooze doesn't cancel pending backups
     public boolean backupPersistOnStop; // if true, Stop/Dismiss doesn't cancel pending backups
     public long createdAt;
+    public long updatedAt; // bumped on every genuine local edit; preserved as-is when applying a synced remote update
 
     public AlarmData() {}
 
@@ -42,6 +43,7 @@ public class AlarmData {
         o.put("backupPersistOnSnooze", backupPersistOnSnooze);
         o.put("backupPersistOnStop", backupPersistOnStop);
         o.put("createdAt", createdAt);
+        o.put("updatedAt", updatedAt);
         return o;
     }
 
@@ -67,6 +69,7 @@ public class AlarmData {
         a.backupPersistOnSnooze = o.optBoolean("backupPersistOnSnooze", false);
         a.backupPersistOnStop = o.optBoolean("backupPersistOnStop", false);
         a.createdAt = o.optLong("createdAt", System.currentTimeMillis());
+        a.updatedAt = o.optLong("updatedAt", a.createdAt);
         return a;
     }
 }

@@ -9,6 +9,7 @@ import {
   MIN_BACKUP_OFFSET_MIN,
   MAX_BACKUP_OFFSET_MIN,
 } from '../../alarm/plugin';
+import { scheduleAlarmSynced } from '../../cloud/alarmSync';
 import { formatTime, type RepeatMode, type TimeCategory, REPEAT_LABELS } from '../../alarm/types';
 import { loadPresets, addPreset, removePreset } from '../../alarm/presets';
 import { loadCategoryDefaults } from '../../alarm/ringtones';
@@ -163,7 +164,7 @@ export function AlarmEditor({ alarmId, onClose, onDelete }: AlarmEditorProps) {
       // web fallback / unsupported platform — proceed anyway
     }
 
-    const { armed } = await AlarmPlugin.schedule({
+    const { armed } = await scheduleAlarmSynced({
       id: alarmId ?? undefined,
       hour,
       minute,

@@ -11,9 +11,8 @@ Omni Hub is an offline-first utility app. Everything works fully on your device 
 **If you choose to sign in with Google** (Profile ▸ Cloud Sync), to sync your data across your own devices:
 
 - Firebase Authentication (a Google service) receives your Google account's basic profile — name, email address, and profile photo — to identify you as the signed-in user. Omni Hub doesn't see or store your Google password.
-- These tools' content syncs to Cloud Firestore (also a Google service), scoped to your account, so it can reach your other signed-in devices: **Notes** (titles and text), **Checklist** (list names and items), **Expense Tracker** (amounts, categories, notes, dates), **Budget** (per-category limits), **Subscription Calculator**, and **Debt Tracker** (amounts and names/notes you enter).
+- These tools' content syncs to Cloud Firestore (also a Google service), scoped to your account, so it can reach your other signed-in devices: **Notes** (titles and text), **Checklist** (list names and items), **Expense Tracker** (amounts, categories, notes, dates), **Budget** (per-category limits), **Subscription Calculator**, **Debt Tracker** (amounts and names/notes you enter), and **Alarms** (time, label, repeat, sound choice, and backup settings — see [Alarm](#alarm) below).
 - Your **Vault** notes sync too, but only as the same PIN-encrypted ciphertext already stored on your device — see [Vault](#vault) below for exactly what that means.
-- **Alarms** do not sync yet. They remain device-only regardless of sign-in status.
 
 No advertising, analytics, or tracking SDKs are used, and nothing collected is ever sold or shared with third parties beyond the Google/Firebase infrastructure used to provide sync itself.
 
@@ -47,7 +46,7 @@ Omni Hub does not access your microphone, contacts, or location. It requests the
 
 ## Alarm
 
-Alarms you create are stored on your device only (both in the app's own storage and, separately, in Android's system alarm scheduler so they still fire when the app isn't open) and are used only to ring at the time you set. Alarm data is never transmitted anywhere, including if you're signed in. If you pick a custom ringtone, Omni Hub only stores a reference to the sound file already on your device — it doesn't copy or transmit the audio itself.
+Alarms you create are stored on your device (both in the app's own storage and, separately, in Android's system alarm scheduler so they still fire when the app isn't open) and are used only to ring at the time you set. If you're signed in, an alarm's time, label, repeat setting, chosen sound, and backup-ring settings sync the same way as the other tools listed above, so an alarm you set on one device also rings on your other signed-in devices; alarms don't sync at all if you're not signed in. If you pick a custom ringtone, Omni Hub only stores a reference to the sound file already on that device — it doesn't copy or transmit the audio itself, so a synced alarm using a custom sound falls back to the default alarm sound on a device that doesn't have that same file.
 
 ## Third-party services
 

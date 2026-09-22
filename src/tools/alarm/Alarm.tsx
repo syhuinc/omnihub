@@ -4,6 +4,8 @@ import { Icon } from '../../components/Icon';
 import { SwipeToDelete } from '../../components/SwipeToDelete';
 import { useRouter } from '../../app/Router';
 import { useBackHandler } from '../../app/useBackHandler';
+import { useAuth } from '../../cloud/AuthContext';
+import { startAlarmSync, stopAlarmSync, scheduleAlarmSynced, cancelAlarmSynced } from '../../cloud/alarmSync';
 import { AlarmPlugin, type AlarmRecord } from '../../alarm/plugin';
 import { formatTime, REPEAT_LABELS } from '../../alarm/types';
 import { hapticSelect, hapticWarning } from '../../haptics';
@@ -14,6 +16,7 @@ import './Alarm.css';
 
 export function Alarm() {
   const { back } = useRouter();
+  const { user } = useAuth();
   const [alarms, setAlarms] = useState<AlarmRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -33,6 +36,15 @@ export function Alarm() {
   useEffect(() => {
     refresh();
   }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    startAlarmSync(user.uid, refresh);
+    return () => {
+      stopAlarmSync();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.uid]);
 
   function exitSelecting() {
     setSelecting(false);
@@ -66,13 +78,13 @@ export function Alarm() {
         // web fallback / unsupported platform — proceed anyway
       }
     }
-    await AlarmPlugin.schedule({ ...alarm, enabled: turningOn });
+    await scheduleAlarmSynced({ ...alarm, enabled: turningOn });
     refresh();
   }
 
   async function handleDelete(id: string) {
     hapticWarning();
-    await AlarmPlugin.cancel({ id });
+    await cancelAlarmSynced(id);
     setCreatingNew(false);
     setEditingId(null);
     refresh();

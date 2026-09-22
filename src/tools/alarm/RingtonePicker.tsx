@@ -3,6 +3,7 @@ import { ScreenHeader } from '../../components/ScreenHeader';
 import { Icon } from '../../components/Icon';
 import { useBackHandler } from '../../app/useBackHandler';
 import { AlarmPlugin, type AlarmRecord, type RingtoneEntry } from '../../alarm/plugin';
+import { scheduleAlarmSynced } from '../../cloud/alarmSync';
 import { formatTime, REPEAT_LABELS, type TimeCategory } from '../../alarm/types';
 import {
   loadFavoriteUris,
@@ -106,7 +107,7 @@ export function RingtonePicker({ mode = 'select', category, excludeAlarmId, alar
       for (const id of alarmIds ?? []) {
         const alarm = alarms.find((a) => a.id === id);
         if (!alarm) continue;
-        await AlarmPlugin.schedule({ ...alarm, soundUri: chosen.uri, soundName: chosen.name });
+        await scheduleAlarmSynced({ ...alarm, soundUri: chosen.uri, soundName: chosen.name });
       }
       hapticSuccess();
       onSelect(chosen);
@@ -140,7 +141,7 @@ export function RingtonePicker({ mode = 'select', category, excludeAlarmId, alar
     for (const id of selectedBulkIds) {
       const alarm = alarms.find((a) => a.id === id);
       if (!alarm) continue;
-      await AlarmPlugin.schedule({
+      await scheduleAlarmSynced({
         ...alarm,
         soundUri: pendingSound.uri,
         soundName: pendingSound.name,
