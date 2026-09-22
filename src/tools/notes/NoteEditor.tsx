@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ScreenHeader } from '../../components/ScreenHeader';
 import { Icon } from '../../components/Icon';
+import { useBackHandler } from '../../app/useBackHandler';
 import type { Note } from './types';
 
 interface NoteEditorProps {
@@ -12,6 +13,14 @@ interface NoteEditorProps {
 
 export function NoteEditor({ note, onChange, onDelete, onClose }: NoteEditorProps) {
   const [confirmingDelete, setConfirmingDelete] = useState(false);
+
+  useBackHandler(() => {
+    if (confirmingDelete) {
+      setConfirmingDelete(false);
+    } else {
+      onClose();
+    }
+  }, true);
 
   function update(patch: Partial<Note>) {
     onChange({ ...note, ...patch, updatedAt: Date.now() });
