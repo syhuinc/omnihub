@@ -20,6 +20,7 @@ export const StorageKeys = {
   toolSuggestions: `${PREFIX}tools.suggestions`,
   subscriptions: `${PREFIX}subscriptions`,
   timeZoneCities: `${PREFIX}timeZone.cities`,
+  debts: `${PREFIX}debts`,
 } as const;
 
 export function storageGet<T>(key: string, fallback: T): T {

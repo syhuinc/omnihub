@@ -215,12 +215,12 @@ export const TOOLS: ToolMeta[] = [
   },
   {
     id: 'debt-calculator',
-    name: 'Debt Calculator',
-    shortDescription: 'Payoff time & total interest',
+    name: 'Debt Tracker',
+    shortDescription: 'Who owes you, and who you owe',
     category: 'finance',
     color: 'var(--purple)',
     icon: 'card',
-    keywords: ['debt', 'loan', 'payoff', 'interest', 'credit card', 'amortization'],
+    keywords: ['debt', 'iou', 'owe', 'lend', 'borrow', 'money', 'friends'],
     presentation: 'sheet',
   },
   {
