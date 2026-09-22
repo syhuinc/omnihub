@@ -1,0 +1,11 @@
+.pinned-tile--editable {
+  touch-action: none;
+}
+
+.pinned-tile--dragging {
+  position: relative;
+  z-index: 2;
+  transition: none;
+  scale: 1.06;
+  filter: drop-shadow(0 12px 20px rgba(0, 0, 0, 0.35));
+}

@@ -1,4 +1,4 @@
-import { useMemo, useState, type CSSProperties } from 'react';
+import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { ScreenHeader } from '../../components/ScreenHeader';
 import { SearchBar } from '../../components/SearchBar';
 import { ToolTile } from '../../components/ToolTile';
@@ -9,12 +9,17 @@ import { searchTools } from '../../search/searchIndex';
 import { storageGet, storageSet, StorageKeys } from '../../storage/db';
 import { hapticSelect, hapticSuccess } from '../../haptics';
 import { TOOL_ICON_IMAGES } from '../../assets/tool-icons';
-import type { ToolCategory } from '../../types';
+import { loadPinnedToolIds, savePinnedToolIds } from '../../tools/pinnedTools';
+import type { ToolCategory, ToolMeta } from '../../types';
 import './Tools.css';
 
 type CategoryFilter = 'all' | ToolCategory;
+type SortMode = 'default' | 'alpha' | 'category';
 
 const CATEGORIES: CategoryFilter[] = ['all', 'essentials', 'productivity', 'finance', 'more'];
+const CATEGORY_ORDER: ToolCategory[] = ['essentials', 'productivity', 'finance', 'more'];
+const SORT_CYCLE: SortMode[] = ['default', 'alpha', 'category'];
+const SORT_LABELS: Record<SortMode, string> = { default: 'Sort', alpha: 'A–Z', category: 'By Category' };
 
 const FEATURED_TOOL_IDS = ['calculator', 'timer', 'checklist'];
 
@@ -22,12 +27,15 @@ export function Tools() {
   const { navigate } = useRouter();
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState<CategoryFilter>('all');
-  const [sortAlpha, setSortAlpha] = useState(false);
+  const [sortMode, setSortMode] = useState<SortMode>('default');
   const [suggestOpen, setSuggestOpen] = useState(false);
   const [suggestText, setSuggestText] = useState('');
   const [suggestSent, setSuggestSent] = useState(false);
+  const [pinnedIds, setPinnedIds] = useState<string[]>(loadPinnedToolIds);
+  const [longPressedId, setLongPressedId] = useState<string | null>(null);
 
   const visibleTools = useMemo(() => {
+    if (sortMode === 'category') return [];
     const base = query
       ? searchTools(query, 20)
           .map((r) => r.tool)
@@ -35,14 +43,49 @@ export function Tools() {
       : category === 'all'
         ? TOOLS
         : TOOLS.filter((t) => t.category === category);
-    return sortAlpha ? [...base].sort((a, b) => a.name.localeCompare(b.name)) : base;
-  }, [query, category, sortAlpha]);
+    return sortMode === 'alpha' ? [...base].sort((a, b) => a.name.localeCompare(b.name)) : base;
+  }, [query, category, sortMode]);
+
+  const categorizedGroups = useMemo(() => {
+    if (sortMode !== 'category') return null;
+    const base = query ? searchTools(query, 50).map((r) => r.tool) : TOOLS;
+    return CATEGORY_ORDER.map((cat) => ({
+      cat,
+      tools: base.filter((t) => t.category === cat),
+    })).filter((g) => g.tools.length > 0);
+  }, [query, sortMode]);
+
+  useEffect(() => {
+    setLongPressedId(null);
+  }, [category, sortMode, query]);
 
   const openTool = (id: string) => navigate(`/tools/${id}`);
 
   function toggleSort() {
     hapticSelect();
-    setSortAlpha((v) => !v);
+    setSortMode((v) => SORT_CYCLE[(SORT_CYCLE.indexOf(v) + 1) % SORT_CYCLE.length]);
+  }
+
+  function togglePin(id: string) {
+    const next = pinnedIds.includes(id) ? pinnedIds.filter((p) => p !== id) : [...pinnedIds, id];
+    setPinnedIds(next);
+    savePinnedToolIds(next);
+    hapticSuccess();
+    setLongPressedId(null);
+  }
+
+  function renderTile(tool: ToolMeta) {
+    return (
+      <ToolTile
+        key={tool.id}
+        tool={tool}
+        onClick={() => (longPressedId === tool.id ? setLongPressedId(null) : openTool(tool.id))}
+        onLongPress={() => setLongPressedId(tool.id)}
+        showPinBadge={longPressedId === tool.id}
+        pinned={pinnedIds.includes(tool.id)}
+        onTogglePin={() => togglePin(tool.id)}
+      />
+    );
   }
 
   function handleSuggestSubmit() {
@@ -65,18 +108,20 @@ export function Tools() {
         <SearchBar value={query} onChange={setQuery} placeholder="Search tools..." />
       </div>
 
-      <div className="tools__tabs">
-        {CATEGORIES.map((cat) => (
-          <button
-            key={cat}
-            type="button"
-            className={`tools__tab${category === cat ? ' tools__tab--active' : ''}`}
-            onClick={() => setCategory(cat)}
-          >
-            {cat === 'all' ? 'All' : CATEGORY_LABELS[cat]}
-          </button>
-        ))}
-      </div>
+      {sortMode !== 'category' && (
+        <div className="tools__tabs">
+          {CATEGORIES.map((cat) => (
+            <button
+              key={cat}
+              type="button"
+              className={`tools__tab${category === cat ? ' tools__tab--active' : ''}`}
+              onClick={() => setCategory(cat)}
+            >
+              {cat === 'all' ? 'All' : CATEGORY_LABELS[cat]}
+            </button>
+          ))}
+        </div>
+      )}
 
       <div className="tools__content">
         <div className="tools__featured">
@@ -101,7 +146,29 @@ export function Tools() {
           <p className="tools__featured-text">Tools to make your everyday life easier.</p>
         </div>
 
-        {visibleTools.length === 0 ? (
+        {sortMode === 'category' ? (
+          categorizedGroups && categorizedGroups.length > 0 ? (
+            <>
+              <div className="tools__section-header">
+                <h2>All Tools</h2>
+                <button type="button" className="tools__sort-btn" onClick={toggleSort}>
+                  <Icon name="sort" size={14} />
+                  {SORT_LABELS[sortMode]}
+                </button>
+              </div>
+              {categorizedGroups.map((group) => (
+                <div key={group.cat} className="tools__category-group">
+                  <h3 className="tools__category-heading">{CATEGORY_LABELS[group.cat]}</h3>
+                  <div className="tools__grid">{group.tools.map(renderTile)}</div>
+                </div>
+              ))}
+            </>
+          ) : (
+            <p className="tools__empty">
+              No tools found{query ? ` for "${query}"` : ''}. Try another search term.
+            </p>
+          )
+        ) : visibleTools.length === 0 ? (
           <p className="tools__empty">
             No tools found{query ? ` for "${query}"` : ''}. Try another category or search term.
           </p>
@@ -111,14 +178,10 @@ export function Tools() {
               <h2>All Tools</h2>
               <button type="button" className="tools__sort-btn" onClick={toggleSort}>
                 <Icon name="sort" size={14} />
-                {sortAlpha ? 'A–Z' : 'Sort'}
+                {SORT_LABELS[sortMode]}
               </button>
             </div>
-            <div className="tools__grid">
-              {visibleTools.map((tool) => (
-                <ToolTile key={tool.id} tool={tool} onClick={() => openTool(tool.id)} />
-              ))}
-            </div>
+            <div className="tools__grid">{visibleTools.map(renderTile)}</div>
           </>
         )}
 

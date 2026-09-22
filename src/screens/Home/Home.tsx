@@ -7,10 +7,10 @@ import { useRouter } from '../../app/Router';
 import { TOOLS, getToolById } from '../../tools/registry';
 import { searchTools } from '../../search/searchIndex';
 import { storageGet, storageSet, StorageKeys } from '../../storage/db';
+import { loadPinnedToolIds, savePinnedToolIds } from '../../tools/pinnedTools';
+import { PinnedToolsGrid } from './PinnedToolsGrid';
 import type { ToolMeta } from '../../types';
 import './Home.css';
-
-const DEFAULT_PINNED = ['calculator', 'unit-converter', 'notes', 'timer'];
 
 const QUICK_ACTIONS: { label: string; toolId: string; icon: ToolMeta['icon'] }[] = [
   { label: 'New Note', toolId: 'notes', icon: 'note' },
@@ -36,9 +36,7 @@ const DEFAULT_SECTIONS: HomeSections = { recommended: true, quickActions: true }
 export function Home() {
   const { navigate } = useRouter();
   const [query, setQuery] = useState('');
-  const [pinnedIds, setPinnedIds] = useState<string[]>(() =>
-    storageGet(StorageKeys.pinnedTools, DEFAULT_PINNED),
-  );
+  const [pinnedIds, setPinnedIds] = useState<string[]>(loadPinnedToolIds);
   const [editingPinned, setEditingPinned] = useState(false);
   const [sections, setSections] = useState<HomeSections>(() =>
     storageGet(StorageKeys.homeSections, DEFAULT_SECTIONS),
@@ -65,7 +63,7 @@ export function Home() {
 
   function updatePinned(next: string[]) {
     setPinnedIds(next);
-    storageSet(StorageKeys.pinnedTools, next);
+    savePinnedToolIds(next);
   }
 
   function unpin(id: string) {
@@ -130,16 +128,13 @@ export function Home() {
             {pinnedTools.length === 0 ? (
               <p className="home__empty">No pinned tools yet. Tap Edit to add some.</p>
             ) : (
-              <div className="home__grid">
-                {pinnedTools.map((tool) => (
-                  <ToolTile
-                    key={tool.id}
-                    tool={tool}
-                    onClick={() => (editingPinned ? undefined : openTool(tool.id))}
-                    onRemove={editingPinned ? () => unpin(tool.id) : undefined}
-                  />
-                ))}
-              </div>
+              <PinnedToolsGrid
+                tools={pinnedTools}
+                editing={editingPinned}
+                onOpen={openTool}
+                onRemove={unpin}
+                onReorder={updatePinned}
+              />
             )}
             {editingPinned && pinnableTools.length > 0 && (
               <div className="home__pin-picker">

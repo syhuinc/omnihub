@@ -144,6 +144,19 @@
   gap: 20px 8px;
 }
 
+.tools__category-group {
+  margin-bottom: 24px;
+}
+
+.tools__category-heading {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 12px;
+}
+
 .tools__empty {
   color: var(--text-secondary);
   font-size: 13px;
