@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Icon } from '../components/Icon';
 import { encryptBytes, decryptBytes } from './crypto';
 import { putFile, getAllFiles, deleteFile, type VaultFileRecord } from './fileStore';
+import { exportFilesZip, importFilesZip } from './backup';
 import { hapticSuccess, hapticWarning } from '../haptics';
 
 function formatSize(bytes: number): string {
@@ -24,7 +25,9 @@ export function VaultFiles({ vaultKey }: VaultFilesProps) {
   const [busy, setBusy] = useState(false);
   const [preview, setPreview] = useState<{ url: string; name: string } | null>(null);
   const [confirmingDeleteId, setConfirmingDeleteId] = useState<string | null>(null);
+  const [status, setStatus] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const backupInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -45,6 +48,12 @@ export function VaultFiles({ vaultKey }: VaultFilesProps) {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [preview]);
+
+  useEffect(() => {
+    if (!status) return;
+    const timer = setTimeout(() => setStatus(null), 4000);
+    return () => clearTimeout(timer);
+  }, [status]);
 
   async function handleFilesSelected(fileList: FileList | null) {
     if (!fileList || fileList.length === 0) return;
@@ -98,6 +107,38 @@ export function VaultFiles({ vaultKey }: VaultFilesProps) {
     hapticWarning();
   }
 
+  async function handleExport() {
+    setBusy(true);
+    try {
+      const { count } = await exportFilesZip(vaultKey);
+      setStatus(count === 0 ? 'No files to export yet.' : `Exported ${count} file${count === 1 ? '' : 's'} to your Downloads.`);
+      if (count > 0) hapticSuccess();
+    } catch {
+      setStatus('Export failed. Try again.');
+      hapticWarning();
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleImportZip(zipFile: File | null) {
+    if (!zipFile) return;
+    setBusy(true);
+    try {
+      const { imported } = await importFilesZip(vaultKey, zipFile);
+      const records = await getAllFiles();
+      setFiles(records.sort((a, b) => b.createdAt - a.createdAt));
+      setStatus(imported === 0 ? "That file didn't contain any importable files." : `Imported ${imported} file${imported === 1 ? '' : 's'}.`);
+      if (imported > 0) hapticSuccess();
+    } catch {
+      setStatus("Couldn't read that backup file.");
+      hapticWarning();
+    } finally {
+      setBusy(false);
+      if (backupInputRef.current) backupInputRef.current.value = '';
+    }
+  }
+
   if (preview) {
     return (
       <div className="vault-preview">
@@ -127,6 +168,31 @@ export function VaultFiles({ vaultKey }: VaultFilesProps) {
         className="vault-files__input"
         onChange={(e) => handleFilesSelected(e.target.files)}
       />
+      <input
+        ref={backupInputRef}
+        type="file"
+        accept=".zip,application/zip"
+        className="vault-files__input"
+        onChange={(e) => handleImportZip(e.target.files?.[0] ?? null)}
+      />
+
+      <div className="vault-files__toolbar">
+        <button type="button" className="vault-files__toolbar-btn" onClick={handleExport} disabled={busy}>
+          <Icon name="download" size={15} />
+          Export
+        </button>
+        <button
+          type="button"
+          className="vault-files__toolbar-btn"
+          onClick={() => backupInputRef.current?.click()}
+          disabled={busy}
+        >
+          <Icon name="upload" size={15} />
+          Import
+        </button>
+      </div>
+
+      {status && <p className="vault-files__status">{status}</p>}
 
       {loading ? null : files.length === 0 ? (
         <p className="vault__empty">No private files yet. Tap + to add photos or files.</p>
