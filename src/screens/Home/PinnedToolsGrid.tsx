@@ -28,6 +28,12 @@ export function PinnedToolsGrid({ tools, editing, onOpen, onRemove, onReorder }:
   // zero there instead of jumping by the tile's whole new-slot offset.
   const startRef = useRef({ x: 0, y: 0 });
   const movedRef = useRef(false);
+  // Window-level listeners, not setPointerCapture + per-element onPointerMove: some Android
+  // WebView versions don't reliably route pointermove back to the origin element once the
+  // finger leaves its bounds (or setPointerCapture itself throws), which silently breaks the
+  // whole drag with no error visible anywhere. Listening on window sidesteps that entirely -
+  // it's what every mainstream drag library (dnd-kit, sortablejs, etc.) actually does.
+  const cleanupRef = useRef<(() => void) | null>(null);
 
   // Stay in sync when the pinned set changes from outside (unpin, add, external update).
   useEffect(() => {
@@ -41,26 +47,26 @@ export function PinnedToolsGrid({ tools, editing, onOpen, onRemove, onReorder }:
     });
   }, [tools]);
 
+  // If edit mode is turned off mid-drag (e.g. tapping "Done"), stop cleanly instead of leaving
+  // dangling window listeners or a tile stuck mid-drag.
+  useEffect(() => {
+    if (!editing) endDrag();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editing]);
+
+  useEffect(() => () => cleanupRef.current?.(), []);
+
   function setOrderAndPersist(next: string[]) {
     orderRef.current = next;
     setOrder(next);
   }
 
-  function handlePointerDown(e: ReactPointerEvent<HTMLDivElement>, id: string) {
-    if (!editing) return;
-    e.preventDefault();
-    e.currentTarget.setPointerCapture(e.pointerId);
-    activeIdRef.current = id;
-    activePointerIdRef.current = e.pointerId;
-    startRef.current = { x: e.clientX, y: e.clientY };
-    movedRef.current = false;
-  }
+  function handleMove(clientX: number, clientY: number) {
+    const id = activeIdRef.current;
+    if (!id) return;
 
-  function handlePointerMove(e: ReactPointerEvent<HTMLDivElement>, id: string) {
-    if (activeIdRef.current !== id || activePointerIdRef.current !== e.pointerId) return;
-
-    const dx = e.clientX - startRef.current.x;
-    const dy = e.clientY - startRef.current.y;
+    const dx = clientX - startRef.current.x;
+    const dy = clientY - startRef.current.y;
 
     if (!movedRef.current) {
       if (Math.abs(dx) < DRAG_START_THRESHOLD && Math.abs(dy) < DRAG_START_THRESHOLD) return;
@@ -74,7 +80,7 @@ export function PinnedToolsGrid({ tools, editing, onOpen, onRemove, onReorder }:
     for (const [otherId, el] of itemRefs.current) {
       if (otherId === id) continue;
       const r = el.getBoundingClientRect();
-      if (e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom) {
+      if (clientX >= r.left && clientX <= r.right && clientY >= r.top && clientY <= r.bottom) {
         const from = orderRef.current.indexOf(id);
         const to = orderRef.current.indexOf(otherId);
         if (from === -1 || to === -1) break;
@@ -84,21 +90,50 @@ export function PinnedToolsGrid({ tools, editing, onOpen, onRemove, onReorder }:
         setOrderAndPersist(next);
         // Rebase: the tile just got re-slotted to a new natural position, so restart the
         // translate offset from here instead of jumping by the whole slot distance.
-        startRef.current = { x: e.clientX, y: e.clientY };
+        startRef.current = { x: clientX, y: clientY };
         setDragOffset({ x: 0, y: 0 });
         break;
       }
     }
   }
 
-  function handlePointerEnd(e: ReactPointerEvent<HTMLDivElement>, id: string) {
-    if (activeIdRef.current !== id || activePointerIdRef.current !== e.pointerId) return;
-    if (movedRef.current) onReorder(orderRef.current);
+  function endDrag() {
+    cleanupRef.current?.();
+    cleanupRef.current = null;
+    if (movedRef.current && activeIdRef.current) onReorder(orderRef.current);
     setDraggingId(null);
     setDragOffset({ x: 0, y: 0 });
     movedRef.current = false;
     activeIdRef.current = null;
     activePointerIdRef.current = null;
+  }
+
+  function handlePointerDown(e: ReactPointerEvent<HTMLDivElement>, id: string) {
+    if (!editing) return;
+    e.preventDefault();
+    cleanupRef.current?.();
+
+    activeIdRef.current = id;
+    activePointerIdRef.current = e.pointerId;
+    startRef.current = { x: e.clientX, y: e.clientY };
+    movedRef.current = false;
+
+    const onWindowMove = (ev: PointerEvent) => {
+      if (ev.pointerId !== activePointerIdRef.current) return;
+      handleMove(ev.clientX, ev.clientY);
+    };
+    const onWindowUp = (ev: PointerEvent) => {
+      if (ev.pointerId !== activePointerIdRef.current) return;
+      endDrag();
+    };
+    window.addEventListener('pointermove', onWindowMove);
+    window.addEventListener('pointerup', onWindowUp);
+    window.addEventListener('pointercancel', onWindowUp);
+    cleanupRef.current = () => {
+      window.removeEventListener('pointermove', onWindowMove);
+      window.removeEventListener('pointerup', onWindowUp);
+      window.removeEventListener('pointercancel', onWindowUp);
+    };
   }
 
   const toolMap = new Map(tools.map((t) => [t.id, t]));
@@ -120,9 +155,6 @@ export function PinnedToolsGrid({ tools, editing, onOpen, onRemove, onReorder }:
               : undefined
           }
           onPointerDown={(e) => handlePointerDown(e, tool.id)}
-          onPointerMove={(e) => handlePointerMove(e, tool.id)}
-          onPointerUp={(e) => handlePointerEnd(e, tool.id)}
-          onPointerCancel={(e) => handlePointerEnd(e, tool.id)}
         >
           <ToolTile
             tool={tool}
