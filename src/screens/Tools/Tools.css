@@ -68,22 +68,11 @@
 
 .tools__featured-chip {
   position: absolute;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 38px;
-  height: 38px;
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
   border-radius: 12px;
-  color: #fff;
-  background: radial-gradient(
-    120% 140% at 26% 18%,
-    color-mix(in srgb, var(--tool-color) 45%, white 55%) 0%,
-    var(--tool-color) 42%,
-    color-mix(in srgb, var(--tool-color) 68%, black 32%) 100%
-  );
-  box-shadow:
-    0 6px 12px -4px color-mix(in srgb, var(--tool-color) 75%, transparent),
-    inset 0 1px 1px rgba(255, 255, 255, 0.4);
+  box-shadow: 0 6px 12px -4px rgba(0, 0, 0, 0.5);
   top: calc(var(--i) * 16px);
   right: calc(var(--i) * 14px);
   transform: rotate(calc(-8deg + var(--i) * 8deg));

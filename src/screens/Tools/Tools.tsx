@@ -8,19 +8,15 @@ import { CATEGORY_LABELS, TOOLS } from '../../tools/registry';
 import { searchTools } from '../../search/searchIndex';
 import { storageGet, storageSet, StorageKeys } from '../../storage/db';
 import { hapticSelect, hapticSuccess } from '../../haptics';
+import { TOOL_ICON_IMAGES } from '../../assets/tool-icons';
 import type { ToolCategory } from '../../types';
-import type { IconName } from '../../components/Icon';
 import './Tools.css';
 
 type CategoryFilter = 'all' | ToolCategory;
 
 const CATEGORIES: CategoryFilter[] = ['all', 'essentials', 'productivity', 'finance', 'more'];
 
-const FEATURED_ICONS: { icon: IconName; color: string }[] = [
-  { icon: 'calculator', color: 'var(--green)' },
-  { icon: 'timer', color: 'var(--purple)' },
-  { icon: 'checklist', color: 'var(--yellow)' },
-];
+const FEATURED_TOOL_IDS = ['calculator', 'timer', 'checklist'];
 
 export function Tools() {
   const { navigate } = useRouter();
@@ -86,14 +82,14 @@ export function Tools() {
         <div className="tools__featured">
           <div className="tools__featured-glow" />
           <div className="tools__featured-icons">
-            {FEATURED_ICONS.map((f, i) => (
-              <span
-                key={f.icon}
+            {FEATURED_TOOL_IDS.map((id, i) => (
+              <img
+                key={id}
+                src={TOOL_ICON_IMAGES[id]}
+                alt=""
                 className="tools__featured-chip"
-                style={{ '--tool-color': f.color, '--i': i } as CSSProperties}
-              >
-                <Icon name={f.icon} size={16} />
-              </span>
+                style={{ '--i': i } as CSSProperties}
+              />
             ))}
           </div>
           <span className="tools__featured-badge">Featured</span>
