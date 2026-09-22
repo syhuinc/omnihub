@@ -12,7 +12,20 @@
           "package_name": "com.syhuinc.omnihub"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "354903225183-o35h9ddg6vsprmnrvjci4em3f7odvg4h.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.syhuinc.omnihub",
+            "certificate_hash": "bbcd4efd637a8eccbe30ca0e96ccc3608718a26b"
+          }
+        },
+        {
+          "client_id": "354903225183-i5mo7tg37ram06ji5ccrnksj23p1jrre.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCS5ePh8aDpjPPvuQFn71tbuB5YtQwtzNQ"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "354903225183-i5mo7tg37ram06ji5ccrnksj23p1jrre.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
