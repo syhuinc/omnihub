@@ -11,6 +11,7 @@ import { ToolRoute } from '../tools/ToolRoute';
 import { Vault } from '../vault/Vault';
 import { storageGet, StorageKeys } from '../storage/db';
 import { hapticTap } from '../haptics';
+import { AuthProvider } from '../cloud/AuthContext';
 import './App.css';
 
 const TOP_LEVEL_PATHS = new Set(['/', '/tools', '/pro', '/profile']);
@@ -76,9 +77,11 @@ function App() {
   }, []);
 
   return (
-    <RouterProvider>
-      <Shell />
-    </RouterProvider>
+    <AuthProvider>
+      <RouterProvider>
+        <Shell />
+      </RouterProvider>
+    </AuthProvider>
   );
 }
 

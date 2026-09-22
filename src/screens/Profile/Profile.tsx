@@ -3,11 +3,13 @@ import { ScreenHeader } from '../../components/ScreenHeader';
 import { Icon } from '../../components/Icon';
 import { storageGet, storageSet, StorageKeys, exportBackup, importBackup, clearAllData } from '../../storage/db';
 import { hapticWarning } from '../../haptics';
+import { useAuth } from '../../cloud/AuthContext';
 import './Profile.css';
 
 type Theme = 'dark' | 'light';
 
 export function Profile() {
+  const { user, loading: authLoading, signingIn, error: authError, signInWithGoogle, signOut } = useAuth();
   const [theme, setTheme] = useState<Theme>(() => storageGet(StorageKeys.theme, 'dark'));
   const [importStatus, setImportStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [confirmingClear, setConfirmingClear] = useState(false);
@@ -66,6 +68,56 @@ export function Profile() {
       <ScreenHeader title="Profile" subtitle="Manage your app and data." />
 
       <div className="pf__body">
+        <section className="pf__section">
+          <h2 className="pf__section-title">Cloud Sync</h2>
+          <div className="pf__card">
+            {authLoading ? (
+              <div className="pf__row pf__row--static">
+                <span className="pf__row-text">
+                  <span>Checking sign-in status…</span>
+                </span>
+              </div>
+            ) : user ? (
+              <>
+                <div className="pf__account">
+                  {user.photoUrl ? (
+                    <img src={user.photoUrl} alt="" className="pf__account-avatar" />
+                  ) : (
+                    <span className="pf__account-avatar pf__account-avatar--fallback">
+                      <Icon name="user" size={20} />
+                    </span>
+                  )}
+                  <span className="pf__account-text">
+                    <strong>{user.displayName || 'Signed in'}</strong>
+                    <span>{user.email}</span>
+                  </span>
+                </div>
+                <div className="pf__divider" />
+                <button type="button" className="pf__row pf__row--danger" onClick={signOut}>
+                  <span className="pf__row-icon pf__row-icon--danger">
+                    <Icon name="x" size={18} />
+                  </span>
+                  <span className="pf__row-text">
+                    <strong>Sign Out</strong>
+                  </span>
+                </button>
+              </>
+            ) : (
+              <button type="button" className="pf__row" onClick={signInWithGoogle} disabled={signingIn}>
+                <span className="pf__row-icon">
+                  <Icon name="user" size={18} />
+                </span>
+                <span className="pf__row-text">
+                  <strong>{signingIn ? 'Signing in…' : 'Sign in with Google'}</strong>
+                  <span>Optional — first step toward syncing your data across devices</span>
+                </span>
+                <Icon name="chevron-right" size={18} className="pf__row-chevron" />
+              </button>
+            )}
+          </div>
+          {authError && <p className="pf__status pf__status--error">{authError}</p>}
+        </section>
+
         <section className="pf__section">
           <h2 className="pf__section-title">Appearance</h2>
           <div className="pf__theme-toggle">
@@ -159,8 +211,9 @@ export function Profile() {
           <div className="pf__card pf__privacy">
             <Icon name="shield" size={20} className="pf__privacy-icon" />
             <p>
-              Omni Hub collects no data. There are no accounts, no network requests, no analytics and no ads.
-              Everything you create stays only in this app, on this device.
+              Omni Hub works fully offline by default — no account needed, nothing leaves this device.
+              Signing in above is entirely optional and only used to sync your data across your own devices;
+              nothing is shared, sold, or used for ads or analytics.
             </p>
           </div>
         </section>
