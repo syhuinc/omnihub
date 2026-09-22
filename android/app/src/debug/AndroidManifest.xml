@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+  Debug-only additions, merged into the main manifest for debug builds only (Gradle's manifest
+  merger). Keeps the crash-log launcher out of release builds entirely, rather than relying on
+  remembering to strip it by hand.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <activity
+            android:name=".CrashLogActivity"
+            android:label="Omni Hub Debug"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>
