@@ -6,6 +6,7 @@ import { SwipeToDelete } from '../../components/SwipeToDelete';
 import { useRouter } from '../../app/Router';
 import { storageGet, storageSet, StorageKeys } from '../../storage/db';
 import { hapticWarning } from '../../haptics';
+import { useCloudSync } from '../../cloud/useCloudSync';
 import { NoteEditor } from './NoteEditor';
 import type { Note } from './types';
 import './Notes.css';
@@ -28,10 +29,12 @@ export function Notes() {
   const [query, setQuery] = useState('');
   const [openSwipeId, setOpenSwipeId] = useState<string | null>(null);
 
-  function persist(next: Note[]) {
+  function rawPersist(next: Note[]) {
     setNotes(next);
     storageSet(StorageKeys.notes, next);
   }
+
+  const { persist } = useCloudSync('notes', notes, rawPersist);
 
   const visibleNotes = useMemo(() => {
     const q = query.trim().toLowerCase();

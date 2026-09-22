@@ -5,4 +5,5 @@ export interface Note {
   pinned: boolean;
   createdAt: number;
   updatedAt: number;
+  deletedAt?: number;
 }
