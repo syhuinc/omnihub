@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react';
 import { Icon } from './Icon';
 import type { ToolMeta } from '../types';
 import './ToolTile.css';
@@ -12,11 +13,9 @@ export function ToolTile({ tool, onClick, onRemove }: ToolTileProps) {
   return (
     <div className="tool-tile">
       <button type="button" className="tool-tile__button" onClick={onClick}>
-        <span
-          className="tool-tile__icon"
-          style={{ background: `color-mix(in srgb, ${tool.color} 18%, transparent)`, color: tool.color }}
-        >
-          <Icon name={tool.icon} size={22} />
+        <span className="tool-tile__icon" style={{ '--tool-color': tool.color } as CSSProperties}>
+          <span className="tool-tile__icon-gloss" />
+          <Icon name={tool.icon} size={28} className="tool-tile__icon-svg" />
         </span>
         <span className="tool-tile__label">{tool.name}</span>
       </button>

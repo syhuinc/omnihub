@@ -18,25 +18,52 @@
 }
 
 .tool-tile__icon {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 52px;
-  height: 52px;
-  border-radius: var(--radius-md);
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 22%;
+  overflow: hidden;
+  background: radial-gradient(
+    120% 140% at 26% 18%,
+    color-mix(in srgb, var(--tool-color) 45%, white 55%) 0%,
+    var(--tool-color) 42%,
+    color-mix(in srgb, var(--tool-color) 68%, black 32%) 100%
+  );
   box-shadow:
-    0 6px 14px -6px color-mix(in srgb, currentColor 65%, transparent),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    0 10px 18px -8px color-mix(in srgb, var(--tool-color) 75%, transparent),
+    inset 0 1px 1px rgba(255, 255, 255, 0.4),
+    inset 0 -8px 12px rgba(0, 0, 0, 0.22);
   transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
+.tool-tile__icon-gloss {
+  position: absolute;
+  top: -35%;
+  left: -15%;
+  width: 85%;
+  height: 65%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0) 72%);
+  transform: rotate(-18deg);
+  pointer-events: none;
+}
+
+.tool-tile__icon-svg {
+  position: relative;
+  color: #fff;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.35));
+}
+
 .tool-tile__button:active .tool-tile__icon {
-  transform: scale(0.9);
+  transform: scale(0.92);
 }
 
 .tool-tile__label {
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--text-primary);
   text-align: center;
   line-height: 1.25;
@@ -55,4 +82,5 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 1;
 }

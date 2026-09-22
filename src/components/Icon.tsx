@@ -48,7 +48,9 @@ export type IconName =
   | 'star'
   | 'play'
   | 'stop'
-  | 'music';
+  | 'music'
+  | 'lightbulb'
+  | 'sort';
 
 interface IconProps {
   name: IconName;
@@ -182,6 +184,12 @@ const paths: Record<IconName, React.ReactNode> = {
   stop: <path d="M6 6h12v12H6Z" />,
   music: (
     <path d="M9 18V5l11-2v13 M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z M20 16a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+  ),
+  lightbulb: (
+    <path d="M9 18h6 M10 21h4 M12 3a6 6 0 0 0-3.5 10.9c.5.4.8 1 .8 1.6v.5h5.4v-.5c0-.6.3-1.2.8-1.6A6 6 0 0 0 12 3Z" />
+  ),
+  sort: (
+    <path d="M7 4v16 M7 4 4 7m3-3 3 3 M17 20V4m0 16-3-3m3 3 3-3" />
   ),
 };
 
