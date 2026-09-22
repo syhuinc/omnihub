@@ -73,8 +73,10 @@
         after reboot and keep the device awake long enough to ring.
       - POST_NOTIFICATIONS / USE_FULL_SCREEN_INTENT: show the full-screen ringing screen reliably,
         including over the lock screen.
-      No exact-alarm permission is needed: alarms are scheduled via AlarmManager.setAlarmClock(),
-      which Android exempts from that requirement since it's meant for user-facing alarm clocks.
+      - SCHEDULE_EXACT_ALARM: required by AlarmManager.setAlarmClock() on API 31+. Declaring it
+        here only lets the app request it; on API 33+ it is not auto-granted, so the user must
+        approve it via Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM (AlarmEditor prompts for this
+        before saving an alarm).
     -->
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
@@ -83,4 +85,5 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
 </manifest>

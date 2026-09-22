@@ -11,21 +11,29 @@ import java.util.Calendar;
 /**
  * Computes next-fire timestamps for each repeat mode and arms/disarms the OS alarm.
  *
- * Uses AlarmManager.setAlarmClock() rather than setExact() or setExactAndAllowWhileIdle():
- * it's the API meant for user-facing alarm clocks specifically, is exempt from the
- * exact-alarm permission requirement added in Android 12+, and gets top-priority
- * wake behavior (shows the status-bar alarm icon too).
+ * Uses AlarmManager.setAlarmClock() rather than setExact() or setExactAndAllowWhileIdle()
+ * since it's the API meant for user-facing alarm clocks and gets top-priority wake behavior
+ * (shows the status-bar alarm icon too). It still requires SCHEDULE_EXACT_ALARM to be granted
+ * on API 31+ (not auto-granted for apps targeting API 33+) - the system throws a
+ * SecurityException otherwise, so callers must check canScheduleExactAlarms() first.
  */
 public class AlarmScheduler {
 
     public static final String EXTRA_ALARM_ID = "alarm_id";
 
-    public static void arm(Context ctx, AlarmData alarm) {
+    public static boolean canScheduleExactAlarms(Context ctx) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return true;
+        AlarmManager am = (AlarmManager) ctx.getSystemService(Context.ALARM_SERVICE);
+        return am != null && am.canScheduleExactAlarms();
+    }
+
+    /** Returns true if the alarm was armed, false if it couldn't be (missing permission, etc). */
+    public static boolean arm(Context ctx, AlarmData alarm) {
         long triggerAt = nextTriggerMillis(alarm);
-        if (triggerAt <= 0) return;
+        if (triggerAt <= 0) return false;
 
         AlarmManager am = (AlarmManager) ctx.getSystemService(Context.ALARM_SERVICE);
-        if (am == null) return;
+        if (am == null) return false;
 
         Intent intent = new Intent(ctx, AlarmReceiver.class);
         intent.putExtra(EXTRA_ALARM_ID, alarm.id);
@@ -39,7 +47,15 @@ public class AlarmScheduler {
         Intent showIntent = new Intent(ctx, com.syhuinc.omnihub.MainActivity.class);
         PendingIntent showPi = PendingIntent.getActivity(ctx, alarm.id.hashCode(), showIntent, flags);
 
-        am.setAlarmClock(new AlarmManager.AlarmClockInfo(triggerAt, showPi), pi);
+        try {
+            am.setAlarmClock(new AlarmManager.AlarmClockInfo(triggerAt, showPi), pi);
+            return true;
+        } catch (SecurityException e) {
+            // Missing SCHEDULE_EXACT_ALARM (denied, or revoked after being granted). Never let
+            // this crash the caller - it can run on a receiver/service thread where an uncaught
+            // exception kills the whole app process, not just this one alarm.
+            return false;
+        }
     }
 
     public static void disarm(Context ctx, String alarmId) {

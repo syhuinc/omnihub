@@ -57,14 +57,16 @@ public class AlarmPlugin extends Plugin {
         alarm.createdAt = System.currentTimeMillis();
 
         AlarmStore.upsert(getContext(), alarm);
+        boolean armed = false;
         if (enabled) {
-            AlarmScheduler.arm(getContext(), alarm);
+            armed = AlarmScheduler.arm(getContext(), alarm);
         } else {
             AlarmScheduler.disarm(getContext(), alarm.id);
         }
 
         JSObject ret = new JSObject();
         ret.put("id", alarm.id);
+        ret.put("armed", armed);
         call.resolve(ret);
     }
 
@@ -154,6 +156,24 @@ public class AlarmPlugin extends Plugin {
             ret.put("name", ringtone != null ? ringtone.getTitle(getContext()) : "Custom");
         }
         call.resolve(ret);
+    }
+
+    @PluginMethod
+    public void checkExactAlarmPermission(PluginCall call) {
+        JSObject ret = new JSObject();
+        ret.put("granted", AlarmScheduler.canScheduleExactAlarms(getContext()));
+        call.resolve(ret);
+    }
+
+    @PluginMethod
+    public void requestExactAlarmPermission(PluginCall call) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            Intent intent = new Intent(android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
+            intent.setData(Uri.parse("package:" + getContext().getPackageName()));
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            getContext().startActivity(intent);
+        }
+        call.resolve();
     }
 
     @PluginMethod

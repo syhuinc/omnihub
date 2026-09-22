@@ -25,11 +25,13 @@ export interface ScheduleOptions {
 }
 
 export interface AlarmPluginInterface {
-  schedule(options: ScheduleOptions): Promise<{ id: string }>;
+  schedule(options: ScheduleOptions): Promise<{ id: string; armed: boolean }>;
   cancel(options: { id: string }): Promise<void>;
   list(): Promise<{ alarms: AlarmRecord[] }>;
   checkNotificationPermission(): Promise<{ granted: boolean }>;
   requestNotificationPermission(): Promise<{ granted: boolean }>;
+  checkExactAlarmPermission(): Promise<{ granted: boolean }>;
+  requestExactAlarmPermission(): Promise<void>;
   pickRingtone(): Promise<{ cancelled: boolean; uri?: string; name?: string }>;
   getCrashLog(): Promise<{ log: string }>;
   clearCrashLog(): Promise<void>;
@@ -38,7 +40,7 @@ export interface AlarmPluginInterface {
 class AlarmPluginWeb extends WebPlugin implements AlarmPluginInterface {
   private alarms = new Map<string, AlarmRecord>();
 
-  async schedule(options: ScheduleOptions): Promise<{ id: string }> {
+  async schedule(options: ScheduleOptions): Promise<{ id: string; armed: boolean }> {
     const id = options.id || `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     this.alarms.set(id, {
       id,
@@ -51,7 +53,7 @@ class AlarmPluginWeb extends WebPlugin implements AlarmPluginInterface {
       soundName: options.soundName ?? null,
       createdAt: Date.now(),
     });
-    return { id };
+    return { id, armed: true };
   }
 
   async cancel(options: { id: string }): Promise<void> {
@@ -68,6 +70,14 @@ class AlarmPluginWeb extends WebPlugin implements AlarmPluginInterface {
 
   async requestNotificationPermission(): Promise<{ granted: boolean }> {
     return { granted: true };
+  }
+
+  async checkExactAlarmPermission(): Promise<{ granted: boolean }> {
+    return { granted: true };
+  }
+
+  async requestExactAlarmPermission(): Promise<void> {
+    // no-op in browser
   }
 
   async pickRingtone(): Promise<{ cancelled: boolean; uri?: string; name?: string }> {

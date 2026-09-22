@@ -38,6 +38,7 @@ export function AlarmEditor({ alarmId, onClose, onDelete }: AlarmEditorProps) {
   const [editingPresets, setEditingPresets] = useState(false);
   const [presets, setPresets] = useState(loadPresets());
   const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [needsExactAlarmPermission, setNeedsExactAlarmPermission] = useState(false);
 
   useEffect(() => {
     if (alarmId === null) return;
@@ -91,19 +92,28 @@ export function AlarmEditor({ alarmId, onClose, onDelete }: AlarmEditorProps) {
   }
 
   async function handleSave() {
-    let granted = true;
     try {
       const check = await AlarmPlugin.checkNotificationPermission();
-      granted = check.granted;
-      if (!granted) {
-        const req = await AlarmPlugin.requestNotificationPermission();
-        granted = req.granted;
+      if (!check.granted) {
+        await AlarmPlugin.requestNotificationPermission();
       }
     } catch {
       // web fallback / unsupported platform — proceed anyway
     }
 
-    await AlarmPlugin.schedule({
+    try {
+      const check = await AlarmPlugin.checkExactAlarmPermission();
+      if (!check.granted) {
+        hapticWarning();
+        setNeedsExactAlarmPermission(true);
+        await AlarmPlugin.requestExactAlarmPermission();
+        return;
+      }
+    } catch {
+      // web fallback / unsupported platform — proceed anyway
+    }
+
+    const { armed } = await AlarmPlugin.schedule({
       id: alarmId ?? undefined,
       hour,
       minute,
@@ -113,6 +123,14 @@ export function AlarmEditor({ alarmId, onClose, onDelete }: AlarmEditorProps) {
       soundUri,
       soundName,
     });
+
+    if (!armed) {
+      hapticWarning();
+      setNeedsExactAlarmPermission(true);
+      return;
+    }
+
+    setNeedsExactAlarmPermission(false);
     hapticSuccess();
     onClose();
   }
@@ -139,6 +157,20 @@ export function AlarmEditor({ alarmId, onClose, onDelete }: AlarmEditorProps) {
           )
         }
       />
+
+      {needsExactAlarmPermission && (
+        <div className="alarm-editor__confirm">
+          <p>
+            Omni Hub needs the "Alarms &amp; reminders" permission to schedule alarms. Turn it on
+            in the Settings screen that just opened, then come back and tap Save again.
+          </p>
+          <div className="alarm-editor__confirm-actions">
+            <button type="button" onClick={() => AlarmPlugin.requestExactAlarmPermission()}>
+              Open Settings
+            </button>
+          </div>
+        </div>
+      )}
 
       {confirmingDelete && (
         <div className="alarm-editor__confirm">

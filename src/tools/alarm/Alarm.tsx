@@ -29,7 +29,20 @@ export function Alarm() {
 
   async function toggleEnabled(alarm: AlarmRecord) {
     hapticSelect();
-    await AlarmPlugin.schedule({ ...alarm, enabled: !alarm.enabled });
+    const turningOn = !alarm.enabled;
+    if (turningOn) {
+      try {
+        const check = await AlarmPlugin.checkExactAlarmPermission();
+        if (!check.granted) {
+          hapticWarning();
+          await AlarmPlugin.requestExactAlarmPermission();
+          return;
+        }
+      } catch {
+        // web fallback / unsupported platform — proceed anyway
+      }
+    }
+    await AlarmPlugin.schedule({ ...alarm, enabled: turningOn });
     refresh();
   }
 
