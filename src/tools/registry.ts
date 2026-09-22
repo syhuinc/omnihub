@@ -196,11 +196,11 @@ export const TOOLS: ToolMeta[] = [
   {
     id: 'time-difference',
     name: 'Time Difference',
-    shortDescription: 'Duration between two moments',
+    shortDescription: 'Hours ahead or behind, city to city',
     category: 'more',
     color: 'var(--pink)',
     icon: 'clock',
-    keywords: ['time difference', 'duration', 'elapsed', 'how long', 'between two times'],
+    keywords: ['time difference', 'time zone', 'countries', 'hours ahead', 'hours behind', 'ahead of', 'behind'],
     presentation: 'sheet',
   },
   {
