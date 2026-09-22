@@ -35,6 +35,55 @@
   white-space: pre-line;
 }
 
+.pro__vault-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  text-align: left;
+  background: var(--bg-elevated);
+  border: 1px solid color-mix(in srgb, var(--accent) 40%, var(--border));
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  box-shadow: 0 4px 16px -6px color-mix(in srgb, var(--accent) 35%, transparent);
+}
+
+.pro__vault-icon {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--accent-gradient);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pro__vault-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pro__vault-text strong {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.pro__vault-text span {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.pro__vault-chevron {
+  flex-shrink: 0;
+  color: var(--text-tertiary);
+}
+
 .pro__features {
   list-style: none;
   margin: 0;

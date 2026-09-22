@@ -38,7 +38,9 @@ export type IconName =
   | 'shopping'
   | 'entertainment'
   | 'health'
-  | 'more-dots';
+  | 'more-dots'
+  | 'lock'
+  | 'unlock';
 
 interface IconProps {
   name: IconName;
@@ -147,6 +149,12 @@ const paths: Record<IconName, React.ReactNode> = {
     <path d="M12 21s-7-4.5-9.5-9A5.5 5.5 0 0 1 12 6a5.5 5.5 0 0 1 9.5 6c-2.5 4.5-9.5 9-9.5 9Z" />
   ),
   'more-dots': <path d="M5 12h.01M12 12h.01M19 12h.01" />,
+  lock: (
+    <path d="M6 11V8a6 6 0 0 1 12 0v3 M5 11h14a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-8a1 1 0 0 1 1-1Z M12 15v3" />
+  ),
+  unlock: (
+    <path d="M6 11V8a6 6 0 0 1 11.3-2.7 M5 11h14a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-8a1 1 0 0 1 1-1Z M12 15v3" />
+  ),
 };
 
 export function Icon({ name, size = 20, strokeWidth = 2, className, style }: IconProps) {

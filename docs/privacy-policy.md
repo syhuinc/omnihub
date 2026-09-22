@@ -21,6 +21,8 @@ Everything you enter into Omni Hub — notes, checklists, expenses, budgets, cal
 - You can delete all of it at any time from **Profile ▸ Clear All Data**.
 - Uninstalling the app deletes this data along with it.
 
+Notes you save in the **Vault** are additionally encrypted on your device with a key derived from your PIN before being stored. Your PIN is never stored — only used to derive that key each time you unlock — so if you forget it, Vault notes cannot be recovered and the Vault must be reset.
+
 ## Permissions
 
 Omni Hub requests only the **Vibrate** permission, used for haptic feedback (tap and completion vibrations). It does not access your camera, microphone, contacts, location, storage beyond its own app sandbox, or any other device feature.
