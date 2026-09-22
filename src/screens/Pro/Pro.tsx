@@ -32,7 +32,7 @@ export function Pro() {
           </span>
           <span className="pro__vault-text">
             <strong>Vault</strong>
-            <span>PIN-locked private notes, available now</span>
+            <span>PIN-locked notes, photos & files, available now</span>
           </span>
           <Icon name="chevron-right" size={20} className="pro__vault-chevron" />
         </button>

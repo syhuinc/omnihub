@@ -4,15 +4,26 @@ import { Icon } from '../components/Icon';
 import { useRouter } from '../app/Router';
 import { storageGet, storageSet, storageRemove, StorageKeys } from '../storage/db';
 import { hapticSuccess, hapticWarning } from '../haptics';
-import { deriveVaultKey, encryptText, decryptText, randomSalt, type EncryptedPayload } from './crypto';
+import {
+  deriveVaultKey,
+  encryptText,
+  decryptText,
+  encryptBytes,
+  decryptBytes,
+  randomSalt,
+  type EncryptedPayload,
+} from './crypto';
 import { PinPad, PIN_LENGTH } from './PinPad';
 import { VaultNoteEditor } from './VaultNoteEditor';
+import { VaultFiles } from './VaultFiles';
+import { clearAllFiles, getAllFiles, putFile } from './fileStore';
 import type { VaultNote, VaultNoteRecord } from './types';
 import './Vault.css';
 
 const CANARY_TEXT = 'omni-hub-vault-ok';
 
 type Status = 'loading' | 'setupPin' | 'confirmPin' | 'locked' | 'unlocked';
+type Tab = 'notes' | 'files';
 
 function newNote(): VaultNote {
   const now = Date.now();
@@ -32,6 +43,7 @@ export function Vault() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [changingPin, setChangingPin] = useState(false);
   const [confirmingReset, setConfirmingReset] = useState(false);
+  const [tab, setTab] = useState<Tab>('notes');
 
   useEffect(() => {
     const salt = storageGet<string | null>(StorageKeys.vaultSalt, null);
@@ -67,8 +79,9 @@ export function Vault() {
     storageSet(StorageKeys.vaultSalt, salt);
     storageSet(StorageKeys.vaultCanary, canary);
     if (changingPin) {
-      // Re-encrypt the existing notes with the new key rather than wiping them.
+      // Re-encrypt the existing notes and files with the new key rather than losing them.
       await persistNotes(notes, derivedKey);
+      if (key) await reencryptFiles(key, derivedKey);
     } else {
       storageSet(StorageKeys.vaultNotes, []);
       setNotes([]);
@@ -129,6 +142,15 @@ export function Vault() {
     storageSet(StorageKeys.vaultNotes, records);
   }
 
+  async function reencryptFiles(oldKey: CryptoKey, newKey: CryptoKey) {
+    const files = await getAllFiles();
+    for (const f of files) {
+      const plain = await decryptBytes(oldKey, f.iv, f.data);
+      const { iv, data } = await encryptBytes(newKey, plain);
+      await putFile({ ...f, iv, data });
+    }
+  }
+
   function lock() {
     setKey(null);
     setNotes([]);
@@ -137,6 +159,7 @@ export function Vault() {
     setSettingsOpen(false);
     setPinInput('');
     setError('');
+    setTab('notes');
     setStatus('locked');
   }
 
@@ -199,6 +222,7 @@ export function Vault() {
     storageRemove(StorageKeys.vaultSalt);
     storageRemove(StorageKeys.vaultCanary);
     storageRemove(StorageKeys.vaultNotes);
+    void clearAllFiles();
     setKey(null);
     setNotes([]);
     setDraft(null);
@@ -209,6 +233,7 @@ export function Vault() {
     setPendingPin('');
     setError('');
     setChangingPin(false);
+    setTab('notes');
     setStatus('setupPin');
   }
 
@@ -273,7 +298,7 @@ export function Vault() {
     <div className="screen">
       <ScreenHeader
         title="Vault"
-        subtitle="Private, PIN-locked notes"
+        subtitle="Private, PIN-locked notes, photos & files"
         onBack={back}
         action={
           <div className="vault__header-actions">
@@ -309,7 +334,7 @@ export function Vault() {
             </button>
           ) : (
             <div className="vault__reset-confirm">
-              <p>This deletes all private notes and your PIN. This can't be undone.</p>
+              <p>This deletes all private notes, photos, files and your PIN. This can't be undone.</p>
               <div className="vault-editor__confirm-actions">
                 <button type="button" onClick={() => setConfirmingReset(false)}>
                   Cancel
@@ -323,28 +348,51 @@ export function Vault() {
         </div>
       )}
 
-      <div className="vault__content">
-        {notes.length === 0 ? (
-          <p className="vault__empty">No private notes yet. Tap + to write your first one.</p>
-        ) : (
-          <ul className="vault__list">
-            {[...notes]
-              .sort((a, b) => b.updatedAt - a.updatedAt)
-              .map((note) => (
-                <li key={note.id}>
-                  <button type="button" className="vault__card" onClick={() => openExisting(note)}>
-                    <span className="vault__card-title">{note.title || 'Untitled'}</span>
-                    {note.body && <p className="vault__card-preview">{note.body.slice(0, 80)}</p>}
-                  </button>
-                </li>
-              ))}
-          </ul>
-        )}
+      <div className="vault__tabs">
+        <button
+          type="button"
+          className={`vault__tab${tab === 'notes' ? ' vault__tab--active' : ''}`}
+          onClick={() => setTab('notes')}
+        >
+          Notes
+        </button>
+        <button
+          type="button"
+          className={`vault__tab${tab === 'files' ? ' vault__tab--active' : ''}`}
+          onClick={() => setTab('files')}
+        >
+          Photos & Files
+        </button>
       </div>
 
-      <button type="button" className="vault__fab" onClick={openNew} aria-label="New private note">
-        <Icon name="plus" size={24} />
-      </button>
+      {tab === 'notes' ? (
+        <>
+          <div className="vault__content">
+            {notes.length === 0 ? (
+              <p className="vault__empty">No private notes yet. Tap + to write your first one.</p>
+            ) : (
+              <ul className="vault__list">
+                {[...notes]
+                  .sort((a, b) => b.updatedAt - a.updatedAt)
+                  .map((note) => (
+                    <li key={note.id}>
+                      <button type="button" className="vault__card" onClick={() => openExisting(note)}>
+                        <span className="vault__card-title">{note.title || 'Untitled'}</span>
+                        {note.body && <p className="vault__card-preview">{note.body.slice(0, 80)}</p>}
+                      </button>
+                    </li>
+                  ))}
+              </ul>
+            )}
+          </div>
+
+          <button type="button" className="vault__fab" onClick={openNew} aria-label="New private note">
+            <Icon name="plus" size={24} />
+          </button>
+        </>
+      ) : (
+        key && <VaultFiles vaultKey={key} />
+      )}
     </div>
   );
 }

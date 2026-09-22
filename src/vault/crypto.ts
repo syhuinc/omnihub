@@ -7,6 +7,10 @@ export interface EncryptedPayload {
   data: string;
 }
 
+export function randomIv(): Uint8Array {
+  return crypto.getRandomValues(new Uint8Array(IV_BYTES));
+}
+
 function toBase64(bytes: Uint8Array): string {
   let binary = '';
   for (const b of bytes) binary += String.fromCharCode(b);
@@ -54,4 +58,14 @@ export async function decryptText(key: CryptoKey, payload: EncryptedPayload): Pr
     fromBase64(payload.data) as BufferSource,
   );
   return new TextDecoder().decode(plain);
+}
+
+export async function encryptBytes(key: CryptoKey, bytes: ArrayBuffer): Promise<{ iv: Uint8Array; data: ArrayBuffer }> {
+  const iv = randomIv();
+  const data = await crypto.subtle.encrypt({ name: 'AES-GCM', iv: iv as BufferSource }, key, bytes);
+  return { iv, data };
+}
+
+export async function decryptBytes(key: CryptoKey, iv: Uint8Array, data: ArrayBuffer): Promise<ArrayBuffer> {
+  return crypto.subtle.decrypt({ name: 'AES-GCM', iv: iv as BufferSource }, key, data);
 }

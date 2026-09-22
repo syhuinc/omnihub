@@ -40,7 +40,9 @@ export type IconName =
   | 'health'
   | 'more-dots'
   | 'lock'
-  | 'unlock';
+  | 'unlock'
+  | 'image'
+  | 'file';
 
 interface IconProps {
   name: IconName;
@@ -154,6 +156,12 @@ const paths: Record<IconName, React.ReactNode> = {
   ),
   unlock: (
     <path d="M6 11V8a6 6 0 0 1 11.3-2.7 M5 11h14a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-8a1 1 0 0 1 1-1Z M12 15v3" />
+  ),
+  image: (
+    <path d="M5 4h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Z M9 10a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z M4 17l5-5 3.5 3.5L16 12l4 4" />
+  ),
+  file: (
+    <path d="M6 3h9l5 5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z M14 3v5h5" />
   ),
 };
 
