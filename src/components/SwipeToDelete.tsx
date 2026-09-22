@@ -100,9 +100,10 @@ export function SwipeToDelete({ id, openId, onOpenChange, onDelete, deleteLabel 
   return (
     <div className="swipe-row">
       <div className="swipe-row__delete" style={{ width: REVEAL_WIDTH }}>
-        <button type="button" className="swipe-row__delete-btn" onClick={handleDeleteClick}>
-          <Icon name="trash" size={18} />
-          <span>{deleteLabel}</span>
+        <button type="button" className="swipe-row__delete-btn" onClick={handleDeleteClick} aria-label={deleteLabel}>
+          <span className="swipe-row__delete-icon">
+            <Icon name="trash" size={18} />
+          </span>
         </button>
       </div>
       <div
