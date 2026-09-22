@@ -4,25 +4,48 @@ import { Icon } from '../../components/Icon';
 import { useRouter } from '../../app/Router';
 import { useBackHandler } from '../../app/useBackHandler';
 import { storageGet, storageSet, StorageKeys } from '../../storage/db';
+import { useCloudSync } from '../../cloud/useCloudSync';
 import { EXPENSE_CATEGORIES } from '../expense-tracker/categories';
 import { currentMonthKey, formatMonthLabel } from '../expense-tracker/month';
 import type { Expense } from '../expense-tracker/types';
+import type { BudgetLimit } from './types';
 import './Budget.css';
-
-type Budgets = Record<string, number>;
 
 function formatMoney(amount: number): string {
   return `$${amount.toFixed(2)}`;
 }
 
+/** Reads budgets, migrating the old `{categoryId: amount}` map shape (pre-sync) into a list on first load. */
+function loadBudgets(): BudgetLimit[] {
+  const raw = storageGet<unknown>(StorageKeys.budgets, []);
+  if (Array.isArray(raw)) return raw as BudgetLimit[];
+
+  const legacy = raw as Record<string, number>;
+  const now = Date.now();
+  const migrated: BudgetLimit[] = Object.entries(legacy)
+    .filter(([, amount]) => amount > 0)
+    .map(([categoryId, amount]) => ({ id: categoryId, categoryId, amount, updatedAt: now }));
+  storageSet(StorageKeys.budgets, migrated);
+  return migrated;
+}
+
 export function Budget() {
   const { back } = useRouter();
-  const [budgets, setBudgets] = useState<Budgets>(() => storageGet(StorageKeys.budgets, {}));
+  const [budgets, setBudgets] = useState<BudgetLimit[]>(() => loadBudgets());
   const [expenses] = useState<Expense[]>(() => storageGet(StorageKeys.expenses, []));
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draftValue, setDraftValue] = useState('');
 
+  function rawPersist(next: BudgetLimit[]) {
+    setBudgets(next);
+    storageSet(StorageKeys.budgets, next);
+  }
+
+  const { persist } = useCloudSync('budgets', budgets, rawPersist);
+
   const monthKey = currentMonthKey();
+
+  const budgetMap = useMemo(() => new Map(budgets.map((b) => [b.categoryId, b.amount])), [budgets]);
 
   const spentByCategory = useMemo(() => {
     const totals = new Map<string, number>();
@@ -33,18 +56,22 @@ export function Budget() {
     return totals;
   }, [expenses, monthKey]);
 
-  const totalBudget = Object.values(budgets).reduce((sum, v) => sum + (v || 0), 0);
+  const totalBudget = budgets.reduce((sum, b) => sum + b.amount, 0);
   const totalSpent = [...spentByCategory.values()].reduce((sum, v) => sum + v, 0);
 
   function saveBudget(categoryId: string, value: number) {
-    const next = { ...budgets, [categoryId]: value };
-    setBudgets(next);
-    storageSet(StorageKeys.budgets, next);
+    const withoutCategory = budgets.filter((b) => b.categoryId !== categoryId);
+    const next =
+      value > 0
+        ? [...withoutCategory, { id: categoryId, categoryId, amount: value, updatedAt: Date.now() }]
+        : withoutCategory;
+    persist(next);
   }
 
   function startEdit(categoryId: string) {
     setEditingId(categoryId);
-    setDraftValue(budgets[categoryId] ? String(budgets[categoryId]) : '');
+    const limit = budgetMap.get(categoryId);
+    setDraftValue(limit ? String(limit) : '');
   }
 
   function commitEdit() {
@@ -80,7 +107,7 @@ export function Budget() {
       <ul className="bg__list">
         {EXPENSE_CATEGORIES.map((cat) => {
           const spent = spentByCategory.get(cat.id) ?? 0;
-          const limit = budgets[cat.id] ?? 0;
+          const limit = budgetMap.get(cat.id) ?? 0;
           const hasLimit = limit > 0;
           const pct = hasLimit ? Math.min(100, (spent / limit) * 100) : 0;
           const over = hasLimit && spent > limit;
