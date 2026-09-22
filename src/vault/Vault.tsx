@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { Icon } from '../components/Icon';
 import { useRouter } from '../app/Router';
+import { useBackHandler } from '../app/useBackHandler';
 import { storageGet, storageSet, storageRemove, StorageKeys } from '../storage/db';
 import { hapticSuccess, hapticWarning } from '../haptics';
 import {
@@ -44,6 +45,17 @@ export function Vault() {
   const [changingPin, setChangingPin] = useState(false);
   const [confirmingReset, setConfirmingReset] = useState(false);
   const [tab, setTab] = useState<Tab>('notes');
+
+  const hasNestedState = settingsOpen || (changingPin && (status === 'setupPin' || status === 'confirmPin'));
+  useBackHandler(() => {
+    if (confirmingReset) {
+      setConfirmingReset(false);
+    } else if (settingsOpen) {
+      setSettingsOpen(false);
+    } else {
+      setStatus('unlocked');
+    }
+  }, hasNestedState);
 
   useEffect(() => {
     const salt = storageGet<string | null>(StorageKeys.vaultSalt, null);

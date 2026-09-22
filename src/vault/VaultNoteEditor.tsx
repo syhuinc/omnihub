@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { Icon } from '../components/Icon';
+import { useBackHandler } from '../app/useBackHandler';
 import type { VaultNote } from './types';
 
 interface VaultNoteEditorProps {
@@ -12,6 +13,14 @@ interface VaultNoteEditorProps {
 
 export function VaultNoteEditor({ note, onChange, onDelete, onClose }: VaultNoteEditorProps) {
   const [confirmingDelete, setConfirmingDelete] = useState(false);
+
+  useBackHandler(() => {
+    if (confirmingDelete) {
+      setConfirmingDelete(false);
+    } else {
+      onClose();
+    }
+  }, true);
 
   function update(patch: Partial<VaultNote>) {
     onChange({ ...note, ...patch, updatedAt: Date.now() });

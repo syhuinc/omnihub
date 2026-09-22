@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { ScreenHeader } from '../../components/ScreenHeader';
 import { Icon } from '../../components/Icon';
 import { useRouter } from '../../app/Router';
+import { useBackHandler } from '../../app/useBackHandler';
 import { storageGet, storageSet, StorageKeys } from '../../storage/db';
 import { EXPENSE_CATEGORIES } from '../expense-tracker/categories';
 import { currentMonthKey, formatMonthLabel } from '../expense-tracker/month';
@@ -52,6 +53,11 @@ export function Budget() {
     saveBudget(editingId, Number.isNaN(numeric) || numeric < 0 ? 0 : numeric);
     setEditingId(null);
   }
+
+  useBackHandler(() => {
+    commitEdit();
+    back();
+  }, editingId !== null);
 
   return (
     <div className="screen">

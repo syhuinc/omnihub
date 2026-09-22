@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ScreenHeader } from '../../components/ScreenHeader';
 import { Icon } from '../../components/Icon';
+import { useBackHandler } from '../../app/useBackHandler';
 import { EXPENSE_CATEGORIES } from './categories';
 import type { Expense } from './types';
 
@@ -20,14 +21,26 @@ export function AddExpense({ onSave, onClose }: AddExpenseProps) {
   const [dateISO, setDateISO] = useState(todayISO());
   const [error, setError] = useState('');
 
-  function save() {
+  function buildExpense(): Expense | null {
     const numeric = parseFloat(amount);
-    if (!amount || Number.isNaN(numeric) || numeric <= 0) {
+    if (!amount || Number.isNaN(numeric) || numeric <= 0) return null;
+    return { id: `${Date.now()}`, amount: numeric, categoryId, note: note.trim(), dateISO };
+  }
+
+  function save() {
+    const expense = buildExpense();
+    if (!expense) {
       setError('Enter an amount greater than 0.');
       return;
     }
-    onSave({ id: `${Date.now()}`, amount: numeric, categoryId, note: note.trim(), dateISO });
+    onSave(expense);
   }
+
+  useBackHandler(() => {
+    const expense = buildExpense();
+    if (expense) onSave(expense);
+    else onClose();
+  }, true);
 
   return (
     <div className="screen">

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ScreenHeader } from '../../components/ScreenHeader';
 import { Icon } from '../../components/Icon';
 import { hapticSelect, hapticSuccess } from '../../haptics';
+import { useBackHandler } from '../../app/useBackHandler';
 import type { Checklist, ChecklistItem } from './types';
 
 interface ChecklistDetailProps {
@@ -14,6 +15,14 @@ interface ChecklistDetailProps {
 export function ChecklistDetail({ list, onChange, onDelete, onClose }: ChecklistDetailProps) {
   const [newItemText, setNewItemText] = useState('');
   const [confirmingDelete, setConfirmingDelete] = useState(false);
+
+  useBackHandler(() => {
+    if (confirmingDelete) {
+      setConfirmingDelete(false);
+    } else {
+      onClose();
+    }
+  }, true);
 
   function update(patch: Partial<Checklist>) {
     onChange({ ...list, ...patch, updatedAt: Date.now() });
