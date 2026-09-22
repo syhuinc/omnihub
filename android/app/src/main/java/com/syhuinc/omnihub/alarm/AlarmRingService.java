@@ -30,6 +30,8 @@ public class AlarmRingService extends Service {
     private Vibrator vibrator;
     private PowerManager.WakeLock wakeLock;
     private String currentAlarmId;
+    private boolean currentIsBackup;
+    private int currentBackupIndex;
 
     public static void stopRinging(Context ctx) {
         ctx.stopService(new Intent(ctx, AlarmRingService.class));
@@ -50,6 +52,8 @@ public class AlarmRingService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         String alarmId = intent != null ? intent.getStringExtra(AlarmScheduler.EXTRA_ALARM_ID) : null;
         currentAlarmId = alarmId;
+        currentIsBackup = intent != null && intent.getBooleanExtra(AlarmScheduler.EXTRA_IS_BACKUP, false);
+        currentBackupIndex = intent != null ? intent.getIntExtra(AlarmScheduler.EXTRA_BACKUP_INDEX, 0) : 0;
         AlarmData alarm = alarmId != null ? AlarmStore.find(this, alarmId) : null;
 
         startForegroundWithNotification(alarm);
@@ -63,6 +67,8 @@ public class AlarmRingService extends Service {
     private void startForegroundWithNotification(AlarmData alarm) {
         Intent fullScreenIntent = new Intent(this, AlarmRingingActivity.class);
         fullScreenIntent.putExtra(AlarmScheduler.EXTRA_ALARM_ID, currentAlarmId);
+        fullScreenIntent.putExtra(AlarmScheduler.EXTRA_IS_BACKUP, currentIsBackup);
+        fullScreenIntent.putExtra(AlarmScheduler.EXTRA_BACKUP_INDEX, currentBackupIndex);
         fullScreenIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
         int flags = PendingIntent.FLAG_UPDATE_CURRENT;
@@ -70,6 +76,7 @@ public class AlarmRingService extends Service {
         PendingIntent fullScreenPi = PendingIntent.getActivity(this, 0, fullScreenIntent, flags);
 
         String label = alarm != null && alarm.label != null && !alarm.label.isEmpty() ? alarm.label : "Alarm";
+        if (currentIsBackup) label = label + " (Backup " + currentBackupIndex + ")";
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)

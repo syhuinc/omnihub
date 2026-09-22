@@ -10,6 +10,7 @@ export interface AlarmRecord {
   enabled: boolean;
   soundUri: string | null;
   soundName: string | null;
+  backupEnabled: boolean;
   createdAt: number;
 }
 
@@ -22,6 +23,7 @@ export interface ScheduleOptions {
   enabled?: boolean;
   soundUri?: string | null;
   soundName?: string | null;
+  backupEnabled?: boolean;
 }
 
 export interface AlarmPluginInterface {
@@ -51,6 +53,7 @@ class AlarmPluginWeb extends WebPlugin implements AlarmPluginInterface {
       enabled: options.enabled ?? true,
       soundUri: options.soundUri ?? null,
       soundName: options.soundName ?? null,
+      backupEnabled: options.backupEnabled ?? false,
       createdAt: Date.now(),
     });
     return { id, armed: true };

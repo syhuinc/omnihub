@@ -14,6 +14,7 @@ public class AlarmData {
     public boolean enabled;
     public String soundUri; // null/empty = device default alarm sound
     public String soundName;
+    public boolean backupEnabled; // if true, un-dismissed alarms re-ring at +5/+10/+30 min
     public long createdAt;
 
     public AlarmData() {}
@@ -28,6 +29,7 @@ public class AlarmData {
         o.put("enabled", enabled);
         o.put("soundUri", soundUri == null ? JSONObject.NULL : soundUri);
         o.put("soundName", soundName == null ? JSONObject.NULL : soundName);
+        o.put("backupEnabled", backupEnabled);
         o.put("createdAt", createdAt);
         return o;
     }
@@ -42,6 +44,7 @@ public class AlarmData {
         a.enabled = o.optBoolean("enabled", true);
         a.soundUri = o.isNull("soundUri") ? null : o.optString("soundUri", null);
         a.soundName = o.isNull("soundName") ? null : o.optString("soundName", null);
+        a.backupEnabled = o.optBoolean("backupEnabled", false);
         a.createdAt = o.optLong("createdAt", System.currentTimeMillis());
         return a;
     }

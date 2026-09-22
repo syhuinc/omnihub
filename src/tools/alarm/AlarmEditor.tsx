@@ -35,6 +35,7 @@ export function AlarmEditor({ alarmId, onClose, onDelete }: AlarmEditorProps) {
   const [repeatMode, setRepeatMode] = useState<RepeatMode>('today');
   const [soundUri, setSoundUri] = useState<string | null>(null);
   const [soundName, setSoundName] = useState<string | null>(null);
+  const [backupEnabled, setBackupEnabled] = useState(false);
   const [openCategory, setOpenCategory] = useState<TimeCategory | null>(null);
   const [editingPresets, setEditingPresets] = useState(false);
   const [presets, setPresets] = useState(loadPresets());
@@ -60,6 +61,7 @@ export function AlarmEditor({ alarmId, onClose, onDelete }: AlarmEditorProps) {
         setRepeatMode(existing.repeatMode);
         setSoundUri(existing.soundUri);
         setSoundName(existing.soundName);
+        setBackupEnabled(existing.backupEnabled);
       }
       setLoaded(true);
     });
@@ -131,6 +133,7 @@ export function AlarmEditor({ alarmId, onClose, onDelete }: AlarmEditorProps) {
       enabled: true,
       soundUri,
       soundName,
+      backupEnabled,
     });
 
     if (!armed) {
@@ -299,6 +302,27 @@ export function AlarmEditor({ alarmId, onClose, onDelete }: AlarmEditorProps) {
           <span>{soundName || 'Default Alarm'}</span>
           <Icon name="chevron-right" size={18} />
         </button>
+
+        <h2 className="alarm-editor__section-title">Backup Alarms</h2>
+        <div className="alarm-editor__backup-row">
+          <div className="alarm-editor__backup-text">
+            <span>Ring again if ignored</span>
+            <p>If you don't dismiss or snooze, we'll ring again at +5, +10, and +30 min.</p>
+          </div>
+          <button
+            type="button"
+            className={`alarm__switch${backupEnabled ? ' alarm__switch--on' : ''}`}
+            onClick={() => {
+              hapticSelect();
+              setBackupEnabled((v) => !v);
+            }}
+            role="switch"
+            aria-checked={backupEnabled}
+            aria-label="Toggle backup alarms"
+          >
+            <span className="alarm__switch-knob" />
+          </button>
+        </div>
 
         <button type="button" className="alarm-editor__save" onClick={handleSave}>
           Save Alarm

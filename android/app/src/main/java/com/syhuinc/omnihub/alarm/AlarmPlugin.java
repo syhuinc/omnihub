@@ -54,6 +54,7 @@ public class AlarmPlugin extends Plugin {
         alarm.enabled = enabled;
         alarm.soundUri = call.getString("soundUri", null);
         alarm.soundName = call.getString("soundName", null);
+        alarm.backupEnabled = call.getBoolean("backupEnabled", false);
         alarm.createdAt = System.currentTimeMillis();
 
         AlarmStore.upsert(getContext(), alarm);

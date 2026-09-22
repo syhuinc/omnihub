@@ -112,6 +112,7 @@ export function Alarm() {
                       <span className="alarm__card-meta">
                         {a.label ? `${a.label} · ` : ''}
                         {REPEAT_LABELS[a.repeatMode]}
+                        {a.backupEnabled ? ' · Backup' : ''}
                       </span>
                     </button>
                     <button

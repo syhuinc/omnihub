@@ -27,6 +27,8 @@ public class AlarmRingingActivity extends Activity {
         setContentView(R.layout.activity_alarm_ringing);
 
         alarmId = getIntent().getStringExtra(AlarmScheduler.EXTRA_ALARM_ID);
+        boolean isBackup = getIntent().getBooleanExtra(AlarmScheduler.EXTRA_IS_BACKUP, false);
+        int backupIndex = getIntent().getIntExtra(AlarmScheduler.EXTRA_BACKUP_INDEX, 0);
         AlarmData alarm = alarmId != null ? AlarmStore.find(this, alarmId) : null;
 
         TextView timeText = findViewById(R.id.alarm_time_text);
@@ -39,17 +41,23 @@ public class AlarmRingingActivity extends Activity {
             c.set(Calendar.HOUR_OF_DAY, alarm.hour);
             c.set(Calendar.MINUTE, alarm.minute);
             timeText.setText(new SimpleDateFormat("h:mm a", Locale.getDefault()).format(c.getTime()));
-            labelText.setText(alarm.label == null || alarm.label.isEmpty() ? "Alarm" : alarm.label);
+            String label = alarm.label == null || alarm.label.isEmpty() ? "Alarm" : alarm.label;
+            if (isBackup) label = label + " (Backup " + backupIndex + ")";
+            labelText.setText(label);
         }
 
         dismissButton.setOnClickListener(v -> {
             AlarmRingService.stopRinging(this);
+            if (alarmId != null) AlarmScheduler.cancelBackups(this, alarmId);
             finish();
         });
 
         snoozeButton.setOnClickListener(v -> {
             AlarmRingService.stopRinging(this);
-            if (alarmId != null) snooze(alarmId);
+            if (alarmId != null) {
+                AlarmScheduler.cancelBackups(this, alarmId);
+                snooze(alarmId);
+            }
             finish();
         });
     }
@@ -64,6 +72,7 @@ public class AlarmRingingActivity extends Activity {
         snoozed.enabled = true;
         snoozed.soundUri = alarm.soundUri;
         snoozed.soundName = alarm.soundName;
+        snoozed.backupEnabled = alarm.backupEnabled;
         snoozed.createdAt = System.currentTimeMillis();
 
         Calendar c = Calendar.getInstance();
