@@ -19,7 +19,8 @@ public class AlarmData {
     public String soundName;
     public boolean backupEnabled; // if true, un-dismissed alarms re-ring at the offsets below
     public int[] backupOffsetsMin = DEFAULT_BACKUP_OFFSETS_MIN; // minutes after the main alarm fires
-    public boolean backupPersistOnDismiss; // if true, Dismiss/Snooze don't cancel pending backups
+    public boolean backupPersistOnSnooze; // if true, Snooze doesn't cancel pending backups
+    public boolean backupPersistOnStop; // if true, Stop/Dismiss doesn't cancel pending backups
     public long createdAt;
 
     public AlarmData() {}
@@ -38,7 +39,8 @@ public class AlarmData {
         JSONArray offsets = new JSONArray();
         for (int m : backupOffsetsMin) offsets.put(m);
         o.put("backupOffsetsMin", offsets);
-        o.put("backupPersistOnDismiss", backupPersistOnDismiss);
+        o.put("backupPersistOnSnooze", backupPersistOnSnooze);
+        o.put("backupPersistOnStop", backupPersistOnStop);
         o.put("createdAt", createdAt);
         return o;
     }
@@ -62,7 +64,8 @@ public class AlarmData {
         } else {
             a.backupOffsetsMin = DEFAULT_BACKUP_OFFSETS_MIN;
         }
-        a.backupPersistOnDismiss = o.optBoolean("backupPersistOnDismiss", false);
+        a.backupPersistOnSnooze = o.optBoolean("backupPersistOnSnooze", false);
+        a.backupPersistOnStop = o.optBoolean("backupPersistOnStop", false);
         a.createdAt = o.optLong("createdAt", System.currentTimeMillis());
         return a;
     }

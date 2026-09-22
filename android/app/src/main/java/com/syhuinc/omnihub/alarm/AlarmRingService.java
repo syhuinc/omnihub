@@ -93,7 +93,7 @@ public class AlarmRingService extends Service {
     private void cancelBackupsUnlessPersisted(String alarmId) {
         if (alarmId == null) return;
         AlarmData a = AlarmStore.find(this, alarmId);
-        if (a == null || !a.backupPersistOnDismiss) {
+        if (a == null || !a.backupPersistOnStop) {
             AlarmScheduler.cancelBackups(this, alarmId);
         }
     }

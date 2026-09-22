@@ -17,7 +17,8 @@ export interface AlarmRecord {
   soundName: string | null;
   backupEnabled: boolean;
   backupOffsetsMin: number[];
-  backupPersistOnDismiss: boolean;
+  backupPersistOnSnooze: boolean;
+  backupPersistOnStop: boolean;
   createdAt: number;
 }
 
@@ -32,7 +33,8 @@ export interface ScheduleOptions {
   soundName?: string | null;
   backupEnabled?: boolean;
   backupOffsetsMin?: number[];
-  backupPersistOnDismiss?: boolean;
+  backupPersistOnSnooze?: boolean;
+  backupPersistOnStop?: boolean;
 }
 
 export interface RingtoneEntry {
@@ -74,7 +76,8 @@ class AlarmPluginWeb extends WebPlugin implements AlarmPluginInterface {
       soundName: options.soundName ?? null,
       backupEnabled: options.backupEnabled ?? false,
       backupOffsetsMin: options.backupOffsetsMin?.length ? options.backupOffsetsMin : DEFAULT_BACKUP_OFFSETS_MIN,
-      backupPersistOnDismiss: options.backupPersistOnDismiss ?? false,
+      backupPersistOnSnooze: options.backupPersistOnSnooze ?? false,
+      backupPersistOnStop: options.backupPersistOnStop ?? false,
       createdAt: Date.now(),
     });
     return { id, armed: true };

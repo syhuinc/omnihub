@@ -46,7 +46,8 @@ export function AlarmEditor({ alarmId, onClose, onDelete }: AlarmEditorProps) {
   const [soundName, setSoundName] = useState<string | null>(null);
   const [backupEnabled, setBackupEnabled] = useState(false);
   const [backupOffsets, setBackupOffsets] = useState<number[]>(DEFAULT_BACKUP_OFFSETS_MIN);
-  const [backupPersistOnDismiss, setBackupPersistOnDismiss] = useState(false);
+  const [backupPersistOnSnooze, setBackupPersistOnSnooze] = useState(false);
+  const [backupPersistOnStop, setBackupPersistOnStop] = useState(false);
   const [openCategory, setOpenCategory] = useState<TimeCategory | null>(null);
   const [editingPresets, setEditingPresets] = useState(false);
   const [presets, setPresets] = useState(loadPresets());
@@ -75,7 +76,8 @@ export function AlarmEditor({ alarmId, onClose, onDelete }: AlarmEditorProps) {
         setSoundName(existing.soundName);
         setBackupEnabled(existing.backupEnabled);
         setBackupOffsets(existing.backupOffsetsMin?.length ? existing.backupOffsetsMin : DEFAULT_BACKUP_OFFSETS_MIN);
-        setBackupPersistOnDismiss(existing.backupPersistOnDismiss);
+        setBackupPersistOnSnooze(existing.backupPersistOnSnooze);
+        setBackupPersistOnStop(existing.backupPersistOnStop);
       }
       setLoaded(true);
     });
@@ -172,7 +174,8 @@ export function AlarmEditor({ alarmId, onClose, onDelete }: AlarmEditorProps) {
       soundName,
       backupEnabled,
       backupOffsetsMin: [...backupOffsets].sort((a, b) => a - b),
-      backupPersistOnDismiss,
+      backupPersistOnSnooze,
+      backupPersistOnStop,
     });
 
     if (!armed) {
@@ -430,25 +433,47 @@ export function AlarmEditor({ alarmId, onClose, onDelete }: AlarmEditorProps) {
         )}
 
         {backupEnabled && (
-          <div className="alarm-editor__backup-row alarm-editor__backup-row--persist">
-            <div className="alarm-editor__backup-text">
-              <span>Keep backups on Dismiss/Snooze</span>
-              <p>Backups keep ringing on schedule even after you dismiss or snooze this alarm.</p>
+          <>
+            <div className="alarm-editor__backup-row alarm-editor__backup-row--persist">
+              <div className="alarm-editor__backup-text">
+                <span>Keep backups on Snooze</span>
+                <p>Backups keep ringing on schedule even after you snooze this alarm.</p>
+              </div>
+              <button
+                type="button"
+                className={`alarm__switch${backupPersistOnSnooze ? ' alarm__switch--on' : ''}`}
+                onClick={() => {
+                  hapticSelect();
+                  setBackupPersistOnSnooze((v) => !v);
+                }}
+                role="switch"
+                aria-checked={backupPersistOnSnooze}
+                aria-label="Toggle keeping backups after snooze"
+              >
+                <span className="alarm__switch-knob" />
+              </button>
             </div>
-            <button
-              type="button"
-              className={`alarm__switch${backupPersistOnDismiss ? ' alarm__switch--on' : ''}`}
-              onClick={() => {
-                hapticSelect();
-                setBackupPersistOnDismiss((v) => !v);
-              }}
-              role="switch"
-              aria-checked={backupPersistOnDismiss}
-              aria-label="Toggle keeping backups after dismiss or snooze"
-            >
-              <span className="alarm__switch-knob" />
-            </button>
-          </div>
+
+            <div className="alarm-editor__backup-row alarm-editor__backup-row--persist">
+              <div className="alarm-editor__backup-text">
+                <span>Keep backups on Stop</span>
+                <p>Backups keep ringing on schedule even after you stop/dismiss this alarm.</p>
+              </div>
+              <button
+                type="button"
+                className={`alarm__switch${backupPersistOnStop ? ' alarm__switch--on' : ''}`}
+                onClick={() => {
+                  hapticSelect();
+                  setBackupPersistOnStop((v) => !v);
+                }}
+                role="switch"
+                aria-checked={backupPersistOnStop}
+                aria-label="Toggle keeping backups after stop"
+              >
+                <span className="alarm__switch-knob" />
+              </button>
+            </div>
+          </>
         )}
 
         <button type="button" className="alarm-editor__save" onClick={handleSave}>

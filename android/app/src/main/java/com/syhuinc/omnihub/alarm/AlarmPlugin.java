@@ -73,7 +73,8 @@ public class AlarmPlugin extends Plugin {
         alarm.soundName = call.getString("soundName", null);
         alarm.backupEnabled = call.getBoolean("backupEnabled", false);
         alarm.backupOffsetsMin = parseBackupOffsets(call.getArray("backupOffsetsMin"));
-        alarm.backupPersistOnDismiss = call.getBoolean("backupPersistOnDismiss", false);
+        alarm.backupPersistOnSnooze = call.getBoolean("backupPersistOnSnooze", false);
+        alarm.backupPersistOnStop = call.getBoolean("backupPersistOnStop", false);
         alarm.createdAt = System.currentTimeMillis();
 
         AlarmStore.upsert(getContext(), alarm);
