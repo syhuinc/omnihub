@@ -6,6 +6,7 @@ import { EXPENSE_CATEGORIES } from './categories';
 import type { Expense } from './types';
 
 interface AddExpenseProps {
+  initialCategoryId?: string;
   onSave: (expense: Expense) => void;
   onClose: () => void;
 }
@@ -14,9 +15,9 @@ function todayISO(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
-export function AddExpense({ onSave, onClose }: AddExpenseProps) {
+export function AddExpense({ initialCategoryId, onSave, onClose }: AddExpenseProps) {
   const [amount, setAmount] = useState('');
-  const [categoryId, setCategoryId] = useState(EXPENSE_CATEGORIES[0].id);
+  const [categoryId, setCategoryId] = useState(initialCategoryId ?? EXPENSE_CATEGORIES[0].id);
   const [note, setNote] = useState('');
   const [dateISO, setDateISO] = useState(todayISO());
   const [error, setError] = useState('');
