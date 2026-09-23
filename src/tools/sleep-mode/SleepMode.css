@@ -5,6 +5,97 @@
   gap: 20px;
 }
 
+.sm__banner {
+  position: relative;
+  height: 120px;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: linear-gradient(160deg, #1b1240 0%, #2c1c5c 45%, #191033 100%);
+  box-shadow: var(--shadow-sm);
+}
+
+.sm__banner-stars span {
+  position: absolute;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 4px 1px rgba(255, 255, 255, 0.7);
+  opacity: 0.9;
+}
+
+.sm__banner-moon {
+  position: absolute;
+  top: 14px;
+  right: 22px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 35%, #fdfbff, #e4d9ff 60%, #b9a6f2 100%);
+  box-shadow: 0 0 24px 6px rgba(196, 170, 255, 0.55);
+}
+
+.sm__banner-cat {
+  position: absolute;
+  bottom: 10px;
+  left: 24px;
+  width: 46px;
+  height: 26px;
+}
+
+.sm__banner-cat-face {
+  position: absolute;
+  inset: 0;
+  border-radius: 50% 50% 46% 46%;
+  background: #171022;
+}
+
+.sm__banner-cat-eye {
+  position: absolute;
+  top: 40%;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--purple) 70%, white 10%);
+}
+
+.sm__banner-cat-eye--l {
+  left: 32%;
+}
+
+.sm__banner-cat-eye--r {
+  right: 32%;
+}
+
+.sm__banner-cat-ear {
+  position: absolute;
+  top: -8px;
+  width: 0;
+  height: 0;
+  border-left: 7px solid transparent;
+  border-right: 7px solid transparent;
+  border-bottom: 12px solid #171022;
+}
+
+.sm__banner-cat-ear--l {
+  left: 4px;
+  transform: rotate(-8deg);
+}
+
+.sm__banner-cat-ear--r {
+  right: 4px;
+  transform: rotate(8deg);
+}
+
+.sm__banner-tagline {
+  position: absolute;
+  bottom: 12px;
+  right: 16px;
+  margin: 0;
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.75);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+}
+
 .sm__hero {
   position: relative;
   display: flex;

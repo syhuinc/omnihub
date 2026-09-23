@@ -14,6 +14,18 @@ import type { RelationshipStatus } from '../../sleep-mode/plugin';
 import { PERSONALITY_META, RELATIONSHIP_OPTIONS, INTERVAL_OPTIONS_MIN } from './types';
 import './SleepMode.css';
 
+// Fixed positions so the star field doesn't reshuffle on every re-render.
+const BANNER_STARS = [
+  { top: 18, left: 12, size: 3 },
+  { top: 32, left: 28, size: 2 },
+  { top: 14, left: 46, size: 2 },
+  { top: 40, left: 58, size: 3 },
+  { top: 22, left: 72, size: 2 },
+  { top: 55, left: 20, size: 2 },
+  { top: 60, left: 82, size: 3 },
+  { top: 15, left: 88, size: 2 },
+];
+
 function formatTime(hour: number, minute: number): string {
   const period = hour >= 12 ? 'PM' : 'AM';
   const h12 = hour % 12 === 0 ? 12 : hour % 12;
@@ -128,6 +140,24 @@ export function SleepMode() {
       <ScreenHeader title="Sleep Mode" subtitle="Your bedtime companion" onBack={back} />
 
       <div className="sm__body">
+        <div className="sm__banner">
+          <span className="sm__banner-stars" aria-hidden="true">
+            {BANNER_STARS.map((s, i) => (
+              <span key={i} style={{ top: `${s.top}%`, left: `${s.left}%`, width: s.size, height: s.size }} />
+            ))}
+          </span>
+          <span className="sm__banner-moon" aria-hidden="true" />
+          <span className="sm__banner-cat" aria-hidden="true">
+            <span className="sm__banner-cat-ear sm__banner-cat-ear--l" />
+            <span className="sm__banner-cat-ear sm__banner-cat-ear--r" />
+            <span className="sm__banner-cat-face">
+              <span className="sm__banner-cat-eye sm__banner-cat-eye--l" />
+              <span className="sm__banner-cat-eye sm__banner-cat-eye--r" />
+            </span>
+          </span>
+          <p className="sm__banner-tagline">Better sleep. Brighter days.</p>
+        </div>
+
         <div className={`sm__hero${config.enabled ? ' sm__hero--active' : ''}`}>
           <span className="sm__hero-icon">
             <Icon name="moon" size={26} />
