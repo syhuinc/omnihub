@@ -17,9 +17,10 @@
 }
 
 .rg__tab--active {
-  background: var(--accent);
-  border-color: var(--accent);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 85%, white 10%), var(--accent));
+  border-color: transparent;
   color: #fff;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent), 0 3px 14px -4px color-mix(in srgb, var(--accent) 60%, transparent);
 }
 
 .rg__body {
@@ -37,10 +38,11 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
+  background: linear-gradient(160deg, var(--bg-elevated-2), var(--bg-elevated));
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
   padding: 12px 16px;
+  box-shadow: var(--shadow-sm);
 }
 
 .rg__stepper-label {
@@ -59,11 +61,12 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: var(--bg-active);
-  border: 1px solid var(--border-strong);
-  color: var(--text-primary);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 85%, white 10%), var(--accent));
+  border: none;
+  color: #fff;
   font-size: 16px;
   font-weight: 700;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent), 0 3px 12px -4px color-mix(in srgb, var(--accent) 60%, transparent);
 }
 
 .rg__stepper span {
@@ -83,7 +86,7 @@
 .dice-face {
   width: 64px;
   height: 64px;
-  background: var(--bg-elevated);
+  background: linear-gradient(160deg, var(--bg-elevated-2), var(--bg-elevated));
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
   display: grid;
@@ -91,6 +94,7 @@
   grid-template-rows: repeat(3, 1fr);
   padding: 10px;
   gap: 2px;
+  box-shadow: var(--shadow-sm);
 }
 
 .dice-face__pip {
@@ -123,7 +127,7 @@
   font-size: 56px;
   font-weight: 800;
   color: #1a1400;
-  box-shadow: 0 8px 20px rgba(234, 179, 8, 0.25);
+  box-shadow: 0 0 0 1px color-mix(in srgb, #eab308 40%, transparent), 0 10px 32px -6px rgba(234, 179, 8, 0.5);
   transition: transform 0.4s ease;
 }
 
@@ -157,15 +161,21 @@
 }
 
 .rg__range-field input {
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
+  background: linear-gradient(160deg, var(--bg-elevated-2), var(--bg-elevated));
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
   padding: 12px 14px;
   color: var(--text-primary);
   font-size: 18px;
   font-weight: 600;
   outline: none;
+  box-shadow: var(--shadow-sm);
   -moz-appearance: textfield;
+}
+
+.rg__range-field input:focus {
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  box-shadow: var(--shadow-sm), 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent);
 }
 
 .rg__range-field input::-webkit-outer-spin-button,
@@ -180,15 +190,17 @@
   font-weight: 800;
   color: var(--accent);
   padding: 20px 0;
+  text-shadow: 0 0 26px color-mix(in srgb, var(--accent) 45%, transparent);
 }
 
 .rg__action-btn {
   min-height: 52px;
   border-radius: var(--radius-pill);
-  background: var(--accent);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 85%, white 10%), var(--accent));
   color: #fff;
   font-size: 16px;
   font-weight: 700;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent), 0 4px 18px -4px color-mix(in srgb, var(--accent) 60%, transparent);
 }
 
 .rg__action-btn:disabled {
@@ -203,13 +215,19 @@
 .rg__add-input {
   flex: 1;
   min-width: 0;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
+  background: linear-gradient(160deg, var(--bg-elevated-2), var(--bg-elevated));
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-pill);
   padding: 12px 16px;
   color: var(--text-primary);
   font-size: 15px;
   outline: none;
+  box-shadow: var(--shadow-sm);
+}
+
+.rg__add-input:focus {
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  box-shadow: var(--shadow-sm), 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent);
 }
 
 .rg__add-btn {
@@ -217,11 +235,12 @@
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: var(--accent);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 85%, white 10%), var(--accent));
   color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent), 0 3px 14px -4px color-mix(in srgb, var(--accent) 60%, transparent);
 }
 
 .rg__empty {
@@ -246,17 +265,19 @@
   justify-content: space-between;
   gap: 8px;
   padding: 12px 14px;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
+  background: linear-gradient(160deg, var(--bg-elevated-2), var(--bg-elevated));
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
   font-size: 14px;
   color: var(--text-primary);
+  box-shadow: var(--shadow-sm);
 }
 
 .rg__item--winner {
   background: color-mix(in srgb, var(--green) 18%, transparent);
   border-color: var(--green);
   font-weight: 700;
+  box-shadow: 0 0 18px -6px color-mix(in srgb, var(--green) 55%, transparent);
 }
 
 .rg__item button {

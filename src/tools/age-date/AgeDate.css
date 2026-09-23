@@ -19,8 +19,9 @@
 }
 
 .ad__switch-btn--active {
-  background: var(--accent);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 85%, white 10%), var(--accent));
   color: #fff;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent), 0 3px 14px -4px color-mix(in srgb, var(--accent) 60%, transparent);
 }
 
 .ad__body {
@@ -47,13 +48,19 @@
 }
 
 .ad__date-input {
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
+  background: linear-gradient(160deg, var(--bg-elevated-2), var(--bg-elevated));
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
   padding: 14px 16px;
   color: var(--text-primary);
   font-size: 16px;
   outline: none;
+  box-shadow: var(--shadow-sm);
+}
+
+.ad__date-input:focus {
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  box-shadow: var(--shadow-sm), 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent);
 }
 
 .ad__error {
@@ -79,16 +86,18 @@
   flex-direction: column;
   align-items: center;
   gap: 4px;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
+  background: linear-gradient(160deg, color-mix(in srgb, var(--accent) 6%, var(--bg-elevated)), var(--bg-elevated));
+  border: 1px solid color-mix(in srgb, var(--accent) 25%, var(--border));
   border-radius: var(--radius-lg);
   padding: 18px 8px;
+  box-shadow: var(--shadow-sm);
 }
 
 .ad__age-unit strong {
   font-size: 32px;
   font-weight: 700;
   color: var(--accent);
+  text-shadow: 0 0 16px color-mix(in srgb, var(--accent) 40%, transparent);
 }
 
 .ad__age-unit span {
@@ -99,13 +108,14 @@
 }
 
 .ad__result {
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
+  background: linear-gradient(160deg, color-mix(in srgb, var(--green) 6%, var(--bg-elevated)), var(--bg-elevated));
+  border: 1px solid color-mix(in srgb, var(--green) 25%, var(--border));
   border-radius: var(--radius-lg);
   padding: 18px 20px;
   display: flex;
   flex-direction: column;
   gap: 12px;
+  box-shadow: 0 0 24px -10px color-mix(in srgb, var(--green) 40%, transparent);
 }
 
 .ad__result-row {
@@ -125,6 +135,7 @@
   font-size: 28px;
   font-weight: 700;
   color: var(--green);
+  text-shadow: 0 0 18px color-mix(in srgb, var(--green) 45%, transparent);
 }
 
 .ad__result-highlight--small {
@@ -149,21 +160,23 @@
 }
 
 .ad__shift-toggle--active {
-  background: var(--accent);
-  border-color: var(--accent);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 85%, white 10%), var(--accent));
+  border-color: transparent;
   color: #fff;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent), 0 3px 14px -4px color-mix(in srgb, var(--accent) 60%, transparent);
 }
 
 .ad__shift-input {
   width: 80px;
   text-align: center;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
+  background: linear-gradient(160deg, var(--bg-elevated-2), var(--bg-elevated));
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
   padding: 12px 8px;
   color: var(--text-primary);
   font-size: 18px;
   font-weight: 700;
+  box-shadow: var(--shadow-sm);
   -moz-appearance: textfield;
 }
 
