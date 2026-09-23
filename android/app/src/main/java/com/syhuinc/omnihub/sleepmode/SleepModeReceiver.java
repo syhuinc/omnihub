@@ -39,7 +39,15 @@ public class SleepModeReceiver extends BroadcastReceiver {
 
         long wakeMillis = SleepModeScheduler.wakeMillisForSession(data);
         if (now >= wakeMillis) {
-            // Session's over — don't speak, just re-arm tomorrow's bedtime and stop this loop.
+            // Session's over — record it for Sleep Insights, then re-arm tomorrow's bedtime.
+            if (data.sessionStartMillis > 0) {
+                SleepSession session = new SleepSession();
+                session.bedtimeScheduledMillis = data.sessionStartMillis;
+                session.wakeScheduledMillis = wakeMillis;
+                session.lastNagMillis = data.lastNagMillis;
+                session.nagCount = data.nagCount;
+                SleepModeStore.appendSession(context, session);
+            }
             SleepModeStore.save(context, data);
             SleepModeScheduler.armBedtime(context, data);
             return;
@@ -67,7 +75,8 @@ public class SleepModeReceiver extends BroadcastReceiver {
                 data.personality,
                 tier,
                 data.effectiveCallName(),
-                data.effectiveHasWorkTomorrow(),
+                data.effectiveWorkSchoolRoutine() != null,
+                data.effectiveInterests(),
                 formatWakeTime(data),
                 recentKeys
         );
@@ -81,6 +90,7 @@ public class SleepModeReceiver extends BroadcastReceiver {
         }
 
         data.nagCount += 1;
+        data.lastNagMillis = System.currentTimeMillis();
         recentKeys.add(pick.key);
         while (recentKeys.size() > MAX_RECENT_KEYS) {
             recentKeys.remove(recentKeys.iterator().next());

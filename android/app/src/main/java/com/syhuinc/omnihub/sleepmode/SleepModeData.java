@@ -23,13 +23,16 @@ public class SleepModeData {
 
     // Personal Mode fields — all optional, only read when mode == "personal"
     public String callName; // what Sleep Mode should call the user
-    public boolean hasWorkTomorrow;
+    public String workSchoolRoutine; // free text, e.g. "Morning shift (5AM - 3PM)"; non-empty = "has somewhere to be tomorrow"
     // "single" | "relationship" | "married" | "prefer-not"
     public String relationshipStatus;
+    public String interests; // free text, e.g. "Manga, Music, Games"
+    public String customNotes; // free text; stored for a future Sleep Mode AI pass, not yet used to alter messages
 
     // Nightly runtime state — reset each time a fresh bedtime session starts
     public long sessionStartMillis;
     public int nagCount;
+    public long lastNagMillis; // 0 if never nagged this session
     public String recentKeysCsv = ""; // last few MessageBank pick keys, comma-joined, for anti-repeat
 
     public SleepModeData() {}
@@ -45,10 +48,13 @@ public class SleepModeData {
         o.put("personality", personality);
         o.put("mode", mode);
         o.put("callName", callName == null ? JSONObject.NULL : callName);
-        o.put("hasWorkTomorrow", hasWorkTomorrow);
+        o.put("workSchoolRoutine", workSchoolRoutine == null ? JSONObject.NULL : workSchoolRoutine);
         o.put("relationshipStatus", relationshipStatus == null ? JSONObject.NULL : relationshipStatus);
+        o.put("interests", interests == null ? JSONObject.NULL : interests);
+        o.put("customNotes", customNotes == null ? JSONObject.NULL : customNotes);
         o.put("sessionStartMillis", sessionStartMillis);
         o.put("nagCount", nagCount);
+        o.put("lastNagMillis", lastNagMillis);
         o.put("recentKeysCsv", recentKeysCsv);
         return o;
     }
@@ -64,10 +70,13 @@ public class SleepModeData {
         d.personality = o.optString("personality", "friendly");
         d.mode = o.optString("mode", "normal");
         d.callName = o.isNull("callName") ? null : o.optString("callName", null);
-        d.hasWorkTomorrow = o.optBoolean("hasWorkTomorrow", false);
+        d.workSchoolRoutine = o.isNull("workSchoolRoutine") ? null : o.optString("workSchoolRoutine", null);
         d.relationshipStatus = o.isNull("relationshipStatus") ? null : o.optString("relationshipStatus", null);
+        d.interests = o.isNull("interests") ? null : o.optString("interests", null);
+        d.customNotes = o.isNull("customNotes") ? null : o.optString("customNotes", null);
         d.sessionStartMillis = o.optLong("sessionStartMillis", 0);
         d.nagCount = o.optInt("nagCount", 0);
+        d.lastNagMillis = o.optLong("lastNagMillis", 0);
         d.recentKeysCsv = o.optString("recentKeysCsv", "");
         return d;
     }
@@ -77,7 +86,15 @@ public class SleepModeData {
         return "personal".equals(mode) ? callName : null;
     }
 
-    public boolean effectiveHasWorkTomorrow() {
-        return "personal".equals(mode) && hasWorkTomorrow;
+    public String effectiveWorkSchoolRoutine() {
+        return "personal".equals(mode) && workSchoolRoutine != null && !workSchoolRoutine.trim().isEmpty()
+                ? workSchoolRoutine.trim()
+                : null;
+    }
+
+    public String effectiveInterests() {
+        return "personal".equals(mode) && interests != null && !interests.trim().isEmpty()
+                ? interests.trim()
+                : null;
     }
 }

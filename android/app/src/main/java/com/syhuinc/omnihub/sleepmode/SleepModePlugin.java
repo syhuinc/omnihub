@@ -34,8 +34,10 @@ public class SleepModePlugin extends Plugin {
         data.personality = call.getString("personality", "friendly");
         data.mode = call.getString("mode", "normal");
         data.callName = call.getString("callName", null);
-        data.hasWorkTomorrow = call.getBoolean("hasWorkTomorrow", false);
+        data.workSchoolRoutine = call.getString("workSchoolRoutine", null);
         data.relationshipStatus = call.getString("relationshipStatus", null);
+        data.interests = call.getString("interests", null);
+        data.customNotes = call.getString("customNotes", null);
 
         // A settings change always (re)starts scheduling from now, rather than trying to preserve
         // an in-progress nightly session's nag count/anti-repeat state across an edit.
@@ -75,13 +77,33 @@ public class SleepModePlugin extends Plugin {
         String personality = call.getString("personality", "friendly");
         int tier = call.getInt("tier", 0);
         String callName = call.getString("callName", null);
-        boolean hasWorkTomorrow = call.getBoolean("hasWorkTomorrow", false);
+        String workSchoolRoutine = call.getString("workSchoolRoutine", null);
+        String interests = call.getString("interests", null);
+        boolean hasWorkTomorrow = workSchoolRoutine != null && !workSchoolRoutine.trim().isEmpty();
 
         MessageBank.Pick pick = MessageBank.pick(
-                personality, tier, callName, hasWorkTomorrow, null, java.util.Collections.emptySet());
+                personality, tier, callName, hasWorkTomorrow, interests, null, java.util.Collections.emptySet());
 
         JSObject ret = new JSObject();
         ret.put("text", pick.text);
+        call.resolve(ret);
+    }
+
+    /** Recent completed nights, for Sleep Insights — real measured data only, never fabricated. */
+    @PluginMethod
+    public void getHistory(PluginCall call) {
+        java.util.List<SleepSession> history = SleepModeStore.loadHistory(getContext());
+        com.getcapacitor.JSArray arr = new com.getcapacitor.JSArray();
+        try {
+            for (SleepSession s : history) {
+                arr.put(new JSObject(s.toJson().toString()));
+            }
+        } catch (JSONException e) {
+            call.reject("Failed to read Sleep Mode history", e);
+            return;
+        }
+        JSObject ret = new JSObject();
+        ret.put("sessions", arr);
         call.resolve(ret);
     }
 

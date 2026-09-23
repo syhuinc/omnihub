@@ -86,7 +86,9 @@ export type IconName =
   | 'power'
   | 'battery'
   | 'zap'
-  | 'package';
+  | 'package'
+  | 'pause'
+  | 'volume';
 
 interface IconProps {
   name: IconName;
@@ -218,6 +220,8 @@ const paths: Record<IconName, React.ReactNode> = {
   ),
   play: <path d="M7 4.5v15l13-7.5Z" />,
   stop: <path d="M6 6h12v12H6Z" />,
+  pause: <path d="M7 5h4v14H7Z M13 5h4v14h-4Z" />,
+  volume: <path d="M4 9v6h4l5 4V5L8 9Z M16.5 9a4 4 0 0 1 0 6" />,
   music: (
     <path d="M9 18V5l11-2v13 M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z M20 16a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
   ),

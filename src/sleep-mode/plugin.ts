@@ -17,12 +17,23 @@ export interface SleepModeConfig {
   personality: SleepPersonality;
   mode: SleepModeMode;
   callName?: string | null;
-  hasWorkTomorrow?: boolean;
+  workSchoolRoutine?: string | null;
   relationshipStatus?: RelationshipStatus | null;
+  interests?: string | null;
+  customNotes?: string | null;
 }
 
 export interface SleepModeStatus extends SleepModeConfig {
   sessionStartMillis: number;
+  nagCount: number;
+}
+
+/** One completed night. Real, measured data only — never fabricated. */
+export interface SleepSession {
+  bedtimeScheduledMillis: number;
+  wakeScheduledMillis: number;
+  /** 0 if the screen was never caught on — the honest reading is "never nagged." */
+  lastNagMillis: number;
   nagCount: number;
 }
 
@@ -33,9 +44,11 @@ export interface SleepModePluginInterface {
     personality: SleepPersonality;
     tier?: number;
     callName?: string | null;
-    hasWorkTomorrow?: boolean;
+    workSchoolRoutine?: string | null;
+    interests?: string | null;
   }): Promise<{ text: string }>;
   speakTest(options: { text: string }): Promise<void>;
+  getHistory(): Promise<{ sessions: SleepSession[] }>;
   checkNotificationPermission(): Promise<{ granted: boolean }>;
   requestNotificationPermission(): Promise<{ granted: boolean }>;
   checkExactAlarmPermission(): Promise<{ granted: boolean }>;
@@ -52,8 +65,10 @@ export const DEFAULT_SLEEP_MODE_CONFIG: SleepModeConfig = {
   personality: 'friendly',
   mode: 'normal',
   callName: null,
-  hasWorkTomorrow: false,
+  workSchoolRoutine: null,
   relationshipStatus: null,
+  interests: null,
+  customNotes: null,
 };
 
 // A handful of sample lines per personality, only for the web preview's "hear a sample" button —
@@ -67,8 +82,27 @@ const WEB_PREVIEW_MESSAGES: Record<SleepPersonality, string[]> = {
   savage: ["It's bedtime. Don't make this weird.", 'Still up? Bold choice.'],
 };
 
+// Deterministic sample history, only so the web preview has something to render — the real device
+// path (SleepModeStore.loadHistory) starts empty and only ever holds genuinely completed nights.
+function buildWebPreviewHistory(): SleepSession[] {
+  const sessions: SleepSession[] = [];
+  const now = Date.now();
+  for (let i = 6; i >= 0; i--) {
+    const bedtime = now - i * 86_400_000 - 6 * 3_600_000;
+    const nagCount = i % 3;
+    sessions.push({
+      bedtimeScheduledMillis: bedtime,
+      wakeScheduledMillis: bedtime + 8.5 * 3_600_000,
+      lastNagMillis: nagCount > 0 ? bedtime + nagCount * 20 * 60_000 : 0,
+      nagCount,
+    });
+  }
+  return sessions;
+}
+
 class SleepModePluginWeb extends WebPlugin implements SleepModePluginInterface {
   private state: SleepModeStatus = { ...DEFAULT_SLEEP_MODE_CONFIG, sessionStartMillis: 0, nagCount: 0 };
+  private history: SleepSession[] = buildWebPreviewHistory();
 
   async configure(options: SleepModeConfig): Promise<{ armed: boolean }> {
     this.state = { ...options, sessionStartMillis: 0, nagCount: 0 };
@@ -97,6 +131,10 @@ class SleepModePluginWeb extends WebPlugin implements SleepModePluginInterface {
     } catch {
       // speechSynthesis unsupported in this browser — silently no-op
     }
+  }
+
+  async getHistory(): Promise<{ sessions: SleepSession[] }> {
+    return { sessions: this.history };
   }
 
   async checkNotificationPermission(): Promise<{ granted: boolean }> {

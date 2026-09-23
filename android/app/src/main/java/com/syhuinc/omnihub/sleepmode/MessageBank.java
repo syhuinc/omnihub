@@ -26,6 +26,8 @@ public class MessageBank {
     private static final String[][] WORK_TOMORROW = new String[5][];
     // [personality] -> bonus lines mixed in once a wake time is known (tier >= 1 only), uses {wakeTime}
     private static final String[][] WAKE_PROXIMITY = new String[5][];
+    // [personality] -> bonus lines mixed in when Interests is set (tier >= 1 only), uses {interests}
+    private static final String[][] INTERESTS = new String[5][];
 
     private static int idx(String personality) {
         for (int i = 0; i < PERSONALITIES.length; i++) {
@@ -80,6 +82,10 @@ public class MessageBank {
                 "Your {wakeTime} alarm will be here before you know it.",
                 "You did want to be up by {wakeTime}, remember?",
         };
+        INTERESTS[0] = new String[] {
+                "Even {interests} can wait until you've had some rest.",
+                "There'll be more time for {interests} tomorrow, once you've slept.",
+        };
 
         // FRIENDLY
         GENERIC[1][0] = new String[] {
@@ -125,6 +131,10 @@ public class MessageBank {
         WAKE_PROXIMITY[1] = new String[] {
                 "Your {wakeTime} wake-up is getting closer, you know.",
                 "{wakeTime} is going to come around fast.",
+        };
+        INTERESTS[1] = new String[] {
+                "{interests} will still be there tomorrow, promise!",
+                "You can go back to {interests} after some sleep!",
         };
 
         // TEASING
@@ -172,6 +182,10 @@ public class MessageBank {
                 "Your {wakeTime} alarm is getting closer. Just saying.",
                 "Hope you like being tired, because {wakeTime} waits for no one.",
         };
+        INTERESTS[2] = new String[] {
+                "{interests}, at this hour? Bold.",
+                "Even your {interests} arc has a bedtime, you know.",
+        };
 
         // STRICT
         GENERIC[3][0] = new String[] {
@@ -217,6 +231,10 @@ public class MessageBank {
         WAKE_PROXIMITY[3] = new String[] {
                 "Your {wakeTime} alarm is not going to feel sorry for you.",
                 "{wakeTime} is coming. Sleep is not optional.",
+        };
+        INTERESTS[3] = new String[] {
+                "{interests} is not a reason to stay up. Sleep. Now.",
+                "Put {interests} down. This is not up for discussion.",
         };
 
         // SAVAGE
@@ -264,6 +282,10 @@ public class MessageBank {
                 "Your {wakeTime} alarm is going to have zero sympathy for you.",
                 "{wakeTime} is closer than your last decision-making skills.",
         };
+        INTERESTS[4] = new String[] {
+                "{interests} isn't going anywhere. Your sleep schedule already has.",
+                "Bold of {interests} to think it's more important than your sleep right now.",
+        };
     }
 
     public static class Pick {
@@ -286,6 +308,7 @@ public class MessageBank {
             int tier,
             String displayName,
             boolean hasWorkTomorrow,
+            String interests,
             String wakeTimeLabel,
             Set<String> recentKeys
     ) {
@@ -310,6 +333,11 @@ public class MessageBank {
             pools.add(WAKE_PROXIMITY[p]);
             prefixes.add("k");
         }
+        boolean hasInterests = interests != null && !interests.trim().isEmpty();
+        if (t >= 1 && hasInterests && INTERESTS[p] != null) {
+            pools.add(INTERESTS[p]);
+            prefixes.add("i");
+        }
 
         List<String> candidateKeys = new ArrayList<>();
         List<String> candidateTexts = new ArrayList<>();
@@ -330,7 +358,8 @@ public class MessageBank {
 
         String text = candidateTexts.get(chosen)
                 .replace("{name}", displayName == null ? "" : displayName.trim())
-                .replace("{wakeTime}", wakeTimeLabel == null ? "" : wakeTimeLabel);
+                .replace("{wakeTime}", wakeTimeLabel == null ? "" : wakeTimeLabel)
+                .replace("{interests}", interests == null ? "" : interests.trim());
         return new Pick(text, candidateKeys.get(chosen));
     }
 

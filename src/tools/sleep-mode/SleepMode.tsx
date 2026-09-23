@@ -1,17 +1,18 @@
-import { useEffect, useState, type CSSProperties } from 'react';
+import { useEffect, useState } from 'react';
 import { ScreenHeader } from '../../components/ScreenHeader';
 import { Icon } from '../../components/Icon';
 import { useRouter } from '../../app/Router';
-import { hapticSelect, hapticTap, hapticWarning } from '../../haptics';
+import { hapticSelect, hapticWarning } from '../../haptics';
 import { WheelTimePicker } from '../alarm/WheelTimePicker';
-import {
-  SleepModePlugin,
-  DEFAULT_SLEEP_MODE_CONFIG,
-  type SleepModeConfig,
-  type SleepPersonality,
-} from '../../sleep-mode/plugin';
-import type { RelationshipStatus } from '../../sleep-mode/plugin';
-import { PERSONALITY_META, RELATIONSHIP_OPTIONS, INTERVAL_OPTIONS_MIN } from './types';
+import { SleepModePlugin, DEFAULT_SLEEP_MODE_CONFIG, type SleepModeConfig } from '../../sleep-mode/plugin';
+import { INTERVAL_OPTIONS_MIN } from './types';
+import { AiPersonalityScreen } from './AiPersonalityScreen';
+import { PersonalizationScreen } from './PersonalizationScreen';
+import { ReminderExampleScreen } from './ReminderExampleScreen';
+import { WindDownMode } from './WindDownMode';
+import { SleepSounds } from './SleepSounds';
+import { SleepInsights } from './SleepInsights';
+import { SleepModePro } from './SleepModePro';
 import './SleepMode.css';
 
 // Fixed positions so the star field doesn't reshuffle on every re-render.
@@ -33,14 +34,32 @@ function formatTime(hour: number, minute: number): string {
 }
 
 type TimeField = 'bedtime' | 'wake';
+type SubScreen = 'main' | 'ai-personality' | 'personalization' | 'reminder-example' | 'wind-down' | 'sleep-sounds' | 'sleep-insights' | 'pro';
+
+interface MenuRow {
+  screen: SubScreen;
+  icon: string;
+  label: string;
+  desc: string;
+  badge?: 'pro';
+}
+
+const MENU_ROWS: MenuRow[] = [
+  { screen: 'ai-personality', icon: 'user', label: 'AI Personality', desc: 'Choose how you want to be reminded' },
+  { screen: 'personalization', icon: 'settings', label: 'Personalization', desc: 'Make your sleep companion more you' },
+  { screen: 'reminder-example', icon: 'note', label: 'Reminder Example', desc: 'See different messages in action' },
+  { screen: 'wind-down', icon: 'moon', label: 'Wind-Down Mode', desc: 'Relax before you get in bed' },
+  { screen: 'sleep-sounds', icon: 'music', label: 'Sleep Sounds', desc: 'Ambient sounds to help you sleep' },
+  { screen: 'sleep-insights', icon: 'trending-up', label: 'Sleep Insights', desc: 'Your real Sleep Mode history' },
+  { screen: 'pro', icon: 'crown', label: 'Sleep Mode Pro', desc: 'Take it to the next level', badge: 'pro' },
+];
 
 export function SleepMode() {
   const { back } = useRouter();
   const [config, setConfig] = useState<SleepModeConfig>(DEFAULT_SLEEP_MODE_CONFIG);
   const [timeSheet, setTimeSheet] = useState<TimeField | null>(null);
-  const [sampleText, setSampleText] = useState<string | null>(null);
-  const [sampleLoading, setSampleLoading] = useState(false);
   const [needsExactAlarmPermission, setNeedsExactAlarmPermission] = useState(false);
+  const [screen, setScreen] = useState<SubScreen>('main');
 
   useEffect(() => {
     SleepModePlugin.status()
@@ -97,42 +116,31 @@ export function SleepMode() {
     );
   }
 
-  function selectPersonality(id: SleepPersonality) {
-    hapticSelect();
-    persist({ ...config, personality: id });
-  }
-
-  function selectMode(mode: 'normal' | 'personal') {
-    hapticSelect();
-    persist({ ...config, mode });
-  }
-
   function selectInterval(min: number) {
     hapticSelect();
     persist({ ...config, intervalMin: min });
   }
 
-  function selectRelationship(id: RelationshipStatus) {
-    hapticSelect();
-    persist({ ...config, relationshipStatus: config.relationshipStatus === id ? null : id });
+  if (screen === 'ai-personality') {
+    return <AiPersonalityScreen config={config} onBack={() => setScreen('main')} onPersist={persist} />;
   }
-
-  async function hearSample() {
-    hapticTap();
-    setSampleLoading(true);
-    try {
-      const { text } = await SleepModePlugin.previewMessage({
-        personality: config.personality,
-        callName: config.mode === 'personal' ? config.callName : null,
-        hasWorkTomorrow: config.mode === 'personal' ? config.hasWorkTomorrow : false,
-      });
-      setSampleText(text);
-      await SleepModePlugin.speakTest({ text });
-    } catch {
-      // web fallback / unsupported platform — nothing more we can do
-    } finally {
-      setSampleLoading(false);
-    }
+  if (screen === 'personalization') {
+    return <PersonalizationScreen config={config} onBack={() => setScreen('main')} onPersist={persist} />;
+  }
+  if (screen === 'reminder-example') {
+    return <ReminderExampleScreen onBack={() => setScreen('main')} />;
+  }
+  if (screen === 'wind-down') {
+    return <WindDownMode onBack={() => setScreen('main')} onOpenSounds={() => setScreen('sleep-sounds')} />;
+  }
+  if (screen === 'sleep-sounds') {
+    return <SleepSounds onBack={() => setScreen('main')} />;
+  }
+  if (screen === 'sleep-insights') {
+    return <SleepInsights onBack={() => setScreen('main')} />;
+  }
+  if (screen === 'pro') {
+    return <SleepModePro onBack={() => setScreen('main')} />;
   }
 
   return (
@@ -240,122 +248,32 @@ export function SleepMode() {
         </section>
 
         <section className="sm__section">
-          <div className="sm__section-header">
-            <h2>
-              <Icon name="user" size={13} />
-              Personality
-            </h2>
-            <span className="sm__section-hint">Choose how you want to be reminded</span>
-          </div>
-          <div className="sm__personality-list">
-            {PERSONALITY_META.map((p) => (
+          <h2>More</h2>
+          <div className="sm__menu-list">
+            {MENU_ROWS.map((row) => (
               <button
-                key={p.id}
+                key={row.screen}
                 type="button"
-                className={`sm__personality${config.personality === p.id ? ' sm__personality--active' : ''}`}
-                onClick={() => selectPersonality(p.id)}
+                className="sm__menu-row"
+                onClick={() => {
+                  hapticSelect();
+                  setScreen(row.screen);
+                }}
               >
-                <span className="sm__personality-emoji" style={{ '--emoji-color': p.color } as CSSProperties}>
-                  {p.emoji}
+                <span className="sm__menu-icon">
+                  <Icon name={row.icon as never} size={17} />
                 </span>
-                <span className="sm__personality-info">
-                  <span className="sm__personality-label">{p.label}</span>
-                  <span className="sm__personality-desc">{p.description}</span>
+                <span className="sm__menu-text">
+                  <span className="sm__menu-label-row">
+                    <strong>{row.label}</strong>
+                    {row.badge === 'pro' && <span className="sm__badge sm__badge--pro">PRO</span>}
+                  </span>
+                  <span>{row.desc}</span>
                 </span>
-                <span className="sm__radio" aria-hidden="true" />
+                <Icon name="chevron-right" size={16} className="sm__time-chevron" />
               </button>
             ))}
           </div>
-          <button type="button" className="sm__sample-btn" onClick={hearSample} disabled={sampleLoading}>
-            <Icon name="activity" size={16} />
-            {sampleLoading ? 'Loading…' : 'Hear a sample'}
-            <Icon name="chevron-right" size={14} />
-          </button>
-          {sampleText && (
-            <div className="sm__sample-bubble">
-              <span className="sm__sample-avatar">🐈‍⬛</span>
-              <p className="sm__sample-text">{sampleText}</p>
-              <span className="sm__sample-wave" aria-hidden="true">
-                <span />
-                <span />
-                <span />
-              </span>
-            </div>
-          )}
-        </section>
-
-        <section className="sm__section">
-          <h2>
-            <Icon name="settings" size={13} />
-            Personalization
-          </h2>
-          <div className="sm__mode-cards">
-            <button
-              type="button"
-              className={`sm__mode-card${config.mode === 'normal' ? ' sm__mode-card--active' : ''}`}
-              onClick={() => selectMode('normal')}
-            >
-              <span className="sm__mode-card-icon">
-                <Icon name="clock" size={18} />
-              </span>
-              <strong>Normal</strong>
-              <span>General bedtime reminders</span>
-            </button>
-            <button
-              type="button"
-              className={`sm__mode-card${config.mode === 'personal' ? ' sm__mode-card--active' : ''}`}
-              onClick={() => selectMode('personal')}
-            >
-              <span className="sm__mode-card-icon">
-                <Icon name="user" size={18} />
-              </span>
-              <strong>Personal</strong>
-              <span>Uses your information for a more personal experience</span>
-            </button>
-          </div>
-
-          {config.mode === 'personal' && (
-            <div className="sm__personal-fields">
-              <label className="sm__field">
-                <span>What should Sleep Mode call you?</span>
-                <input
-                  type="text"
-                  placeholder="Optional"
-                  value={config.callName ?? ''}
-                  onChange={(e) => persist({ ...config, callName: e.target.value || null })}
-                  maxLength={24}
-                />
-              </label>
-
-              <div className="sm__field-row">
-                <span>Work or school tomorrow?</span>
-                <button
-                  type="button"
-                  className={`sm__switch sm__switch--small${config.hasWorkTomorrow ? ' sm__switch--on' : ''}`}
-                  onClick={() => persist({ ...config, hasWorkTomorrow: !config.hasWorkTomorrow })}
-                  aria-label="Toggle work or school tomorrow"
-                >
-                  <span className="sm__switch-knob" />
-                </button>
-              </div>
-
-              <div className="sm__field">
-                <span>Relationship status</span>
-                <div className="sm__chip-row sm__chip-row--wrap">
-                  {RELATIONSHIP_OPTIONS.map((r) => (
-                    <button
-                      key={r.id}
-                      type="button"
-                      className={`sm__chip${config.relationshipStatus === r.id ? ' sm__chip--active' : ''}`}
-                      onClick={() => selectRelationship(r.id)}
-                    >
-                      {r.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
         </section>
       </div>
 
