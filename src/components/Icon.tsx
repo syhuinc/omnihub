@@ -71,7 +71,9 @@ export type IconName =
   | 'mug'
   | 'run'
   | 'pot'
-  | 'flag';
+  | 'flag'
+  | 'coins'
+  | 'list-bullet';
 
 interface IconProps {
   name: IconName;
@@ -277,6 +279,15 @@ const paths: Record<IconName, React.ReactNode> = {
     <path d="M3 11h18M5 11v5a4 4 0 0 0 4 4h6a4 4 0 0 0 4-4v-5M2 8.5h2m16 0h2M12 8.5V4" />
   ),
   flag: <path d="M6 3v18 M6 4h11l-2.5 3.5L17 11H6" />,
+  coins: (
+    <>
+      <circle cx="9" cy="9" r="6" />
+      <path d="M10.5 15.5A6 6 0 1 0 8.5 3.6" />
+    </>
+  ),
+  'list-bullet': (
+    <path d="M9 6h11M9 12h11M9 18h11 M4.5 6h.01M4.5 12h.01M4.5 18h.01" />
+  ),
 };
 
 export function Icon({ name, size = 20, strokeWidth = 2, className, style }: IconProps) {

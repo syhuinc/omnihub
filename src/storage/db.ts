@@ -24,6 +24,7 @@ export const StorageKeys = {
   compassSettings: `${PREFIX}compass.settings`,
   timerHistory: `${PREFIX}timer.history`,
   stopwatchHistory: `${PREFIX}stopwatch.history`,
+  diceRollHistory: `${PREFIX}random.diceHistory`,
 } as const;
 
 export function storageGet<T>(key: string, fallback: T): T {
