@@ -15,9 +15,15 @@ interface AiPersonalityScreenProps {
 export function AiPersonalityScreen({ config, onBack, onPersist }: AiPersonalityScreenProps) {
   const [sampleText, setSampleText] = useState<string | null>(null);
   const [sampleLoading, setSampleLoading] = useState(false);
+  const [comingSoonId, setComingSoonId] = useState<string | null>(null);
 
-  function selectPersonality(id: SleepPersonality) {
+  function selectPersonality(id: SleepPersonality | 'custom') {
     hapticSelect();
+    if (id === 'custom') {
+      setComingSoonId('custom');
+      return;
+    }
+    setComingSoonId(null);
     onPersist({ ...config, personality: id });
   }
 
@@ -41,7 +47,7 @@ export function AiPersonalityScreen({ config, onBack, onPersist }: AiPersonality
 
   return (
     <div className="screen">
-      <ScreenHeader title="AI Personality" subtitle="Choose how you want to be reminded" onBack={onBack} />
+      <ScreenHeader title="AI Personalities" subtitle="Choose how your Sleep Mode AI talks to you" onBack={onBack} />
 
       <div className="sm__body">
         <div className="sm__personality-list">
@@ -53,7 +59,7 @@ export function AiPersonalityScreen({ config, onBack, onPersist }: AiPersonality
               onClick={() => selectPersonality(p.id)}
             >
               <span className="sm__personality-emoji" style={{ '--emoji-color': p.color } as CSSProperties}>
-                <img src={p.image} alt="" />
+                {p.image ? <img src={p.image} alt="" /> : <Icon name={(p.icon ?? 'user') as never} size={18} />}
               </span>
               <span className="sm__personality-info">
                 <span className="sm__personality-label-row">
@@ -63,6 +69,7 @@ export function AiPersonalityScreen({ config, onBack, onPersist }: AiPersonality
                   </span>
                 </span>
                 <span className="sm__personality-desc">{p.description}</span>
+                {comingSoonId === p.id && <span className="sm__personality-soon">Coming soon — not built yet</span>}
               </span>
               <span className="sm__radio" aria-hidden="true" />
             </button>
@@ -92,8 +99,9 @@ export function AiPersonalityScreen({ config, onBack, onPersist }: AiPersonality
         )}
 
         <p className="sm__pro-note">
-          Strict and Savage are marked Pro to match what's coming, but they work today — Sleep Mode
-          Pro billing isn't live yet, so nothing here is actually locked.
+          All personalities are marked Pro to match what's coming, but Gentle through Savage work
+          today — Sleep Mode Pro billing isn't live yet, so nothing here is actually locked. Custom
+          is the one exception: it's a preview of what's next, not something you can use yet.
         </p>
       </div>
     </div>

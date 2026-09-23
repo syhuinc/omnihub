@@ -2,21 +2,25 @@ import type { SleepPersonality, RelationshipStatus } from '../../sleep-mode/plug
 import { PERSONALITY_IMAGES, SOUND_IMAGES } from '../../assets/sleep-mode';
 
 export interface PersonalityMeta {
-  id: SleepPersonality;
+  id: SleepPersonality | 'custom';
   label: string;
   description: string;
   emoji: string;
-  image: string;
+  image?: string;
+  icon?: string;
   color: string;
   pro: boolean;
+  /** True for the placeholder "Custom" row — not a real, selectable personality yet. */
+  comingSoon?: boolean;
 }
 
 export const PERSONALITY_META: PersonalityMeta[] = [
-  { id: 'gentle', label: 'Gentle', description: 'Soft, caring nudges', emoji: '🍃', image: PERSONALITY_IMAGES.gentle, color: 'var(--green)', pro: false },
-  { id: 'friendly', label: 'Friendly', description: 'Casual, upbeat check-ins', emoji: '😊', image: PERSONALITY_IMAGES.friendly, color: 'var(--yellow)', pro: false },
-  { id: 'teasing', label: 'Teasing', description: 'Playful ribbing', emoji: '😆', image: PERSONALITY_IMAGES.teasing, color: 'var(--orange)', pro: false },
+  { id: 'gentle', label: 'Gentle', description: 'Soft, caring nudges', emoji: '🍃', image: PERSONALITY_IMAGES.gentle, color: 'var(--green)', pro: true },
+  { id: 'friendly', label: 'Friendly', description: 'Casual, upbeat check-ins', emoji: '😊', image: PERSONALITY_IMAGES.friendly, color: 'var(--yellow)', pro: true },
+  { id: 'teasing', label: 'Teasing', description: 'Playful ribbing', emoji: '😆', image: PERSONALITY_IMAGES.teasing, color: 'var(--orange)', pro: true },
   { id: 'strict', label: 'Strict', description: 'Firm, no-nonsense', emoji: '🛡️', image: PERSONALITY_IMAGES.strict, color: 'var(--blue)', pro: true },
   { id: 'savage', label: 'Savage', description: 'Sharp roasts, all in fun', emoji: '🔥', image: PERSONALITY_IMAGES.savage, color: 'var(--red)', pro: true },
+  { id: 'custom', label: 'Custom', description: 'Create your own AI personality', emoji: '🎨', icon: 'palette', color: 'var(--purple)', pro: true, comingSoon: true },
 ];
 
 export interface RelationshipOption {
@@ -61,12 +65,13 @@ export const SOUND_FILTERS: { id: 'all' | SoundMeta['category']; label: string }
 export interface WindDownAction {
   id: string;
   label: string;
+  shortLabel: string;
   icon: string;
 }
 
 export const WIND_DOWN_ACTIONS: WindDownAction[] = [
-  { id: 'sounds', label: 'Relaxing Sounds', icon: 'music' },
-  { id: 'breathing', label: 'Breathing Exercise', icon: 'activity' },
-  { id: 'dim', label: 'Screen Dim', icon: 'sun' },
-  { id: 'focus', label: 'Focus Mode', icon: 'moon' },
+  { id: 'sounds', label: 'Relaxing Sounds', shortLabel: 'Sounds', icon: 'music' },
+  { id: 'breathing', label: 'Breathing Exercise', shortLabel: 'Breathing', icon: 'activity' },
+  { id: 'dim', label: 'Screen Dim', shortLabel: 'Screen Dim', icon: 'sun' },
+  { id: 'focus', label: 'Focus Mode', shortLabel: 'Focus Mode', icon: 'moon' },
 ];

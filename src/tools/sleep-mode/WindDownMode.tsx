@@ -2,12 +2,14 @@ import { useEffect, useRef, useState } from 'react';
 import { ScreenHeader } from '../../components/ScreenHeader';
 import { Icon } from '../../components/Icon';
 import { hapticSelect, hapticTap, hapticSuccess } from '../../haptics';
-import { WIND_DOWN_ACTIONS } from './types';
+import { WIND_DOWN_ACTIONS, SLEEP_SOUNDS, SOUND_FILTERS } from './types';
+import * as audioEngine from './audioEngine';
 import './SleepMode.css';
 
 interface WindDownModeProps {
   onBack: () => void;
-  onOpenSounds: () => void;
+  autoStart?: boolean;
+  initialAction?: string;
 }
 
 const DURATION_MS = 30 * 60 * 1000;
@@ -22,12 +24,15 @@ function formatClock(ms: number): string {
   return `${m}:${s.toString().padStart(2, '0')}`;
 }
 
-export function WindDownMode({ onBack, onOpenSounds }: WindDownModeProps) {
+export function WindDownMode({ onBack, autoStart, initialAction }: WindDownModeProps) {
   const [running, setRunning] = useState(false);
   const [remaining, setRemaining] = useState(DURATION_MS);
   const [breathingOpen, setBreathingOpen] = useState(false);
   const [dimOn, setDimOn] = useState(false);
   const [focusOn, setFocusOn] = useState(false);
+  const [filter, setFilter] = useState<(typeof SOUND_FILTERS)[number]['id']>('all');
+  const [playingId, setPlayingId] = useState<string | null>(null);
+  const [volume, setVolume] = useState(0.5);
   const endAtRef = useRef(0);
 
   useEffect(() => {
@@ -48,6 +53,16 @@ export function WindDownMode({ onBack, onOpenSounds }: WindDownModeProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [running]);
 
+  useEffect(() => () => audioEngine.stopSound(), []);
+
+  useEffect(() => {
+    if (autoStart) setRunning(true);
+    if (initialAction === 'breathing') setBreathingOpen(true);
+    if (initialAction === 'dim') setDimOn(true);
+    if (initialAction === 'focus') setFocusOn(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   function toggleRunning() {
     hapticTap();
     if (running) {
@@ -60,17 +75,33 @@ export function WindDownMode({ onBack, onOpenSounds }: WindDownModeProps) {
 
   function handleAction(id: string) {
     hapticSelect();
-    if (id === 'sounds') onOpenSounds();
     if (id === 'breathing') setBreathingOpen(true);
     if (id === 'dim') setDimOn(true);
     if (id === 'focus') setFocusOn((v) => !v);
   }
 
+  function togglePlay(id: string) {
+    hapticTap();
+    if (playingId === id) {
+      audioEngine.stopSound();
+      setPlayingId(null);
+    } else {
+      audioEngine.playSound(id as never, volume);
+      setPlayingId(id);
+    }
+  }
+
+  function handleVolume(v: number) {
+    setVolume(v);
+    audioEngine.setVolume(v);
+  }
+
   const fraction = remaining / DURATION_MS;
+  const visibleSounds = SLEEP_SOUNDS.filter((s) => filter === 'all' || s.category === filter);
 
   return (
     <div className="screen">
-      <ScreenHeader title="Wind-Down Mode" subtitle="Time to relax and prepare for sleep" onBack={onBack} />
+      <ScreenHeader title="Wind-Down" subtitle="Relax your mind and prepare for sleep" onBack={onBack} />
 
       <div className="sm__body sm__body--center">
         <div className="wd__ring-wrap">
@@ -97,7 +128,7 @@ export function WindDownMode({ onBack, onOpenSounds }: WindDownModeProps) {
 
         <div className="wd__actions">
           {WIND_DOWN_ACTIONS.map((a) => {
-            const active = (a.id === 'dim' && dimOn) || (a.id === 'focus' && focusOn);
+            const active = (a.id === 'dim' && dimOn) || (a.id === 'focus' && focusOn) || (a.id === 'sounds' && !!playingId);
             return (
               <button
                 key={a.id}
@@ -116,6 +147,55 @@ export function WindDownMode({ onBack, onOpenSounds }: WindDownModeProps) {
           <Icon name={running ? 'stop' : 'play'} size={18} />
           {running ? 'Stop Wind-Down' : 'Start Wind-Down'}
         </button>
+
+        <section className="sm__section wd__sounds-section">
+          <h2>Choose a sound</h2>
+          <div className="sm__chip-row">
+            {SOUND_FILTERS.map((f) => (
+              <button
+                key={f.id}
+                type="button"
+                className={`sm__chip${filter === f.id ? ' sm__chip--active' : ''}`}
+                onClick={() => {
+                  hapticSelect();
+                  setFilter(f.id);
+                }}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="ss__grid">
+            {visibleSounds.map((s) => (
+              <button
+                key={s.id}
+                type="button"
+                className={`ss__card${playingId === s.id ? ' ss__card--playing' : ''}`}
+                onClick={() => togglePlay(s.id)}
+              >
+                <img className="ss__card-image" src={s.image} alt="" />
+                <span className="ss__card-play">
+                  <Icon name={playingId === s.id ? 'pause' : 'play'} size={16} />
+                </span>
+                <span className="ss__card-label">{s.label}</span>
+              </button>
+            ))}
+          </div>
+
+          <div className="ss__volume-row">
+            <Icon name="volume" size={18} />
+            <input
+              type="range"
+              min={0}
+              max={1}
+              step={0.01}
+              value={volume}
+              onChange={(e) => handleVolume(parseFloat(e.target.value))}
+              className="ss__volume-slider"
+            />
+          </div>
+        </section>
       </div>
 
       {breathingOpen && (

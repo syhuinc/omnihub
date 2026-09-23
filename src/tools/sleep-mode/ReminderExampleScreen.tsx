@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { ScreenHeader } from '../../components/ScreenHeader';
 import { SleepModePlugin } from '../../sleep-mode/plugin';
-import { PERSONALITY_META } from './types';
+import type { SleepPersonality } from '../../sleep-mode/plugin';
+import { PERSONALITY_META, type PersonalityMeta } from './types';
 import './SleepMode.css';
 
 interface ReminderExampleScreenProps {
@@ -9,7 +10,7 @@ interface ReminderExampleScreenProps {
 }
 
 interface ExampleRow {
-  personality: (typeof PERSONALITY_META)[number];
+  personality: PersonalityMeta;
   text: string;
   time: string;
 }
@@ -17,15 +18,21 @@ interface ExampleRow {
 // Illustrative escalation, not a real log — Sleep Insights is where genuinely logged data lives.
 const EXAMPLE_TIMES = ['12:00 AM', '12:15 AM', '12:30 AM', '12:30 AM', '1:00 AM'];
 
+// "Custom" isn't a real personality yet, so it has no messages to preview.
+const REAL_PERSONALITIES = PERSONALITY_META.filter((p) => !p.comingSoon);
+
 export function ReminderExampleScreen({ onBack }: ReminderExampleScreenProps) {
   const [rows, setRows] = useState<ExampleRow[] | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     Promise.all(
-      PERSONALITY_META.map(async (p, i) => {
+      REAL_PERSONALITIES.map(async (p, i) => {
         try {
-          const { text } = await SleepModePlugin.previewMessage({ personality: p.id, tier: Math.min(i, 3) });
+          const { text } = await SleepModePlugin.previewMessage({
+            personality: p.id as SleepPersonality,
+            tier: Math.min(i, 3),
+          });
           return { personality: p, text, time: EXAMPLE_TIMES[i] };
         } catch {
           return { personality: p, text: '', time: EXAMPLE_TIMES[i] };
@@ -56,7 +63,7 @@ export function ReminderExampleScreen({ onBack }: ReminderExampleScreenProps) {
                 className="sm__personality-emoji"
                 style={{ '--emoji-color': row.personality.color } as never}
               >
-                <img src={row.personality.image} alt="" />
+                <img src={row.personality.image ?? ''} alt="" />
               </span>
               <div className="sm__example-body">
                 <div className="sm__example-head">
