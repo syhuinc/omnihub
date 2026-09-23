@@ -22,6 +22,7 @@ export const StorageKeys = {
   timeZoneCities: `${PREFIX}timeZone.cities`,
   debts: `${PREFIX}debts`,
   compassSettings: `${PREFIX}compass.settings`,
+  timerHistory: `${PREFIX}timer.history`,
 } as const;
 
 export function storageGet<T>(key: string, fallback: T): T {

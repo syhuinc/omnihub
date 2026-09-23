@@ -1,10 +1,41 @@
 import { useEffect, useRef, useState } from 'react';
 import { formatClock, pad, playBeep } from './time';
-import { hapticSuccess } from '../../haptics';
+import { hapticSuccess, hapticTap } from '../../haptics';
+import { Icon, type IconName } from '../../components/Icon';
+import { ScreenHeader } from '../../components/ScreenHeader';
+import { useRouter } from '../../app/Router';
+import { useBackHandler } from '../../app/useBackHandler';
+import { storageGet, storageSet, StorageKeys } from '../../storage/db';
 
 type Status = 'idle' | 'running' | 'paused' | 'finished';
 
+interface TimerHistoryEntry {
+  id: string;
+  durationMs: number;
+  label: string | null;
+  completedAt: number;
+}
+
+interface Preset {
+  label: string;
+  minutes: number;
+  icon: IconName;
+  color: string;
+}
+
+const PRESETS: Preset[] = [
+  { label: 'Break', minutes: 5, icon: 'mug', color: 'var(--green)' },
+  { label: 'Workout', minutes: 10, icon: 'run', color: 'var(--blue)' },
+  { label: 'Cooking', minutes: 15, icon: 'pot', color: 'var(--orange)' },
+  { label: 'Sleep', minutes: 30, icon: 'moon', color: 'var(--purple)' },
+];
+
+const MAX_HISTORY = 20;
+const RING_R = 44;
+const RING_C = 2 * Math.PI * RING_R;
+
 export function TimerView() {
+  const { back } = useRouter();
   const [hoursInput, setHoursInput] = useState('0');
   const [minutesInput, setMinutesInput] = useState('5');
   const [secondsInput, setSecondsInput] = useState('0');
@@ -14,6 +45,13 @@ export function TimerView() {
   const [startedAt, setStartedAt] = useState<number | null>(null);
   const [, forceTick] = useState(0);
   const beepedRef = useRef(false);
+
+  const [showHistory, setShowHistory] = useState(false);
+  const [history, setHistory] = useState<TimerHistoryEntry[]>(() =>
+    storageGet(StorageKeys.timerHistory, []),
+  );
+
+  useBackHandler(() => setShowHistory(false), showHistory);
 
   const setDurationMs =
     (Math.max(0, parseInt(hoursInput || '0', 10)) * 3600 +
@@ -41,8 +79,43 @@ export function TimerView() {
       setRemainingAtPause(0);
       playBeep();
       hapticSuccess();
+      logHistory(setDurationMs);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, remaining]);
+
+  function logHistory(durationMs: number) {
+    const matched = PRESETS.find(
+      (p) => p.minutes * 60000 === durationMs && parseInt(hoursInput || '0', 10) === 0,
+    );
+    const entry: TimerHistoryEntry = {
+      id: `${Date.now()}`,
+      durationMs,
+      label: matched?.label ?? null,
+      completedAt: Date.now(),
+    };
+    const next = [entry, ...history].slice(0, MAX_HISTORY);
+    setHistory(next);
+    storageSet(StorageKeys.timerHistory, next);
+  }
+
+  function clearHistory() {
+    setHistory([]);
+    storageSet(StorageKeys.timerHistory, []);
+  }
+
+  function fillFromMs(ms: number) {
+    const totalSec = Math.round(ms / 1000);
+    setHoursInput(pad(Math.floor(totalSec / 3600)));
+    setMinutesInput(pad(Math.floor((totalSec % 3600) / 60)));
+    setSecondsInput(pad(totalSec % 60));
+  }
+
+  function useHistoryEntry(entry: TimerHistoryEntry) {
+    reset();
+    fillFromMs(entry.durationMs);
+    setShowHistory(false);
+  }
 
   function start() {
     beepedRef.current = false;
@@ -71,87 +144,288 @@ export function TimerView() {
 
   const isEditing = status === 'idle';
 
+  function adjust(setValue: (v: string) => void, current: string, delta: number, max: number) {
+    if (!isEditing) return;
+    const cur = parseInt(current || '0', 10);
+    setValue(pad(Math.min(max, Math.max(0, cur + delta))));
+    hapticTap();
+  }
+
+  function handleFieldChange(raw: string, max: number, setValue: (v: string) => void) {
+    const num = parseInt(raw, 10);
+    if (raw === '') setValue('');
+    else if (!Number.isNaN(num)) setValue(pad(Math.min(Math.max(num, 0), max)));
+  }
+
+  function applyPreset(preset: Preset) {
+    if (!isEditing) return;
+    setHoursInput('00');
+    setMinutesInput(pad(preset.minutes));
+    setSecondsInput('00');
+    hapticTap();
+  }
+
+  const ringFraction =
+    status === 'idle'
+      ? 1
+      : status === 'finished'
+        ? 0
+        : setDurationMs > 0
+          ? Math.min(1, Math.max(0, remaining / setDurationMs))
+          : 0;
+
+  const handleAngle = ringFraction * 2 * Math.PI;
+  const handleX = 50 + RING_R * Math.sin(handleAngle);
+  const handleY = 50 - RING_R * Math.cos(handleAngle);
+
+  const hoursNum = parseInt(hoursInput || '0', 10);
+  const showHours = hoursNum > 0;
+  const displayTotalSec = Math.max(0, Math.floor(remaining / 1000));
+  const dispH = pad(Math.floor(displayTotalSec / 3600));
+  const dispM = pad(Math.floor((displayTotalSec % 3600) / 60));
+  const dispS = pad(displayTotalSec % 60);
+
   return (
-    <div className="tm">
-      {isEditing ? (
-        <div className="tm__picker">
-          <TimeField label="hr" value={hoursInput} onChange={setHoursInput} max={99} />
-          <span className="tm__colon">:</span>
-          <TimeField label="min" value={minutesInput} onChange={setMinutesInput} max={59} />
-          <span className="tm__colon">:</span>
-          <TimeField label="sec" value={secondsInput} onChange={setSecondsInput} max={59} />
+    <div className="screen">
+      <ScreenHeader
+        title="Timer"
+        subtitle="Set a time and stay focused"
+        onBack={back}
+        action={
+          <button
+            type="button"
+            className="tm2__header-btn"
+            onClick={() => setShowHistory((v) => !v)}
+            aria-label="Toggle timer history"
+          >
+            <Icon name={showHistory ? 'x' : 'history'} size={19} />
+          </button>
+        }
+      />
+
+      {showHistory ? (
+        <div className="tm2__history">
+          {history.length === 0 ? (
+            <p className="tm2__history-empty">No timers completed yet.</p>
+          ) : (
+            <>
+              <ul className="tm2__history-list">
+                {history.map((entry) => (
+                  <li key={entry.id}>
+                    <button
+                      type="button"
+                      className="tm2__history-item"
+                      onClick={() => useHistoryEntry(entry)}
+                    >
+                      <span className="tm2__history-icon">
+                        <Icon name={PRESETS.find((p) => p.label === entry.label)?.icon ?? 'timer'} size={17} />
+                      </span>
+                      <span className="tm2__history-info">
+                        <span className="tm2__history-duration">
+                          {formatClock(entry.durationMs, entry.durationMs >= 3600000)}
+                        </span>
+                        <span className="tm2__history-label">{entry.label ?? 'Custom'}</span>
+                      </span>
+                      <span className="tm2__history-ago">{timeAgo(entry.completedAt)}</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+              <button type="button" className="tm2__clear-history" onClick={clearHistory}>
+                Clear History
+              </button>
+            </>
+          )}
         </div>
       ) : (
-        <div className={`tm__display${status === 'finished' ? ' tm__display--finished' : ''}`}>
-          {formatClock(remaining, parseInt(hoursInput || '0', 10) > 0)}
+        <div className="tm2">
+          <div className="tm2__ring-wrap">
+            <svg className="tm2__ring" viewBox="0 0 100 100">
+              <circle className="tm2__ring-track" cx="50" cy="50" r={RING_R} />
+              <circle
+                className={`tm2__ring-progress${status === 'finished' ? ' tm2__ring-progress--finished' : ''}`}
+                cx="50"
+                cy="50"
+                r={RING_R}
+                style={{
+                  strokeDasharray: RING_C,
+                  strokeDashoffset: RING_C * (1 - ringFraction),
+                }}
+              />
+            </svg>
+            {status !== 'idle' && (
+              <span
+                className={`tm2__ring-handle${status === 'finished' ? ' tm2__ring-handle--finished' : ''}`}
+                style={{ left: `${handleX}%`, top: `${handleY}%` }}
+              />
+            )}
+
+            <div className="tm2__ring-center">
+              {isEditing ? (
+                <div className="tm2__display">
+                  <span>{hoursInput.padStart(2, '0')}</span>
+                  <span className="tm2__colon">:</span>
+                  <span className="tm2__display--accent">{minutesInput.padStart(2, '0')}</span>
+                  <span className="tm2__colon">:</span>
+                  <span>{secondsInput.padStart(2, '0')}</span>
+                </div>
+              ) : (
+                <div className={`tm2__display${status === 'finished' ? ' tm2__display--finished' : ''}`}>
+                  {showHours && (
+                    <>
+                      <span>{dispH}</span>
+                      <span className="tm2__colon">:</span>
+                    </>
+                  )}
+                  <span className="tm2__display--accent">{dispM}</span>
+                  <span className="tm2__colon">:</span>
+                  <span>{dispS}</span>
+                </div>
+              )}
+              <div className="tm2__unit-row">
+                {showHours || isEditing ? <span>HR</span> : null}
+                <span>MIN</span>
+                <span>SEC</span>
+              </div>
+            </div>
+          </div>
+
+          {status === 'finished' && <p className="tm2__finished-label">Time's up!</p>}
+
+          {isEditing && (
+            <div className="tm2__steppers">
+              <Stepper
+                label="HR"
+                value={hoursInput}
+                onInc={() => adjust(setHoursInput, hoursInput, 1, 99)}
+                onDec={() => adjust(setHoursInput, hoursInput, -1, 99)}
+                onChange={(v) => handleFieldChange(v, 99, setHoursInput)}
+                onBlur={() => hoursInput === '' && setHoursInput('0')}
+              />
+              <Stepper
+                label="MIN"
+                value={minutesInput}
+                onInc={() => adjust(setMinutesInput, minutesInput, 1, 59)}
+                onDec={() => adjust(setMinutesInput, minutesInput, -1, 59)}
+                onChange={(v) => handleFieldChange(v, 59, setMinutesInput)}
+                onBlur={() => minutesInput === '' && setMinutesInput('0')}
+              />
+              <Stepper
+                label="SEC"
+                value={secondsInput}
+                onInc={() => adjust(setSecondsInput, secondsInput, 1, 59)}
+                onDec={() => adjust(setSecondsInput, secondsInput, -1, 59)}
+                onChange={(v) => handleFieldChange(v, 59, setSecondsInput)}
+                onBlur={() => secondsInput === '' && setSecondsInput('0')}
+              />
+            </div>
+          )}
+
+          <div className="tm__controls">
+            {status === 'idle' && (
+              <button
+                type="button"
+                className="tm__btn tm__btn--start tm2__start-btn"
+                onClick={start}
+                disabled={setDurationMs <= 0}
+              >
+                <Icon name="play" size={18} />
+                Start
+              </button>
+            )}
+            {status === 'running' && (
+              <>
+                <button type="button" className="tm__btn tm__btn--secondary" onClick={reset}>
+                  Reset
+                </button>
+                <button type="button" className="tm__btn tm__btn--stop" onClick={pause}>
+                  Pause
+                </button>
+              </>
+            )}
+            {status === 'paused' && (
+              <>
+                <button type="button" className="tm__btn tm__btn--secondary" onClick={reset}>
+                  Reset
+                </button>
+                <button type="button" className="tm__btn tm__btn--start" onClick={resume}>
+                  Resume
+                </button>
+              </>
+            )}
+            {status === 'finished' && (
+              <button type="button" className="tm__btn tm__btn--start" onClick={reset}>
+                Reset
+              </button>
+            )}
+          </div>
+
+          {isEditing && (
+            <div className="tm2__presets">
+              {PRESETS.map((preset) => (
+                <button
+                  key={preset.label}
+                  type="button"
+                  className="tm2__preset"
+                  style={{ '--preset-color': preset.color } as React.CSSProperties}
+                  onClick={() => applyPreset(preset)}
+                >
+                  <span className="tm2__preset-icon">
+                    <Icon name={preset.icon} size={18} />
+                  </span>
+                  <strong>{preset.minutes} min</strong>
+                  <span className="tm2__preset-label">{preset.label}</span>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       )}
-
-      {status === 'finished' && <p className="tm__finished-label">Time's up!</p>}
-
-      <div className="tm__controls">
-        {status === 'idle' && (
-          <button type="button" className="tm__btn tm__btn--start" onClick={start} disabled={setDurationMs <= 0}>
-            Start
-          </button>
-        )}
-        {status === 'running' && (
-          <>
-            <button type="button" className="tm__btn tm__btn--secondary" onClick={reset}>
-              Reset
-            </button>
-            <button type="button" className="tm__btn tm__btn--stop" onClick={pause}>
-              Pause
-            </button>
-          </>
-        )}
-        {status === 'paused' && (
-          <>
-            <button type="button" className="tm__btn tm__btn--secondary" onClick={reset}>
-              Reset
-            </button>
-            <button type="button" className="tm__btn tm__btn--start" onClick={resume}>
-              Resume
-            </button>
-          </>
-        )}
-        {status === 'finished' && (
-          <button type="button" className="tm__btn tm__btn--start" onClick={reset}>
-            Reset
-          </button>
-        )}
-      </div>
     </div>
   );
 }
 
-function TimeField({
+function Stepper({
   label,
   value,
+  onInc,
+  onDec,
   onChange,
-  max,
+  onBlur,
 }: {
   label: string;
   value: string;
+  onInc: () => void;
+  onDec: () => void;
   onChange: (v: string) => void;
-  max: number;
+  onBlur: () => void;
 }) {
   return (
-    <div className="tm__field">
+    <div className="tm2__stepper">
+      <button type="button" className="tm2__stepper-btn" onClick={onInc} aria-label={`Increase ${label}`}>
+        <Icon name="plus" size={15} />
+      </button>
       <input
         type="number"
         inputMode="numeric"
+        className="tm2__stepper-input"
         value={value}
-        onChange={(e) => {
-          const num = parseInt(e.target.value, 10);
-          if (e.target.value === '') onChange('');
-          else if (!Number.isNaN(num)) onChange(pad(Math.min(Math.max(num, 0), max)));
-        }}
-        onBlur={() => {
-          if (value === '') onChange('0');
-        }}
+        onChange={(e) => onChange(e.target.value)}
+        onBlur={onBlur}
       />
-      <span>{label}</span>
+      <button type="button" className="tm2__stepper-btn" onClick={onDec} aria-label={`Decrease ${label}`}>
+        <Icon name="minus" size={15} />
+      </button>
+      <span className="tm2__stepper-label">{label}</span>
     </div>
   );
+}
+
+function timeAgo(ts: number): string {
+  const diffMin = Math.floor((Date.now() - ts) / 60000);
+  if (diffMin < 1) return 'just now';
+  if (diffMin < 60) return `${diffMin}m ago`;
+  const diffHr = Math.floor(diffMin / 60);
+  if (diffHr < 24) return `${diffHr}h ago`;
+  return `${Math.floor(diffHr / 24)}d ago`;
 }

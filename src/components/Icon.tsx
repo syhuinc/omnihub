@@ -66,7 +66,11 @@ export type IconName =
   | 'magnet'
   | 'gyroscope'
   | 'activity'
-  | 'level';
+  | 'level'
+  | 'minus'
+  | 'mug'
+  | 'run'
+  | 'pot';
 
 interface IconProps {
   name: IconName;
@@ -257,6 +261,19 @@ const paths: Record<IconName, React.ReactNode> = {
       <rect x="3" y="9" width="18" height="6" rx="3" />
       <circle cx="12" cy="12" r="1.6" fill="currentColor" />
     </>
+  ),
+  minus: <path d="M5 12h14" />,
+  mug: (
+    <path d="M4 8h12v7a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4Z M16 10h2a2 2 0 0 1 0 4h-2 M8 2.5c0 .7-.6.9-.6 1.6s.6 1 .6 1.6M12 2.5c0 .7-.6.9-.6 1.6s.6 1 .6 1.6" />
+  ),
+  run: (
+    <>
+      <circle cx="14.5" cy="4.3" r="1.7" />
+      <path d="M8.5 20.5l1.5-5 3-1.5 2 2.5 3 1M11 14l-2-3 2.7-2.6 3 1.6 2.3-1.3" />
+    </>
+  ),
+  pot: (
+    <path d="M3 11h18M5 11v5a4 4 0 0 0 4 4h6a4 4 0 0 0 4-4v-5M2 8.5h2m16 0h2M12 8.5V4" />
   ),
 };
 
