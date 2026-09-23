@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type CSSProperties } from 'react';
 import { ScreenHeader } from '../../components/ScreenHeader';
 import { Icon } from '../../components/Icon';
 import { hapticSelect } from '../../haptics';
@@ -47,17 +47,18 @@ export function PersonalizationScreen({ config, onBack, onPersist }: Personaliza
     setEditingField(null);
   }
 
-  const rows: { key: FieldKey; icon: string; label: string; value: string }[] = [
-    { key: 'name', icon: 'user', label: 'Your name / nickname', value: config.callName || 'Not set' },
+  const rows: { key: FieldKey; icon: string; label: string; value: string; color: string }[] = [
+    { key: 'name', icon: 'user', label: 'Your name / nickname', value: config.callName || 'Not set', color: 'var(--blue)' },
     {
       key: 'relationship',
       icon: 'heart',
       label: 'Relationship status',
       value: config.relationshipStatus ? RELATIONSHIP_LABEL[config.relationshipStatus] : 'Not set',
+      color: 'var(--pink)',
     },
-    { key: 'routine', icon: 'calendar', label: 'Work / School routine', value: config.workSchoolRoutine || 'Not set' },
-    { key: 'interests', icon: 'star', label: 'Interests', value: config.interests || 'Not set' },
-    { key: 'notes', icon: 'edit', label: 'Custom notes', value: config.customNotes || 'Not set' },
+    { key: 'routine', icon: 'calendar', label: 'Work / School routine', value: config.workSchoolRoutine || 'Not set', color: 'var(--teal)' },
+    { key: 'interests', icon: 'star', label: 'Interests', value: config.interests || 'Not set', color: 'var(--purple)' },
+    { key: 'notes', icon: 'edit', label: 'Custom notes', value: config.customNotes || 'Not set', color: 'var(--orange)' },
   ];
 
   return (
@@ -105,7 +106,7 @@ export function PersonalizationScreen({ config, onBack, onPersist }: Personaliza
                   className="sm__field-row2"
                   onClick={() => openEditor(row.key, row.value === 'Not set' ? '' : row.value)}
                 >
-                  <span className="sm__field-row2-icon">
+                  <span className="sm__field-row2-icon" style={{ '--field-color': row.color } as CSSProperties}>
                     <Icon name={row.icon as never} size={16} />
                   </span>
                   <span className="sm__field-row2-text">
@@ -117,7 +118,7 @@ export function PersonalizationScreen({ config, onBack, onPersist }: Personaliza
               ))}
 
               <div className="sm__field-row2 sm__field-row2--static">
-                <span className="sm__field-row2-icon">
+                <span className="sm__field-row2-icon" style={{ '--field-color': 'var(--blue)' } as CSSProperties}>
                   <Icon name="volume" size={16} />
                 </span>
                 <span className="sm__field-row2-text">

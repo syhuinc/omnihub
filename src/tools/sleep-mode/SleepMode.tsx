@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type CSSProperties } from 'react';
 import { ScreenHeader } from '../../components/ScreenHeader';
 import { Icon } from '../../components/Icon';
 import { useRouter } from '../../app/Router';
@@ -41,17 +41,18 @@ interface MenuRow {
   icon: string;
   label: string;
   desc: string;
+  color: string;
   badge?: 'pro';
 }
 
 const MENU_ROWS: MenuRow[] = [
-  { screen: 'ai-personality', icon: 'user', label: 'AI Personality', desc: 'Choose how you want to be reminded' },
-  { screen: 'personalization', icon: 'settings', label: 'Personalization', desc: 'Make your sleep companion more you' },
-  { screen: 'reminder-example', icon: 'note', label: 'Reminder Example', desc: 'See different messages in action' },
-  { screen: 'wind-down', icon: 'moon', label: 'Wind-Down Mode', desc: 'Relax before you get in bed' },
-  { screen: 'sleep-sounds', icon: 'music', label: 'Sleep Sounds', desc: 'Ambient sounds to help you sleep' },
-  { screen: 'sleep-insights', icon: 'trending-up', label: 'Sleep Insights', desc: 'Your real Sleep Mode history' },
-  { screen: 'pro', icon: 'crown', label: 'Sleep Mode Pro', desc: 'Take it to the next level', badge: 'pro' },
+  { screen: 'ai-personality', icon: 'user', label: 'AI Personality', desc: 'Choose how you want to be reminded', color: 'var(--purple)' },
+  { screen: 'personalization', icon: 'settings', label: 'Personalization', desc: 'Make your sleep companion more you', color: 'var(--pink)' },
+  { screen: 'reminder-example', icon: 'note', label: 'Reminder Example', desc: 'See different messages in action', color: 'var(--blue)' },
+  { screen: 'wind-down', icon: 'moon', label: 'Wind-Down Mode', desc: 'Relax before you get in bed', color: 'var(--teal)' },
+  { screen: 'sleep-sounds', icon: 'music', label: 'Sleep Sounds', desc: 'Ambient sounds to help you sleep', color: 'var(--green)' },
+  { screen: 'sleep-insights', icon: 'trending-up', label: 'Sleep Insights', desc: 'Your real Sleep Mode history', color: 'var(--orange)' },
+  { screen: 'pro', icon: 'crown', label: 'Sleep Mode Pro', desc: 'Take it to the next level', color: '#f6c453', badge: 'pro' },
 ];
 
 export function SleepMode() {
@@ -260,7 +261,7 @@ export function SleepMode() {
                   setScreen(row.screen);
                 }}
               >
-                <span className="sm__menu-icon">
+                <span className="sm__menu-icon" style={{ '--menu-color': row.color } as CSSProperties}>
                   <Icon name={row.icon as never} size={17} />
                 </span>
                 <span className="sm__menu-text">
