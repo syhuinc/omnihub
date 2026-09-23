@@ -8,10 +8,11 @@
 .dc__summary {
   display: flex;
   align-items: center;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
+  background: linear-gradient(160deg, var(--bg-elevated-2), var(--bg-elevated));
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-lg);
   padding: 16px 20px;
+  box-shadow: var(--shadow-sm);
 }
 
 .dc__summary-item {
@@ -37,10 +38,12 @@
 
 .dc__summary-value--green {
   color: var(--green);
+  text-shadow: 0 0 14px color-mix(in srgb, var(--green) 40%, transparent);
 }
 
 .dc__summary-value--red {
   color: var(--red);
+  text-shadow: 0 0 14px color-mix(in srgb, var(--red) 40%, transparent);
 }
 
 .dc__summary-divider {
@@ -68,13 +71,14 @@
 }
 
 .dc__add {
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
+  background: linear-gradient(160deg, var(--bg-elevated-2), var(--bg-elevated));
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-lg);
   padding: 14px;
   display: flex;
   flex-direction: column;
   gap: 10px;
+  box-shadow: var(--shadow-sm);
 }
 
 .dc__direction-row {
@@ -93,13 +97,15 @@
 }
 
 .dc__direction-chip--active-green {
-  background: var(--green);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--green) 85%, white 10%), var(--green));
   color: #fff;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--green) 30%, transparent), 0 3px 14px -4px color-mix(in srgb, var(--green) 60%, transparent);
 }
 
 .dc__direction-chip--active-red {
-  background: var(--red);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--red) 85%, white 10%), var(--red));
   color: #fff;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--red) 30%, transparent), 0 3px 14px -4px color-mix(in srgb, var(--red) 60%, transparent);
 }
 
 .dc__add-input {
@@ -148,6 +154,7 @@
   color: #fff;
   font-size: 14px;
   font-weight: 600;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent), 0 4px 16px -4px color-mix(in srgb, var(--accent) 60%, transparent);
 }
 
 .dc__empty {
@@ -171,10 +178,11 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
+  background: linear-gradient(160deg, var(--bg-elevated-2), var(--bg-elevated));
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
   padding: 14px 16px;
+  box-shadow: var(--shadow-sm);
 }
 
 .dc__row-icon {
