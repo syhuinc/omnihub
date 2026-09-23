@@ -23,9 +23,10 @@
 }
 
 .uc__tab--active {
-  background: var(--accent);
-  border-color: var(--accent);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 85%, white 10%), var(--accent));
+  border-color: transparent;
   color: #fff;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent), 0 3px 14px -4px color-mix(in srgb, var(--accent) 60%, transparent);
 }
 
 .uc__body {
@@ -40,10 +41,16 @@
 
 .uc__field {
   width: 100%;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
+  background: linear-gradient(160deg, var(--bg-elevated-2), var(--bg-elevated));
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-lg);
   padding: 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+.uc__field:focus-within {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border-strong));
+  box-shadow: var(--shadow-sm), 0 0 0 3px color-mix(in srgb, var(--accent) 16%, transparent);
 }
 
 .uc__label {
@@ -106,7 +113,7 @@
   height: 44px;
   margin: -6px 0;
   border-radius: 50%;
-  background: var(--accent);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 85%, white 10%), var(--accent));
   color: #fff;
   display: flex;
   align-items: center;
@@ -114,4 +121,5 @@
   z-index: 1;
   flex-shrink: 0;
   transform: rotate(90deg);
+  box-shadow: 0 0 0 4px var(--bg), 0 0 0 5px color-mix(in srgb, var(--accent) 30%, transparent), 0 4px 16px -4px color-mix(in srgb, var(--accent) 60%, transparent);
 }

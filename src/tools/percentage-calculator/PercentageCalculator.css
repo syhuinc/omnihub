@@ -23,9 +23,10 @@
 }
 
 .pc__mode-chip--active {
-  background: var(--accent);
-  border-color: var(--accent);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 85%, white 10%), var(--accent));
+  border-color: transparent;
   color: #fff;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent), 0 3px 14px -4px color-mix(in srgb, var(--accent) 60%, transparent);
 }
 
 .pc__field {
@@ -43,14 +44,22 @@
 }
 
 .pc__input {
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
+  background: linear-gradient(160deg, var(--bg-elevated-2), var(--bg-elevated));
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-lg);
   padding: 14px 18px;
   font-size: 22px;
   font-weight: 700;
   color: var(--text-primary);
+  box-shadow: var(--shadow-sm), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
   -moz-appearance: textfield;
+}
+
+.pc__input:focus {
+  outline: none;
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent), var(--shadow-glow);
 }
 
 .pc__input::-webkit-outer-spin-button,
@@ -60,8 +69,8 @@
 }
 
 .pc__result {
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
+  background: linear-gradient(160deg, color-mix(in srgb, var(--green) 8%, var(--bg-elevated)), var(--bg-elevated));
+  border: 1px solid color-mix(in srgb, var(--green) 30%, var(--border));
   border-radius: var(--radius-lg);
   padding: 18px 20px;
   display: flex;
@@ -69,6 +78,7 @@
   gap: 6px;
   align-items: center;
   margin-top: 8px;
+  box-shadow: 0 0 24px -10px color-mix(in srgb, var(--green) 50%, transparent);
 }
 
 .pc__result-label {
@@ -83,4 +93,5 @@
   font-size: 32px;
   font-weight: 700;
   color: var(--green);
+  text-shadow: 0 0 18px color-mix(in srgb, var(--green) 45%, transparent);
 }
