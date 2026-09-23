@@ -5,8 +5,17 @@ import { SearchBar } from '../../components/SearchBar';
 import { useRouter } from '../../app/Router';
 import { useBackHandler } from '../../app/useBackHandler';
 import { hapticSelect, hapticTap } from '../../haptics';
-import { CITIES, getCityById } from '../time-zone/cities';
-import { dayOffsetLabel, getOffsetMinutes, hourInZone, instantAtHourInZone } from '../time-zone/offset';
+import { CITIES, getCityById, type City } from '../time-zone/cities';
+import {
+  dayPeriod,
+  formatFullDate,
+  formatTimeLower,
+  getOffsetMinutes,
+  hourInZone,
+  instantAtHourInZone,
+} from '../time-zone/offset';
+import { WorldMapArc } from './WorldMapArc';
+import { projectToPercent } from '../time-zone/worldMap';
 import './TimeDifference.css';
 
 type PickerTarget = 'from' | 'to' | null;
@@ -15,18 +24,26 @@ type Overlap = 'good' | 'ok' | 'poor';
 const WAKING_START = 8;
 const WAKING_END = 21;
 
-function formatDiff(fromTimeZone: string, toTimeZone: string, now: Date): { amount: string; direction: 'ahead' | 'behind' | 'same' } {
+function formatDiff(fromTimeZone: string, toTimeZone: string, now: Date): { totalMinutes: number; direction: 'ahead' | 'behind' | 'same' } {
   const diff = Math.round(getOffsetMinutes(toTimeZone, now) - getOffsetMinutes(fromTimeZone, now));
-  if (diff === 0) return { amount: '', direction: 'same' };
-  const hours = Math.floor(Math.abs(diff) / 60);
-  const mins = Math.abs(diff) % 60;
-  const amount = [hours ? `${hours}h` : '', mins ? `${mins}m` : ''].filter(Boolean).join(' ');
-  return { amount, direction: diff > 0 ? 'ahead' : 'behind' };
+  if (diff === 0) return { totalMinutes: 0, direction: 'same' };
+  return { totalMinutes: Math.abs(diff), direction: diff > 0 ? 'ahead' : 'behind' };
+}
+
+function formatDiffWords(totalMinutes: number): string {
+  const hours = Math.floor(totalMinutes / 60);
+  const mins = totalMinutes % 60;
+  if (mins === 0) return `${hours} hour${hours === 1 ? '' : 's'}`;
+  return `${hours}h ${mins}m`;
 }
 
 function formatHour12(hour: number): string {
   const h = hour % 12 === 0 ? 12 : hour % 12;
   return `${h} ${hour < 12 ? 'AM' : 'PM'}`;
+}
+
+function formatShortDate(date: Date, timeZone: string): string {
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone });
 }
 
 export function TimeDifference() {
@@ -52,6 +69,11 @@ export function TimeDifference() {
     return formatDiff(fromCity.timeZone, toCity.timeZone, now);
   }, [fromCity, toCity, now]);
 
+  const sameDate = useMemo(() => {
+    if (!fromCity || !toCity) return true;
+    return now.toLocaleDateString('en-CA', { timeZone: fromCity.timeZone }) === now.toLocaleDateString('en-CA', { timeZone: toCity.timeZone });
+  }, [fromCity, toCity, now]);
+
   const overlap = useMemo(() => {
     if (!fromCity || !toCity) return null;
     const hours: { hour: number; state: Overlap }[] = [];
@@ -62,7 +84,6 @@ export function TimeDifference() {
       const toAwake = toHour >= WAKING_START && toHour < WAKING_END;
       hours.push({ hour: h, state: fromAwake && toAwake ? 'good' : fromAwake || toAwake ? 'ok' : 'poor' });
     }
-    // Longest contiguous "good" run.
     let bestStart = -1;
     let bestLen = 0;
     let curStart = -1;
@@ -103,62 +124,83 @@ export function TimeDifference() {
     setToId(fromId);
   }
 
-  function renderCard(target: 'from' | 'to', city: ReturnType<typeof getCityById>) {
-    const time = city
-      ? now.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', timeZone: city.timeZone })
-      : '--:--';
-    const date = city
-      ? now.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', timeZone: city.timeZone })
-      : '';
-    const dayLabel = city ? dayOffsetLabel(city.timeZone, now) : null;
+  function renderCard(target: 'from' | 'to', city: City | undefined) {
+    const time = city ? formatTimeLower(now, city.timeZone) : '--:--';
+    const date = city ? formatFullDate(now, city.timeZone) : '';
     return (
       <button type="button" className="tdiff__card" onClick={() => setPicker(target)}>
-        <span className="tdiff__card-label">{target === 'from' ? 'From' : 'To'}</span>
+        <span className={`tdiff__card-badge tdiff__card-badge--${target}`}>
+          <Icon name="plus" size={11} /> {target === 'from' ? 'From' : 'To'}
+        </span>
         {city && <span className="tdiff__card-flag">{city.flag}</span>}
-        <span className="tdiff__card-city">{city ? city.name : 'Choose a city'}</span>
+        <span className="tdiff__card-city">
+          {city ? city.name : 'Choose a city'}
+          <Icon name="chevron-down" size={13} />
+        </span>
         {city && <span className="tdiff__card-country">{city.country}</span>}
         <span className="tdiff__card-time">{time}</span>
-        <span className="tdiff__card-date">
-          {date}
-          {dayLabel && <em className="tdiff__card-day-badge">{dayLabel}</em>}
-        </span>
+        <span className="tdiff__card-date">{date}</span>
       </button>
     );
   }
 
   return (
     <div className="screen">
-      <ScreenHeader title="Time Difference" subtitle="Compare two places at a glance" onBack={back} />
+      <ScreenHeader title="Time Difference" subtitle="Compare time between two locations" onBack={back} />
 
       <div className="tdiff__body">
         <div className="tdiff__row">
           {renderCard('from', fromCity)}
-          <div className="tdiff__connector">
-            <span className="tdiff__connector-line" />
-            <button type="button" className="tdiff__swap" onClick={swap} aria-label="Swap cities">
-              <Icon name="repeat" size={18} />
-            </button>
-          </div>
+          <button type="button" className="tdiff__swap" onClick={swap} aria-label="Swap cities">
+            <Icon name="repeat" size={18} />
+          </button>
           {renderCard('to', toCity)}
         </div>
 
         {fromCity && toCity && diff && (
-          <div className="tdiff__result">
-            {diff.direction === 'same' ? (
-              <span className="tdiff__result-value">
-                {toCity.name} and {fromCity.name} are the same time
-              </span>
-            ) : (
-              <>
-                <span className="tdiff__result-label">{toCity.name} is</span>
-                <span className="tdiff__result-value">
-                  {diff.amount} {diff.direction}
+          <div className="tdiff__map-card">
+            <div className="tdiff__map-text">
+              <span className="tdiff__map-label">Time Difference</span>
+              <strong className="tdiff__map-value">
+                {diff.direction === 'same' ? 'Same time' : formatDiffWords(diff.totalMinutes)}
+              </strong>
+              {diff.direction !== 'same' && (
+                <span className="tdiff__map-sub">
+                  {toCity.name} is <em>{diff.direction}</em> {fromCity.name}
                 </span>
-                <span className="tdiff__result-label">
-                  {diff.direction === 'ahead' ? `of ${fromCity.name}` : fromCity.name}
-                </span>
-              </>
-            )}
+              )}
+            </div>
+            <div className="tdiff__map-area">
+              <WorldMapArc fromLat={fromCity.lat} fromLon={fromCity.lon} toLat={toCity.lat} toLon={toCity.lon} />
+              <MapPinLabel city={fromCity} now={now} />
+              <MapPinLabel city={toCity} now={now} />
+            </div>
+          </div>
+        )}
+
+        {fromCity && toCity && diff && (
+          <div className="tdiff__details">
+            <DetailRow icon="clock" label="Time Difference" value={diff.direction === 'same' ? 'Same time' : formatDiffWords(diff.totalMinutes)} accent />
+            {diff.direction !== 'same' && <DetailRow icon="repeat" label={`${toCity.name} is`} value={diff.direction} accent />}
+            <DetailRow
+              icon="calendar"
+              label={sameDate ? 'Same Date' : 'Dates'}
+              value={
+                sameDate
+                  ? formatFullDate(now, fromCity.timeZone)
+                  : `${formatShortDate(now, fromCity.timeZone)} / ${formatShortDate(now, toCity.timeZone)}`
+              }
+            />
+            <ReciprocalRow
+              icon={dayPeriod(fromCity.timeZone, now) === 'sun' || dayPeriod(fromCity.timeZone, now) === 'sunrise' ? 'sun' : 'moon'}
+              main={`When it's ${formatTimeLower(now, fromCity.timeZone)} in ${fromCity.name}`}
+              sub={`It's ${formatTimeLower(now, toCity.timeZone)} in ${toCity.name}`}
+            />
+            <ReciprocalRow
+              icon={dayPeriod(toCity.timeZone, now) === 'sun' || dayPeriod(toCity.timeZone, now) === 'sunrise' ? 'sun' : 'moon'}
+              main={`When it's ${formatTimeLower(now, toCity.timeZone)} in ${toCity.name}`}
+              sub={`It's ${formatTimeLower(now, fromCity.timeZone)} in ${fromCity.name}`}
+            />
           </div>
         )}
 
@@ -216,6 +258,11 @@ export function TimeDifference() {
             </p>
           </div>
         )}
+
+        <button type="button" className="tdiff__change-btn" onClick={() => setPicker('from')}>
+          <Icon name="plus" size={16} />
+          Change Locations
+        </button>
       </div>
 
       {picker && (
@@ -243,6 +290,47 @@ export function TimeDifference() {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function MapPinLabel({ city, now }: { city: City; now: Date }) {
+  const { xPct, yPct } = projectToPercent(city.lon, city.lat);
+  const period = dayPeriod(city.timeZone, now);
+  const isDay = period === 'sun' || period === 'sunrise';
+  return (
+    <div className="wmarc__label" style={{ left: `${xPct}%`, top: `${yPct}%` }}>
+      <span className={`wmarc__label-icon${isDay ? '' : ' wmarc__label-icon--night'}`}>
+        <Icon name={isDay ? 'sun' : 'moon'} size={13} />
+      </span>
+      <strong>{city.name}</strong>
+      <span>{formatTimeLower(now, city.timeZone)}</span>
+    </div>
+  );
+}
+
+function DetailRow({ icon, label, value, accent }: { icon: Parameters<typeof Icon>[0]['name']; label: string; value: string; accent?: boolean }) {
+  return (
+    <div className="tdiff__detail-row">
+      <span className="tdiff__detail-icon">
+        <Icon name={icon} size={16} />
+      </span>
+      <span className="tdiff__detail-label">{label}</span>
+      <span className={`tdiff__detail-value${accent ? ' tdiff__detail-value--accent' : ''}`}>{value}</span>
+    </div>
+  );
+}
+
+function ReciprocalRow({ icon, main, sub }: { icon: Parameters<typeof Icon>[0]['name']; main: string; sub: string }) {
+  return (
+    <div className="tdiff__detail-row tdiff__detail-row--stacked">
+      <span className="tdiff__detail-icon">
+        <Icon name={icon} size={16} />
+      </span>
+      <span className="tdiff__detail-stack">
+        <strong>{main}</strong>
+        <span>{sub}</span>
+      </span>
     </div>
   );
 }

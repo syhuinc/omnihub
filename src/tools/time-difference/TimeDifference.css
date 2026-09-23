@@ -2,7 +2,7 @@
   padding: 8px 20px 32px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
 }
 
 .tdiff__row {
@@ -12,6 +12,7 @@
 }
 
 .tdiff__card {
+  position: relative;
   flex: 1;
   min-width: 0;
   display: flex;
@@ -21,20 +22,37 @@
   background: linear-gradient(160deg, var(--bg-elevated-2), var(--bg-elevated));
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-lg);
-  padding: 18px 12px;
+  padding: 22px 12px 16px;
   text-align: center;
   box-shadow: var(--shadow-sm);
 }
 
-.tdiff__card-label {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+.tdiff__card-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #fff;
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+}
+
+.tdiff__card-badge--from {
+  background: var(--blue);
+}
+
+.tdiff__card-badge--to {
+  background: var(--purple);
 }
 
 .tdiff__card-city {
+  display: flex;
+  align-items: center;
+  gap: 3px;
   font-size: 16px;
   font-weight: 700;
   color: var(--text-primary);
@@ -43,6 +61,11 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   max-width: 100%;
+}
+
+.tdiff__card-city svg {
+  flex-shrink: 0;
+  color: var(--text-tertiary);
 }
 
 .tdiff__card-flag {
@@ -56,53 +79,20 @@
   color: var(--text-secondary);
 }
 
-.tdiff__card-day-badge {
-  font-style: normal;
-  font-size: 9px;
-  font-weight: 700;
-  color: var(--purple);
-  background: color-mix(in srgb, var(--purple) 16%, transparent);
-  padding: 2px 6px;
-  border-radius: var(--radius-pill);
-  margin-left: 6px;
-}
-
 .tdiff__card-time {
   font-size: 22px;
   font-weight: 700;
-  color: var(--accent);
+  color: var(--text-primary);
   margin-top: 10px;
   font-variant-numeric: tabular-nums;
-  text-shadow: 0 0 14px color-mix(in srgb, var(--accent) 40%, transparent);
 }
 
 .tdiff__card-date {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--text-secondary);
 }
 
-.tdiff__connector {
-  position: relative;
-  flex-shrink: 0;
-  width: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.tdiff__connector-line {
-  position: absolute;
-  top: 50%;
-  left: -18px;
-  right: -18px;
-  height: 1px;
-  background: repeating-linear-gradient(90deg, color-mix(in srgb, var(--accent) 45%, transparent) 0 6px, transparent 6px 12px);
-  z-index: 0;
-}
-
 .tdiff__swap {
-  position: relative;
-  z-index: 1;
   flex-shrink: 0;
   width: 40px;
   height: 40px;
@@ -116,29 +106,231 @@
   box-shadow: var(--shadow-sm);
 }
 
-.tdiff__result {
+/* Map + arc card */
+
+.tdiff__map-card {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(160deg, color-mix(in srgb, var(--accent) 12%, var(--bg-elevated)), var(--bg-elevated) 70%);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--border));
+  border-radius: var(--radius-lg);
+  box-shadow: 0 0 24px -10px color-mix(in srgb, var(--accent) 40%, transparent);
+}
+
+.tdiff__map-text {
+  position: relative;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 2px;
-  background: var(--accent-gradient);
-  border-radius: var(--radius-lg);
-  padding: 24px 20px;
-  color: #fff;
+  padding: 18px 16px 10px;
   text-align: center;
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 35%, transparent), 0 8px 28px -8px color-mix(in srgb, var(--accent) 60%, transparent);
 }
 
-.tdiff__result-label {
-  font-size: 14px;
-  opacity: 0.9;
-}
-
-.tdiff__result-value {
-  font-size: 28px;
+.tdiff__map-label {
+  font-size: 11px;
   font-weight: 700;
-  margin: 2px 0;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
+
+.tdiff__map-value {
+  font-size: 30px;
+  font-weight: 800;
+  color: var(--text-primary);
+  text-shadow: 0 0 18px color-mix(in srgb, var(--accent) 40%, transparent);
+}
+
+.tdiff__map-sub {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.tdiff__map-sub em {
+  font-style: normal;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.tdiff__map-area {
+  position: relative;
+  height: 190px;
+}
+
+.wmarc {
+  position: absolute;
+  inset: 0;
+}
+
+.wmarc__dots {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  fill: color-mix(in srgb, var(--accent) 55%, var(--text-tertiary));
+  opacity: 0.5;
+}
+
+.wmarc__arc {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.wmarc__arc path {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1.2;
+  stroke-dasharray: 3 3;
+  vector-effect: non-scaling-stroke;
+  opacity: 0.85;
+}
+
+.wmarc__pin {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 30%, transparent), 0 0 10px color-mix(in srgb, var(--accent) 70%, transparent);
+}
+
+.wmarc__label {
+  position: absolute;
+  transform: translate(-50%, 14px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  white-space: nowrap;
+}
+
+.wmarc__label-icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--yellow);
+  background: color-mix(in srgb, var(--yellow) 20%, var(--bg));
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 2px;
+}
+
+.wmarc__label-icon--night {
+  color: var(--blue);
+  background: color-mix(in srgb, var(--blue) 20%, var(--bg));
+}
+
+.wmarc__label strong {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+.wmarc__label span {
+  font-size: 10px;
+  color: var(--text-secondary);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+/* Details list */
+
+.tdiff__details {
+  background: linear-gradient(160deg, var(--bg-elevated-2), var(--bg-elevated));
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  padding: 4px 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+.tdiff__detail-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 0;
+  border-top: 1px solid var(--border);
+}
+
+.tdiff__detail-row:first-child {
+  border-top: none;
+}
+
+.tdiff__detail-row--stacked {
+  align-items: flex-start;
+}
+
+.tdiff__detail-icon {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+}
+
+.tdiff__detail-label {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.tdiff__detail-value {
+  flex-shrink: 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.tdiff__detail-value--accent {
+  color: var(--accent);
+}
+
+.tdiff__detail-stack {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tdiff__detail-stack strong {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.tdiff__detail-stack span {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.tdiff__change-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 52px;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(120deg, var(--blue), var(--purple));
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent), 0 8px 24px -6px color-mix(in srgb, var(--accent) 60%, transparent);
+}
+
+/* Best Time to Connect (bonus section) */
 
 .tdiff__overlap {
   background: linear-gradient(160deg, var(--bg-elevated-2), var(--bg-elevated));
@@ -266,6 +458,8 @@
 .tdiff__overlap-note strong {
   color: var(--text-primary);
 }
+
+/* City picker sheet */
 
 .tdiff__sheet {
   position: fixed;
