@@ -43,3 +43,16 @@ export function dayPeriod(timeZone: string, at: Date): DayPeriod {
   if (hour >= 18 && hour < 20) return 'sunset';
   return 'moon';
 }
+
+export function hourInZone(timeZone: string, at: Date): number {
+  const raw = Number(at.toLocaleString('en-US', { timeZone, hour: 'numeric', hour12: false }));
+  return raw === 24 ? 0 : raw;
+}
+
+/** The real instant that is `hour`:00 wall-clock time in `timeZone`, on the same calendar day (in that zone) as `baseDate`. */
+export function instantAtHourInZone(timeZone: string, hour: number, baseDate: Date): Date {
+  const ymd = baseDate.toLocaleDateString('en-CA', { timeZone });
+  const [y, m, d] = ymd.split('-').map(Number);
+  const offsetMinutes = getOffsetMinutes(timeZone, baseDate);
+  return new Date(Date.UTC(y, m - 1, d, hour, 0, 0) - offsetMinutes * 60000);
+}
