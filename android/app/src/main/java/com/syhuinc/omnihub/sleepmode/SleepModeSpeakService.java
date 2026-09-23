@@ -14,19 +14,31 @@ import android.os.Looper;
 import android.os.PowerManager;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
+import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.ServiceCompat;
 
+import java.util.Locale;
+
 /**
  * Speaks one short Sleep Mode reminder line through Android's built-in TextToSpeech engine, as a
  * brief foreground service (required to reliably play audio from a background-triggered
- * receiver), then stops itself. Deliberately uses USAGE_NOTIFICATION_EVENT rather than
- * USAGE_ALARM: this is a nudge, not an emergency wake-up, so it plays at the phone's normal
- * notification volume and is silenced by Do Not Disturb like any other notification sound would be.
+ * receiver), then stops itself.
+ *
+ * The real, automatic nightly nag plays on USAGE_NOTIFICATION_EVENT rather than USAGE_ALARM:
+ * it's a nudge, not an emergency wake-up, so it respects the phone's notification volume and Do
+ * Not Disturb like any other notification sound would. EXTRA_FORCE_AUDIBLE is the one exception -
+ * the settings screen's "Hear a sample" button sets it so a reminder you explicitly asked to hear
+ * right now, while looking at the app, always plays on the media stream instead. Otherwise a
+ * muted notification channel or DND would make the preview silently do nothing, which looks like
+ * a bug rather than the DND-respecting behavior working as intended.
  */
 public class SleepModeSpeakService extends Service {
     public static final String EXTRA_TEXT = "text";
+    public static final String EXTRA_FORCE_AUDIBLE = "forceAudible";
+
+    private static final String TAG = "SleepModeSpeak";
 
     private static final String CHANNEL_ID = "omnihub_sleep_mode";
     private static final int NOTIFICATION_ID = 992;
@@ -48,6 +60,7 @@ public class SleepModeSpeakService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         String text = intent != null ? intent.getStringExtra(EXTRA_TEXT) : null;
+        boolean forceAudible = intent != null && intent.getBooleanExtra(EXTRA_FORCE_AUDIBLE, false);
         if (text == null || text.isEmpty()) {
             stopSelf();
             return START_NOT_STICKY;
@@ -55,7 +68,7 @@ public class SleepModeSpeakService extends Service {
 
         startForegroundWithNotification();
         acquireWakeLock();
-        speak(text);
+        speak(text, forceAudible);
 
         safetyHandler.removeCallbacks(safetyStop);
         safetyHandler.postDelayed(safetyStop, MAX_SPEAK_MS);
@@ -63,14 +76,28 @@ public class SleepModeSpeakService extends Service {
         return START_NOT_STICKY;
     }
 
-    private void speak(String text) {
+    private void speak(String text, boolean forceAudible) {
         tts = new TextToSpeech(this, status -> {
             if (status != TextToSpeech.SUCCESS || tts == null) {
+                Log.w(TAG, "TextToSpeech init failed (status=" + status + ")");
                 stopSelf();
                 return;
             }
+
+            int langResult = tts.setLanguage(Locale.getDefault());
+            if (langResult == TextToSpeech.LANG_MISSING_DATA || langResult == TextToSpeech.LANG_NOT_SUPPORTED) {
+                // Fall back to US English before giving up entirely - most devices have this
+                // voice installed even when the device's own locale's voice data isn't.
+                langResult = tts.setLanguage(Locale.US);
+            }
+            if (langResult == TextToSpeech.LANG_MISSING_DATA || langResult == TextToSpeech.LANG_NOT_SUPPORTED) {
+                Log.w(TAG, "No usable TTS voice/language available (result=" + langResult + ")");
+                stopSelf();
+                return;
+            }
+
             tts.setAudioAttributes(new AudioAttributes.Builder()
-                    .setUsage(AudioAttributes.USAGE_NOTIFICATION_EVENT)
+                    .setUsage(forceAudible ? AudioAttributes.USAGE_MEDIA : AudioAttributes.USAGE_NOTIFICATION_EVENT)
                     .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
                     .build());
             tts.setOnUtteranceProgressListener(new UtteranceProgressListener() {

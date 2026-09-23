@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type CSSProperties } from 'react';
 import { ScreenHeader } from '../../components/ScreenHeader';
 import { Icon } from '../../components/Icon';
 import { useRouter } from '../../app/Router';
@@ -130,11 +130,15 @@ export function SleepMode() {
       <div className="sm__body">
         <div className={`sm__hero${config.enabled ? ' sm__hero--active' : ''}`}>
           <span className="sm__hero-icon">
-            <Icon name="moon" size={24} />
+            <Icon name="moon" size={26} />
+            <span className="sm__hero-zzz">Zz</span>
           </span>
+          <Icon name="star" size={9} className="sm__hero-sparkle sm__hero-sparkle--1" />
+          <Icon name="star" size={7} className="sm__hero-sparkle sm__hero-sparkle--2" />
           <div className="sm__hero-text">
-            <strong>{config.enabled ? 'Sleep Mode is active' : 'Sleep Mode is off'}</strong>
-            <span>
+            <span className="sm__hero-eyebrow">Sleep Mode</span>
+            <strong>{config.enabled ? 'Active' : 'Off'}</strong>
+            <span className="sm__hero-desc">
               {config.enabled
                 ? `Nagging you between ${formatTime(config.bedtimeHour, config.bedtimeMinute)} and ${formatTime(config.wakeHour, config.wakeMinute)}`
                 : 'Turn it on to get talked into sleeping on time.'}
@@ -158,7 +162,10 @@ export function SleepMode() {
         )}
 
         <section className="sm__section">
-          <h2>Schedule</h2>
+          <h2>
+            <Icon name="calendar" size={13} />
+            Schedule
+          </h2>
           <div className="sm__schedule-row">
             <button type="button" className="sm__time-btn" onClick={() => setTimeSheet('bedtime')}>
               <span className="sm__time-icon sm__time-icon--night">
@@ -168,6 +175,7 @@ export function SleepMode() {
                 <span>Bedtime</span>
                 <strong>{formatTime(config.bedtimeHour, config.bedtimeMinute)}</strong>
               </span>
+              <Icon name="chevron-right" size={16} className="sm__time-chevron" />
             </button>
             <button type="button" className="sm__time-btn" onClick={() => setTimeSheet('wake')}>
               <span className="sm__time-icon sm__time-icon--day">
@@ -177,11 +185,15 @@ export function SleepMode() {
                 <span>Wake time</span>
                 <strong>{formatTime(config.wakeHour, config.wakeMinute)}</strong>
               </span>
+              <Icon name="chevron-right" size={16} className="sm__time-chevron" />
             </button>
           </div>
 
           <div className="sm__interval-row">
-            <span className="sm__interval-label">Check in every</span>
+            <span className="sm__interval-label">
+              <Icon name="clock" size={13} />
+              Check in every
+            </span>
             <div className="sm__chip-row">
               {INTERVAL_OPTIONS_MIN.map((m) => (
                 <button
@@ -198,7 +210,13 @@ export function SleepMode() {
         </section>
 
         <section className="sm__section">
-          <h2>Personality</h2>
+          <div className="sm__section-header">
+            <h2>
+              <Icon name="user" size={13} />
+              Personality
+            </h2>
+            <span className="sm__section-hint">Choose how you want to be reminded</span>
+          </div>
           <div className="sm__personality-list">
             {PERSONALITY_META.map((p) => (
               <button
@@ -207,41 +225,64 @@ export function SleepMode() {
                 className={`sm__personality${config.personality === p.id ? ' sm__personality--active' : ''}`}
                 onClick={() => selectPersonality(p.id)}
               >
-                <span className="sm__personality-label">{p.label}</span>
-                <span className="sm__personality-desc">{p.description}</span>
+                <span className="sm__personality-emoji" style={{ '--emoji-color': p.color } as CSSProperties}>
+                  {p.emoji}
+                </span>
+                <span className="sm__personality-info">
+                  <span className="sm__personality-label">{p.label}</span>
+                  <span className="sm__personality-desc">{p.description}</span>
+                </span>
+                <span className="sm__radio" aria-hidden="true" />
               </button>
             ))}
           </div>
           <button type="button" className="sm__sample-btn" onClick={hearSample} disabled={sampleLoading}>
-            <Icon name="zap" size={16} />
+            <Icon name="activity" size={16} />
             {sampleLoading ? 'Loading…' : 'Hear a sample'}
+            <Icon name="chevron-right" size={14} />
           </button>
-          {sampleText && <p className="sm__sample-text">"{sampleText}"</p>}
+          {sampleText && (
+            <div className="sm__sample-bubble">
+              <span className="sm__sample-avatar">🐈‍⬛</span>
+              <p className="sm__sample-text">{sampleText}</p>
+              <span className="sm__sample-wave" aria-hidden="true">
+                <span />
+                <span />
+                <span />
+              </span>
+            </div>
+          )}
         </section>
 
         <section className="sm__section">
-          <h2>Personalization</h2>
-          <div className="sm__mode-tabs">
+          <h2>
+            <Icon name="settings" size={13} />
+            Personalization
+          </h2>
+          <div className="sm__mode-cards">
             <button
               type="button"
-              className={`sm__mode-tab${config.mode === 'normal' ? ' sm__mode-tab--active' : ''}`}
+              className={`sm__mode-card${config.mode === 'normal' ? ' sm__mode-card--active' : ''}`}
               onClick={() => selectMode('normal')}
             >
-              Normal
+              <span className="sm__mode-card-icon">
+                <Icon name="clock" size={18} />
+              </span>
+              <strong>Normal</strong>
+              <span>General bedtime reminders</span>
             </button>
             <button
               type="button"
-              className={`sm__mode-tab${config.mode === 'personal' ? ' sm__mode-tab--active' : ''}`}
+              className={`sm__mode-card${config.mode === 'personal' ? ' sm__mode-card--active' : ''}`}
               onClick={() => selectMode('personal')}
             >
-              Personal
+              <span className="sm__mode-card-icon">
+                <Icon name="user" size={18} />
+              </span>
+              <strong>Personal</strong>
+              <span>Uses your information for a more personal experience</span>
             </button>
           </div>
-          <p className="sm__mode-hint">
-            {config.mode === 'normal'
-              ? "Normal Mode doesn't need any personal information — just general bedtime reminders."
-              : 'Personal Mode is fully optional — fill in only what you want, skip the rest.'}
-          </p>
 
           {config.mode === 'personal' && (
             <div className="sm__personal-fields">

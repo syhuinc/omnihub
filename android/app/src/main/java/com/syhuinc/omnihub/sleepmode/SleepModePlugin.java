@@ -85,7 +85,12 @@ public class SleepModePlugin extends Plugin {
         call.resolve(ret);
     }
 
-    /** Speaks a sample line aloud right now, via the same foreground service the nightly loop uses. */
+    /**
+     * Speaks a sample line aloud right now, via the same foreground service the nightly loop
+     * uses - but always on the media stream (see SleepModeSpeakService's EXTRA_FORCE_AUDIBLE
+     * doc) so a preview you explicitly asked for is never silently swallowed by a muted
+     * notification channel or Do Not Disturb.
+     */
     @PluginMethod
     public void speakTest(PluginCall call) {
         String text = call.getString("text");
@@ -95,6 +100,7 @@ public class SleepModePlugin extends Plugin {
         }
         Intent serviceIntent = new Intent(getContext(), SleepModeSpeakService.class);
         serviceIntent.putExtra(SleepModeSpeakService.EXTRA_TEXT, text);
+        serviceIntent.putExtra(SleepModeSpeakService.EXTRA_FORCE_AUDIBLE, true);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             getContext().startForegroundService(serviceIntent);
         } else {
