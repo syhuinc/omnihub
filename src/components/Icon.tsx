@@ -78,7 +78,14 @@ export type IconName =
   | 'palette'
   | 'hash'
   | 'pie-chart'
-  | 'trending-up';
+  | 'trending-up'
+  | 'heart'
+  | 'camera'
+  | 'paw'
+  | 'chevron-down'
+  | 'power'
+  | 'battery'
+  | 'zap';
 
 interface IconProps {
   name: IconName;
@@ -304,6 +311,13 @@ const paths: Record<IconName, React.ReactNode> = {
     <path d="M12 2a10 10 0 1 0 10 10H12Z M14 2.5A10 10 0 0 1 21.5 10H14Z" />
   ),
   'trending-up': <path d="M3 17 10 10l4 4 7-7 M15 7h6v6" />,
+  heart: <path d="M12 20.5s-7.5-4.6-9.8-9.4C.6 7.4 2.6 4 6 4c2 0 3.4 1 6 3.5C14.6 5 16 4 18 4c3.4 0 5.4 3.4 3.8 7.1-2.3 4.8-9.8 9.4-9.8 9.4Z" />,
+  camera: <path d="M4 8h3l1.5-2h7L17 8h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1ZM12 18a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" />,
+  paw: <path d="M8 7a1.6 2 0 1 0 0-4 1.6 2 0 0 0 0 4ZM16 7a1.6 2 0 1 0 0-4 1.6 2 0 0 0 0 4ZM4.5 11a1.5 2 0 1 0 0-4 1.5 2 0 0 0 0 4ZM19.5 11a1.5 2 0 1 0 0-4 1.5 2 0 0 0 0 4ZM12 20c-3 0-5.5-1.4-5.5-3.8 0-2 1.8-3.2 2.8-4.6.9-1.3 1.3-2.2 2.7-2.2s1.8.9 2.7 2.2c1 1.4 2.8 2.6 2.8 4.6 0 2.4-2.5 3.8-5.5 3.8Z" />,
+  'chevron-down': <path d="M6 9l6 6 6-6" />,
+  power: <path d="M12 3v8 M6.3 6.3a8 8 0 1 0 11.4 0" />,
+  battery: <path d="M3 8a1 1 0 0 1 1-1h13a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1ZM19 10.5h2v3h-2Z" />,
+  zap: <path d="M13 2 4 14h6l-1 8 9-12h-6Z" />,
 };
 
 export function Icon({ name, size = 20, strokeWidth = 2, className, style }: IconProps) {

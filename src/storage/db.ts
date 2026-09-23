@@ -27,6 +27,7 @@ export const StorageKeys = {
   diceRollHistory: `${PREFIX}random.diceHistory`,
   checklistCategories: `${PREFIX}checklist.categories`,
   percentageHistory: `${PREFIX}percentage.history`,
+  people: `${PREFIX}age.people`,
 } as const;
 
 export function storageGet<T>(key: string, fallback: T): T {
