@@ -432,14 +432,63 @@
 .cal__header button {
   width: 24px;
   height: 24px;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--text-secondary);
 }
 
+.cal__header-label {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  justify-content: center;
+  gap: 4px;
+  width: auto;
+  height: auto;
+  padding: 4px 8px;
+  border-radius: var(--radius-pill);
+  color: var(--cal-accent, var(--accent));
+}
+
+.cal__header-label strong {
+  color: inherit;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cal__header-label svg {
+  flex-shrink: 0;
+}
+
 .cal__prev-icon {
   transform: rotate(180deg);
+}
+
+.cal__year-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  padding: 4px 0 2px;
+}
+
+.cal__year {
+  min-height: 40px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  background: var(--bg-active);
+}
+
+.cal__year--selected {
+  background: var(--cal-accent);
+  color: #fff;
+  font-weight: 800;
+  box-shadow: 0 0 10px -2px var(--cal-accent);
 }
 
 .cal__weekdays {
