@@ -73,7 +73,9 @@ export type IconName =
   | 'pot'
   | 'flag'
   | 'coins'
-  | 'list-bullet';
+  | 'list-bullet'
+  | 'tag'
+  | 'palette';
 
 interface IconProps {
   name: IconName;
@@ -287,6 +289,12 @@ const paths: Record<IconName, React.ReactNode> = {
   ),
   'list-bullet': (
     <path d="M9 6h11M9 12h11M9 18h11 M4.5 6h.01M4.5 12h.01M4.5 18h.01" />
+  ),
+  tag: (
+    <path d="M11.5 3H5a2 2 0 0 0-2 2v6.5a2 2 0 0 0 .6 1.4l8.5 8.5a2 2 0 0 0 2.8 0l6.5-6.5a2 2 0 0 0 0-2.8l-8.5-8.5a2 2 0 0 0-1.4-.6ZM7.5 8a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1Z" />
+  ),
+  palette: (
+    <path d="M12 3a9 9 0 1 0 0 18c.9 0 1.6-.7 1.6-1.6 0-.4-.2-.8-.4-1.1-.3-.3-.4-.7-.4-1.1 0-.9.7-1.6 1.6-1.6H16a5 5 0 0 0 5-5c0-4.4-4-8-9-8Z M7 12a1 1 0 1 0 0-2 1 1 0 0 0 0 2ZM9 8a1 1 0 1 0 0-2 1 1 0 0 0 0 2ZM14 7a1 1 0 1 0 0-2 1 1 0 0 0 0 2ZM17 10a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" />
   ),
 };
 
