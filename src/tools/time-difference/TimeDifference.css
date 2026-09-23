@@ -169,7 +169,7 @@
   inset: 0;
   width: 100%;
   height: 100%;
-  fill: color-mix(in srgb, var(--accent) 55%, var(--text-tertiary));
+  --wmap-dot-color: color-mix(in srgb, var(--accent) 55%, var(--text-tertiary));
   opacity: 0.5;
 }
 
@@ -183,11 +183,10 @@
 
 .wmarc__arc path {
   fill: none;
-  stroke: var(--accent);
-  stroke-width: 1.2;
-  stroke-dasharray: 3 3;
+  stroke-width: 1.6;
+  stroke-linecap: round;
   vector-effect: non-scaling-stroke;
-  opacity: 0.85;
+  filter: drop-shadow(0 0 3px color-mix(in srgb, var(--accent) 45%, transparent));
 }
 
 .wmarc__pin {

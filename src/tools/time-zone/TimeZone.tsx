@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { ScreenHeader } from '../../components/ScreenHeader';
 import { Icon } from '../../components/Icon';
 import { SearchBar } from '../../components/SearchBar';
@@ -11,7 +11,6 @@ import { CITIES, getCityById, getCityByTimeZone, type City } from './cities';
 import {
   dayOffsetLabel,
   dayPeriod,
-  formatFullDate,
   formatTimeLower,
   formatWorldClockDiff,
   formatZoneLabel,
@@ -26,6 +25,17 @@ const DEFAULT_CITY_IDS = ['kuala-lumpur', 'new-york', 'london', 'mumbai', 'tokyo
 type Tab = 'clock' | 'favorites' | 'converter';
 type SortMode = 'added' | 'offset' | 'name';
 
+function formatHeroDate(date: Date): string {
+  return date.toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+function formatRowDate(date: Date, timeZone: string): string {
+  const weekday = date.toLocaleDateString('en-US', { weekday: 'short', timeZone });
+  const day = date.toLocaleDateString('en-US', { day: 'numeric', timeZone });
+  const month = date.toLocaleDateString('en-US', { month: 'short', timeZone });
+  return `${weekday}, ${day} ${month}`;
+}
+
 export function TimeZone() {
   const { back } = useRouter();
   const [cityIds, setCityIds] = useState<string[]>(() => storageGet(StorageKeys.timeZoneCities, DEFAULT_CITY_IDS));
@@ -38,6 +48,13 @@ export function TimeZone() {
   const [sortMode, setSortMode] = useState<SortMode>('added');
   const [convHour, setConvHour] = useState(now.getHours());
   const [convMinute, setConvMinute] = useState(now.getMinutes());
+  const searchWrapRef = useRef<HTMLDivElement>(null);
+
+  function focusSearch() {
+    hapticTap();
+    searchWrapRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    searchWrapRef.current?.querySelector('input')?.focus();
+  }
 
   useEffect(() => {
     const interval = setInterval(() => setNow(new Date()), 1000);
@@ -122,7 +139,7 @@ export function TimeZone() {
     const isLocal = city.timeZone === localTimeZone;
     const isFavorite = favoriteIds.includes(city.id);
     const time = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: city.timeZone });
-    const dateLabel = now.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', timeZone: city.timeZone });
+    const dateLabel = formatRowDate(now, city.timeZone);
     return (
       <li key={city.id}>
         <div className={`tz__row2${isLocal ? ' tz__row2--local' : ''}`}>
@@ -153,16 +170,7 @@ export function TimeZone() {
 
   return (
     <div className="screen">
-      <ScreenHeader
-        title="Time Zone"
-        subtitle="Explore time around the world"
-        onBack={back}
-        action={
-          <button type="button" className="tz__header-btn" onClick={() => setShowSortSheet(true)} aria-label="Sort">
-            <Icon name="more-dots" size={18} />
-          </button>
-        }
-      />
+      <ScreenHeader title="Time Zone" subtitle="Explore time around the world" onBack={back} />
 
       <div className="tz__body">
         <div className="tz__hero2">
@@ -178,7 +186,7 @@ export function TimeZone() {
               {formatTimeLower(now).replace(/\s?(am|pm)/i, '')}
               <em>{now.getHours() < 12 ? 'am' : 'pm'}</em>
             </span>
-            <span className="tz__hero2-date">{formatFullDate(now)}</span>
+            <span className="tz__hero2-date">{formatHeroDate(now)}</span>
           </div>
 
           {localCity && (
@@ -213,7 +221,14 @@ export function TimeZone() {
         </div>
 
         {tab !== 'converter' && (
-          <SearchBar value={search} onChange={setSearch} placeholder="Search city, country or time zone..." />
+          <div className="tz__search-row">
+            <div ref={searchWrapRef} className="tz__search-wrap">
+              <SearchBar value={search} onChange={setSearch} placeholder="Search city, country or time zone..." />
+            </div>
+            <button type="button" className="tz__filter-btn" onClick={() => setShowSortSheet(true)} aria-label="Sort">
+              <Icon name="sort" size={17} />
+            </button>
+          </div>
         )}
 
         <div className="tz__tabs">
@@ -255,6 +270,11 @@ export function TimeZone() {
                 </ul>
               </div>
             )}
+
+            <button type="button" className="tz__add-btn" onClick={focusSearch}>
+              <Icon name="plus" size={18} />
+              Add City
+            </button>
           </>
         )}
 

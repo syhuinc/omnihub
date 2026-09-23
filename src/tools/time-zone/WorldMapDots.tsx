@@ -3,14 +3,14 @@ import { WORLD_DOTS_FLAT, projectToPercent } from './worldMap';
 
 interface WorldMapDotsProps {
   className?: string;
-  dotRadius?: number;
-  /** true stretches the 0-100 square to fill a wide container (flat map); false crops it (globe). */
-  stretch?: boolean;
+  /** Dot diameter in real pixels — fixed size so dots stay circular no matter the container's aspect ratio. */
+  dotSize?: number;
 }
 
-/** Renders the precomputed landmass dots as a decorative stippled world-map background, in a
- * shared 0-100 x/y percent space so callers can position their own overlays (pins, arcs) to match. */
-export function WorldMapDots({ className, dotRadius = 0.85, stretch = false }: WorldMapDotsProps) {
+/** Renders the precomputed landmass dots as a decorative stippled world-map background. Uses
+ * absolutely-positioned fixed-size elements (not SVG shapes) so a non-square container — the
+ * flat Time Difference map, or the circular globe crop — never stretches a dot into an ellipse. */
+export function WorldMapDots({ className, dotSize = 3 }: WorldMapDotsProps) {
   const points = useMemo(() => {
     const pts: { x: number; y: number }[] = [];
     for (let i = 0; i < WORLD_DOTS_FLAT.length; i += 2) {
@@ -21,15 +21,14 @@ export function WorldMapDots({ className, dotRadius = 0.85, stretch = false }: W
   }, []);
 
   return (
-    <svg
-      className={className}
-      viewBox="0 0 100 100"
-      preserveAspectRatio={stretch ? 'none' : 'xMidYMid slice'}
-      aria-hidden="true"
-    >
+    <div className={className} aria-hidden="true">
       {points.map((p, i) => (
-        <circle key={i} cx={p.x} cy={p.y} r={dotRadius} />
+        <span
+          key={i}
+          className="wmap-dot"
+          style={{ left: `${p.x}%`, top: `${p.y}%`, width: dotSize, height: dotSize }}
+        />
       ))}
-    </svg>
+    </div>
   );
 }

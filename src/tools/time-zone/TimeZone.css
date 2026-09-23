@@ -51,7 +51,7 @@
 .tz__hero2 {
   position: relative;
   overflow: hidden;
-  min-height: 190px;
+  min-height: 210px;
   background: linear-gradient(160deg, color-mix(in srgb, var(--accent) 14%, var(--bg-elevated)), var(--bg-elevated) 65%);
   border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--border));
   border-radius: var(--radius-lg);
@@ -110,10 +110,9 @@
 
 .tz__hero2-globe {
   position: absolute;
-  right: -30px;
-  bottom: -30px;
+  right: -34px;
+  bottom: -38px;
   z-index: 1;
-  opacity: 0.9;
 }
 
 .tz__hero2-daynight {
@@ -165,16 +164,27 @@
   text-transform: none;
 }
 
+/* Stippled world-map dots (shared by the globe and the Time Difference map arc) */
+
+.wmap-dot {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: var(--wmap-dot-color, currentColor);
+  pointer-events: none;
+}
+
 /* Globe illustration */
 
 .globe {
   position: relative;
-  width: 120px;
-  height: 120px;
+  width: 150px;
+  height: 150px;
   border-radius: 50%;
   overflow: hidden;
   background: radial-gradient(circle at 35% 30%, #1c3a6b, #050d1c 75%);
-  box-shadow: 0 0 30px -6px color-mix(in srgb, var(--accent) 60%, transparent), inset 0 0 20px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 0 34px -4px color-mix(in srgb, var(--accent) 65%, transparent), inset 0 0 24px rgba(0, 0, 0, 0.6),
+    inset 0 0 0 1px color-mix(in srgb, var(--accent) 35%, transparent);
 }
 
 .globe__dots {
@@ -182,14 +192,18 @@
   inset: 0;
   width: 100%;
   height: 100%;
-  fill: #7fb2ff;
-  opacity: 0.85;
+  --wmap-dot-color: #8ec1ff;
+  opacity: 0.9;
+}
+
+.globe__dots .wmap-dot {
+  box-shadow: 0 0 2px #8ec1ff;
 }
 
 .globe__shade {
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 32% 28%, transparent 30%, rgba(0, 0, 0, 0.55) 80%), linear-gradient(200deg, rgba(255, 255, 255, 0.12), transparent 40%);
+  background: radial-gradient(circle at 32% 28%, transparent 30%, rgba(0, 0, 0, 0.6) 82%), linear-gradient(200deg, rgba(255, 255, 255, 0.14), transparent 40%);
   pointer-events: none;
 }
 
@@ -198,6 +212,7 @@
   transform: translate(-50%, -50%);
   width: 10px;
   height: 10px;
+  z-index: 2;
 }
 
 .globe__pin-dot {
@@ -216,12 +231,108 @@
   animation: globe-pulse 2s ease-out infinite;
 }
 
+.globe__pin-label {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translate(-50%, -100%);
+  white-space: nowrap;
+  font-size: 8px;
+  font-weight: 700;
+  color: #fff;
+  background: color-mix(in srgb, var(--accent) 85%, black 10%);
+  padding: 3px 7px;
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-sm);
+}
+
+.globe__pin-label::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 3px solid transparent;
+  border-top-color: color-mix(in srgb, var(--accent) 85%, black 10%);
+}
+
+.globe__pin-label--right {
+  left: auto;
+  right: 14px;
+  transform: translate(0, -100%);
+}
+
+.globe__pin-label--right::after {
+  left: auto;
+  right: 2px;
+  transform: none;
+}
+
+.globe__pin-label--left {
+  left: 14px;
+  transform: translate(0, -100%);
+}
+
+.globe__pin-label--left::after {
+  left: 2px;
+  transform: none;
+}
+
 @keyframes globe-pulse {
   0% { transform: scale(0.6); opacity: 0.8; }
   100% { transform: scale(2.4); opacity: 0; }
 }
 
 /* Search + tabs */
+
+.tz__search-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.tz__search-wrap {
+  flex: 1;
+  min-width: 0;
+}
+
+.tz__filter-btn {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  box-shadow: var(--shadow-sm);
+}
+
+.tz__filter-btn:active {
+  background: var(--bg-active);
+}
+
+.tz__add-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 13px;
+  margin-top: 4px;
+  border-radius: var(--radius-pill);
+  border: 1px dashed color-mix(in srgb, var(--accent) 45%, var(--border));
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  color: var(--accent);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.tz__add-btn:active {
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+}
 
 .tz__conv-hint {
   display: flex;

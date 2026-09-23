@@ -19,9 +19,15 @@ export function WorldMapArc({ fromLat, fromLon, toLat, toLon }: WorldMapArcProps
 
   return (
     <div className="wmarc">
-      <WorldMapDots className="wmarc__dots" dotRadius={0.9} stretch />
+      <WorldMapDots className="wmarc__dots" dotSize={2.2} />
       <svg className="wmarc__arc" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-        <path d={path} />
+        <defs>
+          <linearGradient id="wmarcGradient" x1={from.xPct} y1="0" x2={to.xPct} y2="0" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="var(--yellow)" />
+            <stop offset="100%" stopColor="var(--blue)" />
+          </linearGradient>
+        </defs>
+        <path d={path} stroke="url(#wmarcGradient)" />
       </svg>
       <span className="wmarc__pin wmarc__pin--from" style={{ left: `${from.xPct}%`, top: `${from.yPct}%` }} />
       <span className="wmarc__pin wmarc__pin--to" style={{ left: `${to.xPct}%`, top: `${to.yPct}%` }} />
