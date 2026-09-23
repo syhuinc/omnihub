@@ -26,12 +26,17 @@
 
 .calc__display {
   flex: 0 1 auto;
-  padding: 24px 24px 16px;
+  margin: 8px 16px 16px;
+  padding: 20px 20px 16px;
   text-align: right;
   display: flex;
   flex-direction: column;
   gap: 8px;
   justify-content: flex-end;
+  border-radius: var(--radius-lg);
+  border: 1px solid color-mix(in srgb, var(--accent) 40%, var(--border));
+  background: linear-gradient(160deg, color-mix(in srgb, var(--accent) 6%, var(--bg-elevated)), var(--bg));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 15%, transparent), 0 0 24px -8px color-mix(in srgb, var(--accent) 45%, transparent);
 }
 
 .calc__expression {
@@ -46,6 +51,7 @@
   color: var(--text-primary);
   overflow-x: auto;
   white-space: nowrap;
+  text-shadow: 0 0 20px color-mix(in srgb, var(--accent) 30%, transparent);
 }
 
 .calc__pad {
@@ -66,7 +72,9 @@
   aspect-ratio: 1;
   width: 100%;
   border-radius: 50%;
-  background: var(--bg-elevated);
+  background: linear-gradient(160deg, var(--bg-elevated-2), var(--bg-elevated));
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
   font-size: 26px;
   font-weight: 400;
   color: var(--text-primary);
@@ -78,28 +86,35 @@
 
 .calc__key--fn {
   background: color-mix(in srgb, var(--accent) 16%, var(--bg-elevated));
+  border-color: color-mix(in srgb, var(--accent) 25%, var(--border));
   color: var(--accent);
   font-weight: 500;
   font-size: 22px;
 }
 
 .calc__key--op {
-  background: var(--accent);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 85%, white 10%), var(--accent));
+  border: none;
   color: #fff;
   font-weight: 500;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent), 0 4px 18px -4px color-mix(in srgb, var(--accent) 60%, transparent);
 }
 
 .calc__key--eq {
-  background: var(--green);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--green) 85%, white 10%), var(--green));
+  border: none;
   color: #fff;
   font-weight: 500;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--green) 30%, transparent), 0 4px 18px -4px color-mix(in srgb, var(--green) 60%, transparent);
 }
 
 .calc__key--clear {
-  background: var(--red);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--red) 85%, white 10%), var(--red));
+  border: none;
   color: #fff;
   font-weight: 600;
   font-size: 20px;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--red) 30%, transparent), 0 4px 18px -4px color-mix(in srgb, var(--red) 60%, transparent);
 }
 
 .calc__history {
@@ -133,8 +148,10 @@
   align-items: flex-end;
   gap: 4px;
   padding: 14px;
-  background: var(--bg-elevated);
+  background: linear-gradient(160deg, var(--bg-elevated-2), var(--bg-elevated));
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
   text-align: right;
 }
 
