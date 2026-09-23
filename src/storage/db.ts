@@ -25,6 +25,7 @@ export const StorageKeys = {
   timerHistory: `${PREFIX}timer.history`,
   stopwatchHistory: `${PREFIX}stopwatch.history`,
   diceRollHistory: `${PREFIX}random.diceHistory`,
+  checklistCategories: `${PREFIX}checklist.categories`,
 } as const;
 
 export function storageGet<T>(key: string, fallback: T): T {
