@@ -226,11 +226,11 @@ export const TOOLS: ToolMeta[] = [
   {
     id: 'compass',
     name: 'Compass',
-    shortDescription: 'Find true and magnetic north',
+    shortDescription: 'Heading, location, altitude & a level',
     category: 'essentials',
     color: 'var(--teal)',
     icon: 'compass',
-    keywords: ['compass', 'direction', 'north', 'heading', 'navigate'],
+    keywords: ['compass', 'direction', 'north', 'heading', 'navigate', 'level', 'altitude', 'location', 'gyroscope'],
     presentation: 'page',
   },
   {

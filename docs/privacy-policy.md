@@ -35,7 +35,7 @@ Your PIN is never stored anywhere, on-device or in the cloud — only used to de
 
 ## Permissions
 
-Omni Hub does not access your microphone, contacts, or location. It requests these permissions, all used only to make features work, never to collect or transmit data beyond what's described above:
+Omni Hub does not access your microphone or contacts. It requests these permissions, all used only to make features work, never to collect or transmit data beyond what's described above:
 
 - **Internet / network access** — required only for the optional Google Sign-In and cloud sync described above. Unused unless you sign in.
 - **Vibrate** — haptic feedback (tap and completion vibrations).
@@ -43,6 +43,7 @@ Omni Hub does not access your microphone, contacts, or location. It requests the
 - **Camera / flashlight** — used only by the **QR Scanner**, **Barcode Scanner**, and **Flashlight** tools, entirely on your device. No photo, video, or scanned image is ever saved or transmitted; a scanned code's decoded text stays on-device too.
 - **Phone state** (optional, off by default) — used only by the **Flashlight** tool's "Flash Alerts" setting to detect when your phone starts or stops ringing, so it can blink the flash for an incoming call. Omni Hub never reads phone numbers, call logs, or call content.
 - **Notification access** (optional, off by default, granted separately in Android Settings) — used only by the same "Flash Alerts" setting to detect that some other app posted a notification, so it can blink the flash. Omni Hub never reads, stores, or transmits any notification's content.
+- **Location** — used only by the **Compass** tool's optional location, altitude, and accuracy display. Read entirely on-device to show where you are on that one screen; never stored, logged, or transmitted anywhere.
 
 ## Alarm
 

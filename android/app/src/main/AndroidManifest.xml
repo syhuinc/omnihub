@@ -96,6 +96,9 @@
         notification" alert (also off by default, and requiring a separate grant the user makes
         in Android Settings) never reads or stores notification content either — it only reacts
         to a notification being posted.
+      - ACCESS_FINE_LOCATION / ACCESS_COARSE_LOCATION: only for the Compass tool's optional
+        location/altitude/accuracy display. Used entirely on-device to show where you are on that
+        one screen - never stored, logged, or transmitted anywhere.
     -->
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
@@ -108,6 +111,8 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.FLASHLIGHT" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-feature android:name="android.hardware.camera" android:required="false" />
     <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
 </manifest>

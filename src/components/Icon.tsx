@@ -60,7 +60,13 @@ export type IconName =
   | 'scan'
   | 'flashlight'
   | 'compass'
-  | 'barcode';
+  | 'barcode'
+  | 'mountain'
+  | 'target'
+  | 'magnet'
+  | 'gyroscope'
+  | 'activity'
+  | 'level';
 
 interface IconProps {
   name: IconName;
@@ -225,6 +231,33 @@ const paths: Record<IconName, React.ReactNode> = {
     <path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z M15.5 8.5l-2 5-5 2 2-5Z" />
   ),
   barcode: <path d="M4 4v16M7.5 4v16M10 4v16M13 4v16M16.5 4v16M20 4v16" />,
+  mountain: (
+    <path d="m3 20 5.5-9.5L12 16l2.5-4L21 20Z M15.5 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z" />
+  ),
+  target: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <circle cx="12" cy="12" r="5" />
+      <circle cx="12" cy="12" r="1" fill="currentColor" />
+    </>
+  ),
+  magnet: (
+    <path d="M6 4h4v8.5a2 2 0 1 1-4 0Z M14 4h4v8.5a2 2 0 1 1-4 0Z M6 4a6 6 0 0 1 12 0 M6 9h4 M14 9h4" />
+  ),
+  gyroscope: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <ellipse cx="12" cy="12" rx="9" ry="4" />
+      <ellipse cx="12" cy="12" rx="4" ry="9" />
+    </>
+  ),
+  activity: <path d="M3 12h4l2-7 4 14 2-7h6" />,
+  level: (
+    <>
+      <rect x="3" y="9" width="18" height="6" rx="3" />
+      <circle cx="12" cy="12" r="1.6" fill="currentColor" />
+    </>
+  ),
 };
 
 export function Icon({ name, size = 20, strokeWidth = 2, className, style }: IconProps) {

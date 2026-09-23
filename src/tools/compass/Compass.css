@@ -1,141 +1,175 @@
-.cp__body {
-  flex: 1;
+.cp__header-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  padding: 32px;
+  color: var(--text-tertiary);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
 }
 
-.cp__hint {
+.cp__tabs {
+  display: flex;
+  gap: 8px;
+  padding: 0 20px 12px;
+}
+
+.cp__tab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 40px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
   color: var(--text-secondary);
   font-size: 14px;
-  text-align: center;
-  line-height: 1.5;
+  font-weight: 600;
 }
 
-.cp__hint-icon {
+.cp__tab--active {
+  background: var(--accent-gradient);
+  border-color: transparent;
+  color: #fff;
+}
+
+.cp__sheet {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: flex-end;
+  z-index: 20;
+}
+
+.cp__sheet-content {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 24px 20px calc(20px + var(--safe-bottom));
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+}
+
+.cp__sheet-content h2 {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+
+.cp__sheet-content p {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.cp__calibrate-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+}
+
+.cp__setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 0;
+  border-top: 1px solid var(--border);
+}
+
+.cp__setting-row:first-of-type {
+  border-top: none;
+}
+
+.cp__setting-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.cp__setting-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.cp__setting-desc {
+  font-size: 12px;
   color: var(--text-secondary);
 }
 
-.cp__btn {
-  min-height: 48px;
-  padding: 0 28px;
+.cp__switch {
+  flex-shrink: 0;
+  width: 46px;
+  height: 28px;
   border-radius: var(--radius-pill);
+  background: var(--bg-active);
+  position: relative;
+  transition: background 0.15s ease;
+}
+
+.cp__switch--on {
+  background: var(--accent-gradient);
+}
+
+.cp__switch-knob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.cp__switch--on .cp__switch-knob {
+  transform: translateX(18px);
+}
+
+.cp__unit-toggle {
+  flex-shrink: 0;
+  display: flex;
+  gap: 6px;
+}
+
+.cp__unit-chip {
+  min-height: 32px;
+  padding: 0 12px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-active);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.cp__unit-chip--active {
   background: var(--accent-gradient);
   color: #fff;
+}
+
+.cp__sheet-close {
+  min-height: 48px;
+  margin-top: 20px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-active);
+  color: var(--text-primary);
   font-size: 15px;
   font-weight: 600;
-  margin-top: 8px;
-}
-
-.cp__dial-wrap {
-  position: relative;
-  width: min(70vw, 260px);
-  aspect-ratio: 1;
-  margin-bottom: 8px;
-}
-
-.cp__dial {
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  background: var(--bg-elevated);
-  border: 2px solid var(--border);
-  transition: transform 0.15s ease-out;
-}
-
-.cp__dial-label {
-  position: absolute;
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--text-primary);
-}
-
-.cp__dial-label--n {
-  top: 10px;
-  left: 50%;
-  transform: translateX(-50%);
-  color: var(--red);
-}
-
-.cp__dial-label--e {
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-}
-
-.cp__dial-label--s {
-  bottom: 10px;
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-.cp__dial-label--w {
-  left: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-}
-
-.cp__dial-tick {
-  position: absolute;
-  width: 2px;
-  height: 14px;
-  background: var(--text-tertiary);
-  left: 50%;
-  top: 6px;
-  transform-origin: 50% calc(50vw * 0.7 - 6px);
-}
-
-.cp__dial-tick--ne {
-  transform: translateX(-50%) rotate(45deg);
-}
-
-.cp__dial-tick--se {
-  transform: translateX(-50%) rotate(135deg);
-}
-
-.cp__dial-tick--sw {
-  transform: translateX(-50%) rotate(225deg);
-}
-
-.cp__dial-tick--nw {
-  transform: translateX(-50%) rotate(315deg);
-}
-
-.cp__needle {
-  position: absolute;
-  left: 50%;
-  top: 8%;
-  width: 4px;
-  height: 42%;
-  background: var(--accent);
-  border-radius: 2px;
-  transform: translateX(-50%);
-  transform-origin: 50% 100%;
-}
-
-.cp__needle::before {
-  content: '';
-  position: absolute;
-  top: -6px;
-  left: 50%;
-  transform: translateX(-50%);
-  border-left: 8px solid transparent;
-  border-right: 8px solid transparent;
-  border-bottom: 12px solid var(--accent);
-}
-
-.cp__heading {
-  font-size: 40px;
-  font-weight: 700;
-  color: var(--text-primary);
-  font-variant-numeric: tabular-nums;
-}
-
-.cp__direction {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--text-secondary);
 }

@@ -72,7 +72,7 @@
   <p>Your PIN is never stored anywhere, on-device or in the cloud — only used to derive that key each time you unlock — so if you forget it, Vault content cannot be recovered and the Vault must be reset. Opening or saving a Vault photo/file decrypts a temporary copy for that action (e.g. to view an image or save it to your Downloads folder); that copy is no longer encrypted once it leaves the Vault. Vault photos and files are not included in the main <strong>Profile ▸ Export Backup</strong> file; use <strong>Vault ▸ Photos &amp; Files ▸ Export</strong> instead, which decrypts them into a plain <code>.zip</code> file on your device — that zip is unencrypted, since it needs to be readable outside the app, so store or share it with the same care you'd give the original photos/files. Use <strong>Vault ▸ Photos &amp; Files ▸ Import</strong> to bring that zip back in (e.g. after reinstalling), which re-encrypts everything as it's added.</p>
 
   <h2>Permissions</h2>
-  <p>Omni Hub does not access your microphone, contacts, or location. It requests these permissions, all used only to make features work, never to collect or transmit data beyond what's described above:</p>
+  <p>Omni Hub does not access your microphone or contacts. It requests these permissions, all used only to make features work, never to collect or transmit data beyond what's described above:</p>
   <ul>
     <li><strong>Internet / network access</strong> — required only for the optional Google Sign-In and cloud sync described above. Unused unless you sign in.</li>
     <li><strong>Vibrate</strong> — haptic feedback (tap and completion vibrations).</li>
@@ -80,6 +80,7 @@
     <li><strong>Camera / flashlight</strong> — used only by the <strong>QR Scanner</strong>, <strong>Barcode Scanner</strong>, and <strong>Flashlight</strong> tools, entirely on your device. No photo, video, or scanned image is ever saved or transmitted; a scanned code's decoded text stays on-device too.</li>
     <li><strong>Phone state</strong> (optional, off by default) — used only by the <strong>Flashlight</strong> tool's "Flash Alerts" setting to detect when your phone starts or stops ringing, so it can blink the flash for an incoming call. Omni Hub never reads phone numbers, call logs, or call content.</li>
     <li><strong>Notification access</strong> (optional, off by default, granted separately in Android Settings) — used only by the same "Flash Alerts" setting to detect that some other app posted a notification, so it can blink the flash. Omni Hub never reads, stores, or transmits any notification's content.</li>
+    <li><strong>Location</strong> — used only by the <strong>Compass</strong> tool's optional location, altitude, and accuracy display. Read entirely on-device to show where you are on that one screen; never stored, logged, or transmitted anywhere.</li>
   </ul>
 
   <h2 id="alarm">Alarm</h2>

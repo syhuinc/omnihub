@@ -1,143 +1,174 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { ScreenHeader } from '../../components/ScreenHeader';
 import { Icon } from '../../components/Icon';
 import { useRouter } from '../../app/Router';
+import { useBackHandler } from '../../app/useBackHandler';
+import { storageGet, storageSet, StorageKeys } from '../../storage/db';
+import { hapticTap } from '../../haptics';
+import { useGeolocation } from './useGeolocation';
+import { CompassView } from './CompassView';
+import { LevelView } from './LevelView';
+import { DEFAULT_COMPASS_SETTINGS, type CompassSettings } from './types';
 import './Compass.css';
 
-type Status = 'checking' | 'unavailable' | 'needsPermission' | 'ready';
-
-const DIRECTIONS = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
-
-function directionLabel(heading: number): string {
-  const index = Math.round(heading / 45) % 8;
-  return DIRECTIONS[index];
-}
-
-// Some browsers expose event.webkitCompassHeading (already 0=N, clockwise);
-// otherwise fall back to 360 - alpha, the standard conversion for absolute orientation.
-interface CompassOrientationEvent extends DeviceOrientationEvent {
-  webkitCompassHeading?: number;
-}
+type Tab = 'compass' | 'level';
 
 export function Compass() {
   const { back } = useRouter();
-  const [status, setStatus] = useState<Status>('checking');
-  const [heading, setHeading] = useState(0);
-  const listenerRef = useRef<((e: DeviceOrientationEvent) => void) | null>(null);
+  const [tab, setTab] = useState<Tab>('compass');
+  const [showCalibrate, setShowCalibrate] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [settings, setSettings] = useState<CompassSettings>(() =>
+    storageGet(StorageKeys.compassSettings, DEFAULT_COMPASS_SETTINGS),
+  );
+  const geo = useGeolocation();
 
-  function handleOrientation(e: CompassOrientationEvent) {
-    let value: number | null = null;
-    if (typeof e.webkitCompassHeading === 'number') {
-      value = e.webkitCompassHeading;
-    } else if (e.alpha !== null) {
-      value = 360 - e.alpha;
-    }
-    if (value !== null) {
-      setHeading(((value % 360) + 360) % 360);
-      setStatus('ready');
-    }
-  }
+  useBackHandler(() => {
+    if (showCalibrate) setShowCalibrate(false);
+    else if (showSettings) setShowSettings(false);
+  }, showCalibrate || showSettings);
 
-  function attachListener() {
-    const eventName = 'ondeviceorientationabsolute' in window ? 'deviceorientationabsolute' : 'deviceorientation';
-    listenerRef.current = handleOrientation as (e: DeviceOrientationEvent) => void;
-    window.addEventListener(eventName, listenerRef.current, true);
-  }
-
-  useEffect(() => {
-    if (typeof DeviceOrientationEvent === 'undefined') {
-      setStatus('unavailable');
-      return;
-    }
-
-    const requestPermission = (
-      DeviceOrientationEvent as unknown as { requestPermission?: () => Promise<'granted' | 'denied'> }
-    ).requestPermission;
-
-    if (typeof requestPermission === 'function') {
-      setStatus('needsPermission');
-    } else {
-      attachListener();
-      // If no orientation event ever arrives, the device likely has no compass sensor.
-      const timeout = setTimeout(() => setStatus((s) => (s === 'checking' ? 'unavailable' : s)), 2500);
-      return () => {
-        clearTimeout(timeout);
-        if (listenerRef.current) {
-          window.removeEventListener('deviceorientationabsolute', listenerRef.current, true);
-          window.removeEventListener('deviceorientation', listenerRef.current, true);
-        }
-      };
-    }
-
-    return () => {
-      if (listenerRef.current) {
-        window.removeEventListener('deviceorientationabsolute', listenerRef.current, true);
-        window.removeEventListener('deviceorientation', listenerRef.current, true);
-      }
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  async function grantPermission() {
-    const requestPermission = (
-      DeviceOrientationEvent as unknown as { requestPermission: () => Promise<'granted' | 'denied'> }
-    ).requestPermission;
-    try {
-      const result = await requestPermission();
-      if (result === 'granted') {
-        setStatus('checking');
-        attachListener();
-      } else {
-        setStatus('unavailable');
-      }
-    } catch {
-      setStatus('unavailable');
-    }
+  function updateSettings(patch: Partial<CompassSettings>) {
+    const next = { ...settings, ...patch };
+    setSettings(next);
+    storageSet(StorageKeys.compassSettings, next);
   }
 
   return (
     <div className="screen">
-      <ScreenHeader title="Compass" onBack={back} />
-
-      <div className="cp__body">
-        {status === 'checking' && <p className="cp__hint">Finding compass sensor…</p>}
-
-        {status === 'unavailable' && (
+      <ScreenHeader
+        title="Compass"
+        subtitle="Find your direction. Explore more."
+        onBack={back}
+        action={
           <>
-            <Icon name="info" size={32} className="cp__hint-icon" />
-            <p className="cp__hint">This device doesn't have a compass sensor.</p>
-          </>
-        )}
-
-        {status === 'needsPermission' && (
-          <>
-            <p className="cp__hint">Compass needs access to motion &amp; orientation sensors.</p>
-            <button type="button" className="cp__btn" onClick={grantPermission}>
-              Enable Compass
+            <button
+              type="button"
+              className="cp__header-btn"
+              onClick={() => {
+                hapticTap();
+                setShowCalibrate(true);
+              }}
+              aria-label="Calibrate compass"
+            >
+              <Icon name="repeat" size={19} />
+            </button>
+            <button
+              type="button"
+              className="cp__header-btn"
+              onClick={() => {
+                hapticTap();
+                geo.refresh();
+              }}
+              aria-label="Refresh location"
+            >
+              <Icon name="pin" size={19} />
+            </button>
+            <button
+              type="button"
+              className="cp__header-btn"
+              onClick={() => {
+                hapticTap();
+                setShowSettings(true);
+              }}
+              aria-label="Compass settings"
+            >
+              <Icon name="settings" size={19} />
             </button>
           </>
-        )}
+        }
+      />
 
-        {status === 'ready' && (
-          <>
-            <div className="cp__dial-wrap">
-              <div className="cp__dial" style={{ transform: `rotate(${-heading}deg)` }}>
-                <span className="cp__dial-label cp__dial-label--n">N</span>
-                <span className="cp__dial-label cp__dial-label--e">E</span>
-                <span className="cp__dial-label cp__dial-label--s">S</span>
-                <span className="cp__dial-label cp__dial-label--w">W</span>
-                <span className="cp__dial-tick cp__dial-tick--ne" />
-                <span className="cp__dial-tick cp__dial-tick--se" />
-                <span className="cp__dial-tick cp__dial-tick--sw" />
-                <span className="cp__dial-tick cp__dial-tick--nw" />
-              </div>
-              <span className="cp__needle" />
-            </div>
-            <span className="cp__heading">{Math.round(heading)}°</span>
-            <span className="cp__direction">{directionLabel(heading)}</span>
-          </>
-        )}
+      <div className="cp__tabs">
+        <button
+          type="button"
+          className={`cp__tab${tab === 'compass' ? ' cp__tab--active' : ''}`}
+          onClick={() => setTab('compass')}
+        >
+          <Icon name="compass" size={16} />
+          Compass
+        </button>
+        <button
+          type="button"
+          className={`cp__tab${tab === 'level' ? ' cp__tab--active' : ''}`}
+          onClick={() => setTab('level')}
+        >
+          <Icon name="level" size={16} />
+          Level
+        </button>
       </div>
+
+      {tab === 'compass' ? <CompassView geo={geo} settings={settings} /> : <LevelView />}
+
+      {showCalibrate && (
+        <div className="cp__sheet" onClick={() => setShowCalibrate(false)}>
+          <div className="cp__sheet-content" onClick={(e) => e.stopPropagation()}>
+            <div className="cp__calibrate-icon">
+              <Icon name="repeat" size={32} />
+            </div>
+            <h2>Calibrate Compass</h2>
+            <p>
+              Move your phone in a figure-8 motion a few times. This helps the magnetometer clear
+              any magnetic interference and read your heading more accurately.
+            </p>
+            <button type="button" className="cp__sheet-close" onClick={() => setShowCalibrate(false)}>
+              Done
+            </button>
+          </div>
+        </div>
+      )}
+
+      {showSettings && (
+        <div className="cp__sheet" onClick={() => setShowSettings(false)}>
+          <div className="cp__sheet-content" onClick={(e) => e.stopPropagation()}>
+            <h2>Compass Settings</h2>
+
+            <div className="cp__setting-row">
+              <span className="cp__setting-text">
+                <span className="cp__setting-title">Haptic Ticks</span>
+                <span className="cp__setting-desc">Vibrate lightly when crossing N, NE, E, SE…</span>
+              </span>
+              <button
+                type="button"
+                className={`cp__switch${settings.hapticTicks ? ' cp__switch--on' : ''}`}
+                onClick={() => updateSettings({ hapticTicks: !settings.hapticTicks })}
+                role="switch"
+                aria-checked={settings.hapticTicks}
+                aria-label="Toggle haptic ticks"
+              >
+                <span className="cp__switch-knob" />
+              </button>
+            </div>
+
+            <div className="cp__setting-row">
+              <span className="cp__setting-text">
+                <span className="cp__setting-title">Altitude Unit</span>
+                <span className="cp__setting-desc">How altitude is displayed</span>
+              </span>
+              <div className="cp__unit-toggle">
+                <button
+                  type="button"
+                  className={`cp__unit-chip${settings.altitudeUnit === 'm' ? ' cp__unit-chip--active' : ''}`}
+                  onClick={() => updateSettings({ altitudeUnit: 'm' })}
+                >
+                  Meters
+                </button>
+                <button
+                  type="button"
+                  className={`cp__unit-chip${settings.altitudeUnit === 'ft' ? ' cp__unit-chip--active' : ''}`}
+                  onClick={() => updateSettings({ altitudeUnit: 'ft' })}
+                >
+                  Feet
+                </button>
+              </div>
+            </div>
+
+            <button type="button" className="cp__sheet-close" onClick={() => setShowSettings(false)}>
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
