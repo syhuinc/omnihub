@@ -85,7 +85,8 @@ export type IconName =
   | 'chevron-down'
   | 'power'
   | 'battery'
-  | 'zap';
+  | 'zap'
+  | 'package';
 
 interface IconProps {
   name: IconName;
@@ -318,6 +319,7 @@ const paths: Record<IconName, React.ReactNode> = {
   power: <path d="M12 3v8 M6.3 6.3a8 8 0 1 0 11.4 0" />,
   battery: <path d="M3 8a1 1 0 0 1 1-1h13a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1ZM19 10.5h2v3h-2Z" />,
   zap: <path d="M13 2 4 14h6l-1 8 9-12h-6Z" />,
+  package: <path d="m3.5 8 8.5-4.5L20.5 8 12 12.5 3.5 8ZM3.5 8v8l8.5 4.5m0-8V20.5m0-8L20.5 8v8L12 20.5" />,
 };
 
 export function Icon({ name, size = 20, strokeWidth = 2, className, style }: IconProps) {
