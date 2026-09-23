@@ -79,6 +79,12 @@ export function CompassView({ geo, settings }: CompassViewProps) {
       {status === 'ready' && (
         <>
           <div className="cp__dial-wrap">
+            <div className="cp__dial-backdrop">
+              <span className="cp__backdrop-glow" />
+              <span className="cp__backdrop-peak cp__backdrop-peak--back" />
+              <span className="cp__backdrop-peak cp__backdrop-peak--mid" />
+              <span className="cp__backdrop-peak cp__backdrop-peak--front" />
+            </div>
             <div className="cp__dial" style={{ transform: `rotate(${-heading}deg)` }}>
               {TICK_DEGREES.map((deg) => (
                 <span key={`t${deg}`} className="cp__tick-wrap" style={{ transform: `rotate(${deg}deg)` }}>

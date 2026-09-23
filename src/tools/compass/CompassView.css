@@ -38,13 +38,59 @@
   margin: 8px 0 4px;
 }
 
+.cp__dial-backdrop {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  overflow: hidden;
+  background: radial-gradient(ellipse at 50% 20%, #1b2340 0%, #0a0e1c 55%, #05070d 100%);
+}
+
+.cp__backdrop-glow {
+  position: absolute;
+  left: 50%;
+  top: 16%;
+  width: 55%;
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--accent) 55%, transparent) 0%, transparent 70%);
+  filter: blur(2px);
+}
+
+.cp__backdrop-peak {
+  position: absolute;
+  left: -10%;
+  right: -10%;
+  bottom: -5%;
+}
+
+.cp__backdrop-peak--back {
+  height: 56%;
+  background: #202a4a;
+  clip-path: polygon(0% 100%, 0% 55%, 18% 30%, 32% 48%, 48% 15%, 64% 42%, 80% 22%, 100% 50%, 100% 100%);
+  opacity: 0.9;
+}
+
+.cp__backdrop-peak--mid {
+  height: 42%;
+  background: #161d38;
+  clip-path: polygon(0% 100%, 0% 60%, 22% 25%, 38% 50%, 55% 10%, 72% 45%, 90% 20%, 100% 55%, 100% 100%);
+}
+
+.cp__backdrop-peak--front {
+  height: 28%;
+  background: #0d1226;
+  clip-path: polygon(0% 100%, 0% 65%, 15% 35%, 30% 55%, 50% 20%, 68% 50%, 85% 30%, 100% 60%, 100% 100%);
+}
+
 .cp__dial {
   position: absolute;
   inset: 0;
   border-radius: 50%;
   background:
-    radial-gradient(circle at 50% 40%, color-mix(in srgb, var(--accent) 16%, transparent), transparent 65%),
-    var(--bg-elevated);
+    radial-gradient(circle at 50% 40%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 65%),
+    color-mix(in srgb, var(--bg-elevated) 42%, transparent);
   border: 2px solid var(--border);
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 25%, transparent), 0 0 28px -6px color-mix(in srgb, var(--accent) 45%, transparent);
   transition: transform 0.15s ease-out;
