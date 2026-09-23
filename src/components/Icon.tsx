@@ -75,7 +75,10 @@ export type IconName =
   | 'coins'
   | 'list-bullet'
   | 'tag'
-  | 'palette';
+  | 'palette'
+  | 'hash'
+  | 'pie-chart'
+  | 'trending-up';
 
 interface IconProps {
   name: IconName;
@@ -296,6 +299,11 @@ const paths: Record<IconName, React.ReactNode> = {
   palette: (
     <path d="M12 3a9 9 0 1 0 0 18c.9 0 1.6-.7 1.6-1.6 0-.4-.2-.8-.4-1.1-.3-.3-.4-.7-.4-1.1 0-.9.7-1.6 1.6-1.6H16a5 5 0 0 0 5-5c0-4.4-4-8-9-8Z M7 12a1 1 0 1 0 0-2 1 1 0 0 0 0 2ZM9 8a1 1 0 1 0 0-2 1 1 0 0 0 0 2ZM14 7a1 1 0 1 0 0-2 1 1 0 0 0 0 2ZM17 10a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" />
   ),
+  hash: <path d="M5 9h14M5 15h14M10 3 8 21M16 3l-2 18" />,
+  'pie-chart': (
+    <path d="M12 2a10 10 0 1 0 10 10H12Z M14 2.5A10 10 0 0 1 21.5 10H14Z" />
+  ),
+  'trending-up': <path d="M3 17 10 10l4 4 7-7 M15 7h6v6" />,
 };
 
 export function Icon({ name, size = 20, strokeWidth = 2, className, style }: IconProps) {
