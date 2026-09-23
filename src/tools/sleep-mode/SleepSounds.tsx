@@ -64,7 +64,7 @@ export function SleepSounds({ onBack }: SleepSoundsProps) {
               className={`ss__card${playingId === s.id ? ' ss__card--playing' : ''}`}
               onClick={() => togglePlay(s.id)}
             >
-              <span className="ss__card-emoji">{s.emoji}</span>
+              <img className="ss__card-image" src={s.image} alt="" />
               <span className="ss__card-play">
                 <Icon name={playingId === s.id ? 'pause' : 'play'} size={16} />
               </span>

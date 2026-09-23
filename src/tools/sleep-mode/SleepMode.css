@@ -14,75 +14,12 @@
   box-shadow: var(--shadow-sm);
 }
 
-.sm__banner-stars span {
-  position: absolute;
-  border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 0 4px 1px rgba(255, 255, 255, 0.7);
-  opacity: 0.9;
-}
-
-.sm__banner-moon {
-  position: absolute;
-  top: 14px;
-  right: 22px;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 38% 35%, #fdfbff, #e4d9ff 60%, #b9a6f2 100%);
-  box-shadow: 0 0 24px 6px rgba(196, 170, 255, 0.55);
-}
-
-.sm__banner-cat {
-  position: absolute;
-  bottom: 10px;
-  left: 24px;
-  width: 46px;
-  height: 26px;
-}
-
-.sm__banner-cat-face {
+.sm__banner-image {
   position: absolute;
   inset: 0;
-  border-radius: 50% 50% 46% 46%;
-  background: #171022;
-}
-
-.sm__banner-cat-eye {
-  position: absolute;
-  top: 40%;
-  width: 3px;
-  height: 3px;
-  border-radius: 50%;
-  background: color-mix(in srgb, var(--purple) 70%, white 10%);
-}
-
-.sm__banner-cat-eye--l {
-  left: 32%;
-}
-
-.sm__banner-cat-eye--r {
-  right: 32%;
-}
-
-.sm__banner-cat-ear {
-  position: absolute;
-  top: -8px;
-  width: 0;
-  height: 0;
-  border-left: 7px solid transparent;
-  border-right: 7px solid transparent;
-  border-bottom: 12px solid #171022;
-}
-
-.sm__banner-cat-ear--l {
-  left: 4px;
-  transform: rotate(-8deg);
-}
-
-.sm__banner-cat-ear--r {
-  right: 4px;
-  transform: rotate(8deg);
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .sm__banner-tagline {
@@ -92,8 +29,8 @@
   margin: 0;
   font-size: 11px;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.75);
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+  color: rgba(255, 255, 255, 0.9);
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.8);
 }
 
 .sm__hero {
@@ -425,6 +362,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
   font-size: 19px;
   background: radial-gradient(
     120% 140% at 30% 22%,
@@ -434,6 +372,12 @@
   );
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--emoji-color, var(--purple)) 35%, transparent),
     0 3px 12px -4px color-mix(in srgb, var(--emoji-color, var(--purple)) 80%, transparent);
+}
+
+.sm__personality-emoji img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .sm__personality-info {
@@ -503,9 +447,16 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
   font-size: 16px;
   background: color-mix(in srgb, var(--purple) 22%, var(--bg-elevated));
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--purple) 30%, transparent);
+}
+
+.sm__sample-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .sm__sample-text {
@@ -1141,12 +1092,22 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  padding: 22px 8px 14px;
+  justify-content: flex-end;
+  aspect-ratio: 3 / 2;
+  padding: 10px;
+  overflow: hidden;
   background: linear-gradient(160deg, var(--bg-elevated-2), var(--bg-elevated));
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
+}
+
+.ss__card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(180deg, rgba(10, 8, 20, 0) 42%, rgba(10, 8, 20, 0.85) 100%);
+  pointer-events: none;
 }
 
 .ss__card--playing {
@@ -1154,28 +1115,36 @@
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--purple) 30%, transparent), 0 0 20px -8px color-mix(in srgb, var(--purple) 60%, transparent);
 }
 
-.ss__card-emoji {
-  font-size: 26px;
+.ss__card-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .ss__card-play {
   position: absolute;
   top: 8px;
   right: 8px;
+  z-index: 2;
   width: 26px;
   height: 26px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: color-mix(in srgb, var(--purple) 20%, var(--bg-active));
-  color: var(--purple);
+  background: color-mix(in srgb, var(--purple) 30%, rgba(10, 8, 20, 0.6));
+  color: #fff;
 }
 
 .ss__card-label {
+  position: relative;
+  z-index: 2;
   font-size: 13px;
   font-weight: 700;
-  color: var(--text-primary);
+  color: #fff;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
 }
 
 .ss__volume-row {

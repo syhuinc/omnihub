@@ -53,7 +53,7 @@ export function AiPersonalityScreen({ config, onBack, onPersist }: AiPersonality
               onClick={() => selectPersonality(p.id)}
             >
               <span className="sm__personality-emoji" style={{ '--emoji-color': p.color } as CSSProperties}>
-                {p.emoji}
+                <img src={p.image} alt="" />
               </span>
               <span className="sm__personality-info">
                 <span className="sm__personality-label-row">
@@ -79,7 +79,9 @@ export function AiPersonalityScreen({ config, onBack, onPersist }: AiPersonality
         </button>
         {sampleText && (
           <div className="sm__sample-bubble">
-            <span className="sm__sample-avatar">🐈‍⬛</span>
+            <span className="sm__sample-avatar">
+              <img src={PERSONALITY_META.find((p) => p.id === config.personality)?.image} alt="" />
+            </span>
             <p className="sm__sample-text">{sampleText}</p>
             <span className="sm__sample-wave" aria-hidden="true">
               <span />

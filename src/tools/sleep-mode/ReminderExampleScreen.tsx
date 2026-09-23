@@ -56,7 +56,7 @@ export function ReminderExampleScreen({ onBack }: ReminderExampleScreenProps) {
                 className="sm__personality-emoji"
                 style={{ '--emoji-color': row.personality.color } as never}
               >
-                {row.personality.emoji}
+                <img src={row.personality.image} alt="" />
               </span>
               <div className="sm__example-body">
                 <div className="sm__example-head">
