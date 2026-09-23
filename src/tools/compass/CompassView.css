@@ -225,12 +225,41 @@
   margin-top: 2px;
 }
 
+.cp__lock-pill {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--purple);
+  background: color-mix(in srgb, var(--purple) 16%, transparent);
+  border: 1px solid color-mix(in srgb, var(--purple) 30%, transparent);
+  border-radius: var(--radius-pill);
+  padding: 4px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  margin-top: 8px;
+}
+
+.cp__quick-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  width: 100%;
+  margin-top: 16px;
+}
+
+.cp__stat-sublabel {
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+}
+
 .cp__stats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 8px;
   width: 100%;
-  margin-top: 16px;
+  margin-top: 8px;
 }
 
 .cp__stat-card {

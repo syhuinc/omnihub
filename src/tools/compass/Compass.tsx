@@ -14,10 +14,11 @@ import './Compass.css';
 type Tab = 'compass' | 'level';
 
 export function Compass() {
-  const { back } = useRouter();
+  const { back, navigate } = useRouter();
   const [tab, setTab] = useState<Tab>('compass');
   const [showCalibrate, setShowCalibrate] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [locked, setLocked] = useState(false);
   const [settings, setSettings] = useState<CompassSettings>(() =>
     storageGet(StorageKeys.compassSettings, DEFAULT_COMPASS_SETTINGS),
   );
@@ -98,7 +99,53 @@ export function Compass() {
         </button>
       </div>
 
-      {tab === 'compass' ? <CompassView geo={geo} settings={settings} /> : <LevelView />}
+      {tab === 'compass' ? <CompassView geo={geo} settings={settings} locked={locked} /> : <LevelView />}
+
+      {tab === 'compass' && (
+        <>
+          <div className="cp__actions">
+            <button
+              type="button"
+              className="cp__action"
+              onClick={() => {
+                hapticTap();
+                setShowCalibrate(true);
+              }}
+            >
+              <Icon name="repeat" size={20} />
+              Calibrate
+            </button>
+            <button
+              type="button"
+              className={`cp__action${locked ? ' cp__action--active' : ''}`}
+              onClick={() => {
+                hapticTap();
+                setLocked((v) => !v);
+              }}
+            >
+              <Icon name={locked ? 'unlock' : 'lock'} size={20} />
+              Lock Direction
+              <em>{locked ? 'Tap to unlock' : 'Hold current'}</em>
+            </button>
+            <button type="button" className="cp__action cp__action--flashlight" onClick={() => navigate('/tools/flashlight')}>
+              <Icon name="flashlight" size={20} />
+              Flashlight
+            </button>
+            <button
+              type="button"
+              className="cp__action"
+              onClick={() => {
+                hapticTap();
+                setShowSettings(true);
+              }}
+            >
+              <Icon name="settings" size={20} />
+              Settings
+            </button>
+          </div>
+          <p className="cp__quote">"Not all who wander are lost."</p>
+        </>
+      )}
 
       {showCalibrate && (
         <div className="cp__sheet" onClick={() => setShowCalibrate(false)}>

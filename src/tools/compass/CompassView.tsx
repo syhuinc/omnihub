@@ -1,10 +1,11 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Icon, type IconName } from '../../components/Icon';
 import { hapticSelect } from '../../haptics';
 import { useDeviceOrientation } from './useDeviceOrientation';
 import { useMotionSensors, type SensorAvailability } from './useMotionSensors';
 import type { GeoState } from './useGeolocation';
 import type { CompassSettings } from './types';
+import { solarAzimuth } from './sunPosition';
 import './CompassView.css';
 
 const SHORT_DIRECTIONS = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
@@ -32,19 +33,29 @@ function octant(heading: number): number {
 interface CompassViewProps {
   geo: GeoState;
   settings: CompassSettings;
+  locked: boolean;
 }
 
-export function CompassView({ geo, settings }: CompassViewProps) {
-  const { status, heading, requestPermission } = useDeviceOrientation();
+export function CompassView({ geo, settings, locked }: CompassViewProps) {
+  const { status, heading: liveHeading, requestPermission } = useDeviceOrientation();
   const motion = useMotionSensors();
   const lastOctantRef = useRef<number | null>(null);
+  const lockedHeadingRef = useRef(liveHeading);
+  if (!locked) lockedHeadingRef.current = liveHeading;
+  const heading = locked ? lockedHeadingRef.current : liveHeading;
 
   useEffect(() => {
-    if (!settings.hapticTicks || status !== 'ready') return;
+    if (!settings.hapticTicks || status !== 'ready' || locked) return;
     const current = octant(heading);
     if (lastOctantRef.current !== null && lastOctantRef.current !== current) hapticSelect();
     lastOctantRef.current = current;
-  }, [heading, settings.hapticTicks, status]);
+  }, [heading, settings.hapticTicks, status, locked]);
+
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 30000);
+    return () => clearInterval(id);
+  }, []);
 
   const magnetometer: SensorAvailability =
     status === 'ready' ? 'available' : status === 'unavailable' ? 'unavailable' : 'checking';
@@ -55,6 +66,11 @@ export function CompassView({ geo, settings }: CompassViewProps) {
     if (meters === null) return '—';
     return settings.altitudeUnit === 'ft' ? `${Math.round(meters * 3.28084)} ft` : `${Math.round(meters)} m`;
   }
+
+  const sunAz =
+    geo.status === 'ready' && geo.coords ? solarAzimuth(now, geo.coords.lat, geo.coords.lng) : null;
+  const speedKmh =
+    geo.status === 'ready' && geo.coords && geo.coords.speed !== null ? geo.coords.speed * 3.6 : null;
 
   return (
     <div className="cp__body">
@@ -125,6 +141,25 @@ export function CompassView({ geo, settings }: CompassViewProps) {
           <span className="cp__heading">{Math.round(heading)}°</span>
           <span className="cp__direction">{SHORT_DIRECTIONS[octant(heading)]}</span>
           <span className="cp__direction-pill">{FULL_DIRECTIONS[octant(heading)]}</span>
+          {locked && (
+            <span className="cp__lock-pill">
+              <Icon name="lock" size={12} /> Direction locked
+            </span>
+          )}
+
+          <div className="cp__quick-stats">
+            <StatCard
+              icon="sunrise"
+              label="Sun Direction"
+              value={sunAz !== null ? `${Math.round(sunAz)}° ${SHORT_DIRECTIONS[octant(sunAz)]}` : '—'}
+            />
+            <StatCard
+              icon="activity"
+              label="Speed"
+              value={speedKmh !== null ? `${speedKmh.toFixed(1)} km/h` : '—'}
+              sublabel={speedKmh !== null && speedKmh > 0.5 ? 'Moving' : 'Stationary'}
+            />
+          </div>
 
           <div className="cp__stats">
             <StatCard
@@ -177,12 +212,23 @@ function geoStatusLabel(status: GeoState['status']): string {
   }
 }
 
-function StatCard({ icon, label, value }: { icon: IconName; label: string; value: string }) {
+function StatCard({
+  icon,
+  label,
+  value,
+  sublabel,
+}: {
+  icon: IconName;
+  label: string;
+  value: string;
+  sublabel?: string;
+}) {
   return (
     <div className="cp__stat-card">
       <Icon name={icon} size={18} className="cp__stat-icon" />
       <span className="cp__stat-value">{value}</span>
       <span className="cp__stat-label">{label}</span>
+      {sublabel && <span className="cp__stat-sublabel">{sublabel}</span>}
     </div>
   );
 }

@@ -7,6 +7,7 @@ export interface GeoCoords {
   lng: number;
   accuracy: number;
   altitude: number | null;
+  speed: number | null;
 }
 
 export interface GeoState {
@@ -38,6 +39,7 @@ export function useGeolocation(): GeoState {
           lng: pos.coords.longitude,
           accuracy: pos.coords.accuracy,
           altitude: pos.coords.altitude,
+          speed: pos.coords.speed,
         });
         setStatus('ready');
       },
