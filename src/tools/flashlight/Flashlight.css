@@ -15,25 +15,46 @@
 }
 
 .fl__toggle-section {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 16px;
-  padding: 32px 0;
+  padding: 24px 0 16px;
+}
+
+.fl__beam {
+  position: absolute;
+  top: -40px;
+  left: 50%;
+  width: 180px;
+  height: 220px;
+  transform: translateX(-50%);
+  background: radial-gradient(ellipse 60% 100% at 50% 100%, color-mix(in srgb, var(--blue) 22%, transparent), transparent 70%);
+  opacity: 0.5;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+.fl__beam--on {
+  opacity: 1;
+  background: radial-gradient(ellipse 60% 100% at 50% 100%, color-mix(in srgb, #fff 55%, var(--blue) 20%), transparent 72%);
 }
 
 .fl__toggle {
+  position: relative;
+  z-index: 1;
   width: 180px;
   height: 180px;
   border-radius: 50%;
   background: linear-gradient(160deg, var(--bg-elevated-2), var(--bg-elevated));
-  border: 3px solid var(--border-strong);
+  border: 3px solid var(--blue);
   color: var(--text-secondary);
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-sm), 0 0 24px -6px color-mix(in srgb, var(--blue) 50%, transparent);
 }
 
 .fl__toggle--on {
@@ -60,6 +81,33 @@
   color: var(--text-secondary);
 }
 
+.fl__modes {
+  display: flex;
+  gap: 8px;
+}
+
+.fl__mode-chip {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 4px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(160deg, var(--bg-elevated-2), var(--bg-elevated));
+  border: 1px solid var(--border-strong);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  box-shadow: var(--shadow-sm);
+}
+
+.fl__mode-chip--active {
+  border-color: color-mix(in srgb, var(--blue) 55%, transparent);
+  color: var(--blue);
+  box-shadow: var(--shadow-sm), 0 0 16px -6px color-mix(in srgb, var(--blue) 55%, transparent);
+}
+
 .fl__alerts {
   background: linear-gradient(160deg, var(--bg-elevated-2), var(--bg-elevated));
   border: 1px solid var(--border-strong);
@@ -71,6 +119,25 @@
   box-shadow: var(--shadow-sm);
 }
 
+.fl__alerts-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.fl__alerts-icon {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--blue);
+  background: color-mix(in srgb, var(--blue) 18%, transparent);
+}
+
 .fl__alerts-title {
   font-size: 15px;
   font-weight: 700;
@@ -80,23 +147,39 @@
 .fl__alerts-subtitle {
   font-size: 12px;
   color: var(--text-secondary);
-  margin-bottom: 8px;
 }
 
-.fl__alert-row {
+.fl__alert-row,
+.fl__access-row {
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
   padding: 10px 0;
   border-top: 1px solid var(--border);
+  color: var(--text-tertiary);
+  text-align: left;
 }
 
 .fl__alert-row:first-of-type {
   border-top: none;
 }
 
+.fl__alert-icon {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  background: var(--bg-active);
+}
+
 .fl__alert-info {
+  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -151,3 +234,31 @@
   line-height: 1.5;
   margin-top: 8px;
 }
+
+.fl__badges {
+  display: flex;
+  gap: 8px;
+}
+
+.fl__badge {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 14px 6px;
+  border-radius: var(--radius-md);
+  text-align: center;
+  font-size: 10px;
+  color: var(--text-secondary);
+}
+
+.fl__badge strong {
+  font-size: 11px;
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.fl__badge--green { background: color-mix(in srgb, var(--green) 12%, transparent); border: 1px solid color-mix(in srgb, var(--green) 28%, transparent); color: var(--green); }
+.fl__badge--purple { background: color-mix(in srgb, var(--purple) 12%, transparent); border: 1px solid color-mix(in srgb, var(--purple) 28%, transparent); color: var(--purple); }
+.fl__badge--blue { background: color-mix(in srgb, var(--blue) 12%, transparent); border: 1px solid color-mix(in srgb, var(--blue) 28%, transparent); color: var(--blue); }
