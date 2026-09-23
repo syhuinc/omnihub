@@ -70,7 +70,8 @@ export type IconName =
   | 'minus'
   | 'mug'
   | 'run'
-  | 'pot';
+  | 'pot'
+  | 'flag';
 
 interface IconProps {
   name: IconName;
@@ -275,6 +276,7 @@ const paths: Record<IconName, React.ReactNode> = {
   pot: (
     <path d="M3 11h18M5 11v5a4 4 0 0 0 4 4h6a4 4 0 0 0 4-4v-5M2 8.5h2m16 0h2M12 8.5V4" />
   ),
+  flag: <path d="M6 3v18 M6 4h11l-2.5 3.5L17 11H6" />,
 };
 
 export function Icon({ name, size = 20, strokeWidth = 2, className, style }: IconProps) {

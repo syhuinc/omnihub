@@ -23,6 +23,7 @@ export const StorageKeys = {
   debts: `${PREFIX}debts`,
   compassSettings: `${PREFIX}compass.settings`,
   timerHistory: `${PREFIX}timer.history`,
+  stopwatchHistory: `${PREFIX}stopwatch.history`,
 } as const;
 
 export function storageGet<T>(key: string, fallback: T): T {
