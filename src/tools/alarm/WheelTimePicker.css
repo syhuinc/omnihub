@@ -1,0 +1,117 @@
+.wtp {
+  position: relative;
+  border-radius: var(--radius-lg);
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--border));
+  background: linear-gradient(160deg, color-mix(in srgb, var(--accent) 6%, var(--bg-elevated)), var(--bg-elevated));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 15%, transparent), 0 0 24px -8px color-mix(in srgb, var(--accent) 40%, transparent);
+  padding: 18px 20px 20px;
+  margin: 8px 0 4px;
+}
+
+.wtp__labels {
+  display: flex;
+  justify-content: center;
+  gap: 60px;
+  margin-bottom: 4px;
+}
+
+.wtp__labels span {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.wtp__wheels {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  height: 220px;
+}
+
+.wtp__wheels::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 44px;
+  transform: translateY(-50%);
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  border-radius: var(--radius-sm);
+  pointer-events: none;
+}
+
+.wtp__col {
+  position: relative;
+  z-index: 1;
+  width: 76px;
+  height: 220px;
+  overflow-y: auto;
+  scroll-snap-type: y mandatory;
+  scrollbar-width: none;
+  text-align: center;
+}
+
+.wtp__col::-webkit-scrollbar {
+  display: none;
+}
+
+.wtp__spacer {
+  height: 88px;
+}
+
+.wtp__row {
+  height: 44px;
+  line-height: 44px;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  scroll-snap-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.wtp__row--selected {
+  color: var(--text-primary);
+  font-size: 28px;
+  font-weight: 800;
+}
+
+.wtp__colon {
+  position: relative;
+  z-index: 1;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.wtp__period {
+  position: absolute;
+  top: 18px;
+  right: 20px;
+  display: flex;
+  border-radius: var(--radius-pill);
+  background: var(--bg-active);
+  border: 1px solid var(--border-strong);
+  padding: 3px;
+  z-index: 2;
+}
+
+.wtp__period-btn {
+  min-width: 44px;
+  min-height: 30px;
+  padding: 0 10px;
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.wtp__period-btn--active {
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 85%, white 10%), var(--accent));
+  color: #fff;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent), 0 2px 10px -3px color-mix(in srgb, var(--accent) 60%, transparent);
+}

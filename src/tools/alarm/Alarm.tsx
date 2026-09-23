@@ -8,11 +8,73 @@ import { useAuth } from '../../cloud/AuthContext';
 import { startAlarmSync, stopAlarmSync, scheduleAlarmSynced, cancelAlarmSynced } from '../../cloud/alarmSync';
 import { AlarmPlugin, type AlarmRecord } from '../../alarm/plugin';
 import { formatTime, REPEAT_LABELS } from '../../alarm/types';
-import { hapticSelect, hapticWarning } from '../../haptics';
-import { AlarmEditor } from './AlarmEditor';
+import { hapticSelect, hapticTap, hapticWarning } from '../../haptics';
+import { AlarmEditor, type AlarmEditorInitial } from './AlarmEditor';
 import { CrashLogView } from './CrashLogView';
 import { RingtonePicker } from './RingtonePicker';
 import './Alarm.css';
+
+const SUGGESTIONS: {
+  icon: 'sun' | 'wallet' | 'moon' | 'star';
+  title: string;
+  subtitle: string;
+  color: string;
+  initial: AlarmEditorInitial;
+}[] = [
+  {
+    icon: 'sun',
+    title: 'Wake Up',
+    subtitle: 'Start your day',
+    color: 'var(--yellow)',
+    initial: { hour: 7, minute: 0, category: 'morning', repeatMode: 'daily' },
+  },
+  {
+    icon: 'wallet',
+    title: 'Stay Productive',
+    subtitle: 'Manage your time',
+    color: 'var(--blue)',
+    initial: { hour: 13, minute: 0, category: 'afternoon', repeatMode: 'weekdays', label: 'Focus time' },
+  },
+  {
+    icon: 'moon',
+    title: 'Sleep Better',
+    subtitle: 'Keep a routine',
+    color: 'var(--purple)',
+    initial: { hour: 22, minute: 0, category: 'night', repeatMode: 'daily', label: 'Wind down' },
+  },
+  {
+    icon: 'star',
+    title: 'Never Miss',
+    subtitle: 'What matters',
+    color: 'var(--orange)',
+    initial: { hour: 9, minute: 0, repeatMode: 'daily', label: 'Reminder' },
+  },
+];
+
+function AlarmHeroIllustration() {
+  return (
+    <svg className="alarm__hero-svg" viewBox="0 0 160 160" fill="none" aria-hidden="true">
+      <defs>
+        <radialGradient id="alarmGlow" cx="50%" cy="45%" r="60%">
+          <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.35" />
+          <stop offset="100%" stopColor="var(--accent)" stopOpacity="0" />
+        </radialGradient>
+        <linearGradient id="alarmBody" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#6366f1" />
+          <stop offset="100%" stopColor="#3b82f6" />
+        </linearGradient>
+      </defs>
+      <circle cx="80" cy="80" r="78" fill="url(#alarmGlow)" />
+      <path d="M40 30 L26 44 M120 30 L134 44" stroke="url(#alarmBody)" strokeWidth="7" strokeLinecap="round" />
+      <path d="M22 60 L10 56 M138 60 L150 56 M22 100 L10 104 M138 100 L150 104" stroke="var(--accent)" strokeWidth="4" strokeLinecap="round" opacity="0.6" />
+      <circle cx="80" cy="88" r="52" fill="var(--bg-elevated)" stroke="url(#alarmBody)" strokeWidth="6" />
+      <circle cx="80" cy="88" r="52" fill="none" stroke="var(--accent)" strokeWidth="1" opacity="0.4" />
+      <rect x="70" y="22" width="20" height="12" rx="4" fill="url(#alarmBody)" />
+      <path d="M80 60 L80 90 L100 100" stroke="#fff" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="80" cy="88" r="4.5" fill="#fff" />
+    </svg>
+  );
+}
 
 export function Alarm() {
   const { back } = useRouter();
@@ -20,8 +82,9 @@ export function Alarm() {
   const [alarms, setAlarms] = useState<AlarmRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [creatingNew, setCreatingNew] = useState(false);
+  const [creatingNew, setCreatingNew] = useState<AlarmEditorInitial | true | false>(false);
   const [showCrashLog, setShowCrashLog] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
   const [openSwipeId, setOpenSwipeId] = useState<string | null>(null);
   const [selecting, setSelecting] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -52,6 +115,7 @@ export function Alarm() {
   }
 
   useBackHandler(exitSelecting, selecting);
+  useBackHandler(() => setShowMenu(false), showMenu);
 
   function toggleSelected(id: string) {
     hapticSelect();
@@ -94,6 +158,7 @@ export function Alarm() {
     return (
       <AlarmEditor
         alarmId={editingId}
+        initial={typeof creatingNew === 'object' ? creatingNew : undefined}
         onClose={() => {
           setCreatingNew(false);
           setEditingId(null);
@@ -127,7 +192,7 @@ export function Alarm() {
     <div className="screen">
       <ScreenHeader
         title="Alarm"
-        subtitle={selecting ? `${selectedIds.size} selected` : 'Wakes you even if the app is closed'}
+        subtitle={selecting ? `${selectedIds.size} selected` : 'Wake up to a better you'}
         onBack={selecting ? exitSelecting : back}
         action={
           selecting ? (
@@ -142,28 +207,82 @@ export function Alarm() {
               </button>
             </>
           ) : (
-            <>
-              {alarms.length > 0 && (
-                <button type="button" className="alarm__header-btn" onClick={() => setSelecting(true)}>
-                  Select
-                </button>
-              )}
-              <button
-                type="button"
-                className="alarm__debug-btn"
-                onClick={() => setShowCrashLog(true)}
-                aria-label="View crash log"
-              >
-                <Icon name="info" size={20} />
-              </button>
-            </>
+            <button
+              type="button"
+              className="alarm__debug-btn"
+              onClick={() => {
+                hapticTap();
+                setShowMenu(true);
+              }}
+              aria-label="More options"
+            >
+              <Icon name="more-dots" size={20} />
+            </button>
           )
         }
       />
 
+      {showMenu && (
+        <div className="alarm__menu-overlay" onClick={() => setShowMenu(false)}>
+          <div className="alarm__menu-sheet" onClick={(e) => e.stopPropagation()}>
+            {alarms.length > 0 && (
+              <button
+                type="button"
+                className="alarm__menu-item"
+                onClick={() => {
+                  setShowMenu(false);
+                  setSelecting(true);
+                }}
+              >
+                <Icon name="checklist" size={18} />
+                Select Alarms
+              </button>
+            )}
+            <button
+              type="button"
+              className="alarm__menu-item"
+              onClick={() => {
+                setShowMenu(false);
+                setShowCrashLog(true);
+              }}
+            >
+              <Icon name="info" size={18} />
+              View Crash Log
+            </button>
+            <button type="button" className="alarm__menu-cancel" onClick={() => setShowMenu(false)}>
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="alarm__content">
         {loading ? null : alarms.length === 0 ? (
-          <p className="alarm__empty">No alarms yet. Tap + to create one.</p>
+          <div className="alarm__hero">
+            <AlarmHeroIllustration />
+            <h2 className="alarm__hero-title">No alarms yet</h2>
+            <p className="alarm__hero-subtitle">Tap + to create your first alarm and never miss a moment.</p>
+            <div className="alarm__suggestions">
+              {SUGGESTIONS.map((s) => (
+                <button
+                  key={s.title}
+                  type="button"
+                  className="alarm__suggestion"
+                  style={{ '--sugg-color': s.color } as React.CSSProperties}
+                  onClick={() => {
+                    hapticTap();
+                    setCreatingNew(s.initial);
+                  }}
+                >
+                  <span className="alarm__suggestion-icon">
+                    <Icon name={s.icon} size={20} />
+                  </span>
+                  <strong>{s.title}</strong>
+                  <span>{s.subtitle}</span>
+                </button>
+              ))}
+            </div>
+          </div>
         ) : (
           <ul className="alarm__list">
             {alarms.map((a) => {

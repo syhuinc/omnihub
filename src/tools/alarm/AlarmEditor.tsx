@@ -16,40 +16,46 @@ import { loadCategoryDefaults } from '../../alarm/ringtones';
 import { hapticSelect, hapticSuccess, hapticWarning } from '../../haptics';
 import { useBackHandler } from '../../app/useBackHandler';
 import { RingtonePicker } from './RingtonePicker';
+import { WheelTimePicker } from './WheelTimePicker';
 import './Alarm.css';
 
-const CATEGORIES: { id: TimeCategory; label: string; icon: IconName }[] = [
-  { id: 'morning', label: 'Morning', icon: 'sunrise' },
-  { id: 'afternoon', label: 'Afternoon', icon: 'sun' },
-  { id: 'evening', label: 'Evening', icon: 'sunset' },
-  { id: 'night', label: 'Night', icon: 'moon' },
+const CATEGORIES: { id: TimeCategory; label: string; icon: IconName; color: string }[] = [
+  { id: 'morning', label: 'Morning', icon: 'sunrise', color: 'var(--blue)' },
+  { id: 'afternoon', label: 'Afternoon', icon: 'sun', color: 'var(--yellow)' },
+  { id: 'evening', label: 'Evening', icon: 'sunset', color: 'var(--orange)' },
+  { id: 'night', label: 'Night', icon: 'moon', color: 'var(--purple)' },
 ];
 
 const REPEAT_MODES: RepeatMode[] = ['today', 'daily', 'weekend', 'weekdays'];
 
-function to24HourInputValue(hour: number, minute: number): string {
-  return `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+export interface AlarmEditorInitial {
+  hour: number;
+  minute: number;
+  category?: TimeCategory;
+  repeatMode?: RepeatMode;
+  label?: string;
 }
 
 interface AlarmEditorProps {
   alarmId: string | null;
+  initial?: AlarmEditorInitial;
   onClose: () => void;
   onDelete?: () => void;
 }
 
-export function AlarmEditor({ alarmId, onClose, onDelete }: AlarmEditorProps) {
+export function AlarmEditor({ alarmId, initial, onClose, onDelete }: AlarmEditorProps) {
   const [loaded, setLoaded] = useState(alarmId === null);
-  const [hour, setHour] = useState(7);
-  const [minute, setMinute] = useState(0);
-  const [label, setLabel] = useState('');
-  const [repeatMode, setRepeatMode] = useState<RepeatMode>('today');
+  const [hour, setHour] = useState(initial?.hour ?? 7);
+  const [minute, setMinute] = useState(initial?.minute ?? 0);
+  const [label, setLabel] = useState(initial?.label ?? '');
+  const [repeatMode, setRepeatMode] = useState<RepeatMode>(initial?.repeatMode ?? 'today');
   const [soundUri, setSoundUri] = useState<string | null>(null);
   const [soundName, setSoundName] = useState<string | null>(null);
   const [backupEnabled, setBackupEnabled] = useState(false);
   const [backupOffsets, setBackupOffsets] = useState<number[]>(DEFAULT_BACKUP_OFFSETS_MIN);
   const [backupPersistOnSnooze, setBackupPersistOnSnooze] = useState(false);
   const [backupPersistOnStop, setBackupPersistOnStop] = useState(false);
-  const [openCategory, setOpenCategory] = useState<TimeCategory | null>(null);
+  const [openCategory, setOpenCategory] = useState<TimeCategory | null>(initial?.category ?? null);
   const [editingPresets, setEditingPresets] = useState(false);
   const [presets, setPresets] = useState(loadPresets());
   const [confirmingDelete, setConfirmingDelete] = useState(false);
@@ -98,14 +104,6 @@ export function AlarmEditor({ alarmId, onClose, onDelete }: AlarmEditorProps) {
         setSoundUri(categoryDefault.uri);
         setSoundName(categoryDefault.name);
       }
-    }
-  }
-
-  function handleCustomTimeChange(value: string) {
-    const [h, m] = value.split(':').map((n) => parseInt(n, 10));
-    if (!Number.isNaN(h) && !Number.isNaN(m)) {
-      setHour(h);
-      setMinute(m);
     }
   }
 
@@ -212,6 +210,7 @@ export function AlarmEditor({ alarmId, onClose, onDelete }: AlarmEditorProps) {
     <div className="screen">
       <ScreenHeader
         title={alarmId ? 'Edit Alarm' : 'New Alarm'}
+        subtitle={alarmId ? 'Update the details below' : 'Set a time, make it yours'}
         onBack={onClose}
         action={
           onDelete && (
@@ -260,12 +259,13 @@ export function AlarmEditor({ alarmId, onClose, onDelete }: AlarmEditorProps) {
       )}
 
       <div className="alarm-editor__body">
-        <div className="alarm-editor__time-display">{formatTime(hour, minute)}</div>
-        <input
-          type="time"
-          className="alarm-editor__time-input"
-          value={to24HourInputValue(hour, minute)}
-          onChange={(e) => handleCustomTimeChange(e.target.value)}
+        <WheelTimePicker
+          hour={hour}
+          minute={minute}
+          onChange={(h, m) => {
+            setHour(h);
+            setMinute(m);
+          }}
         />
 
         <div className="alarm-editor__section-header">
@@ -285,6 +285,7 @@ export function AlarmEditor({ alarmId, onClose, onDelete }: AlarmEditorProps) {
               key={cat.id}
               type="button"
               className={`alarm-editor__category${openCategory === cat.id ? ' alarm-editor__category--open' : ''}`}
+              style={{ '--cat-color': cat.color } as React.CSSProperties}
               onClick={() => setOpenCategory(openCategory === cat.id ? null : cat.id)}
             >
               <Icon name={cat.icon} size={22} />
@@ -294,7 +295,10 @@ export function AlarmEditor({ alarmId, onClose, onDelete }: AlarmEditorProps) {
         </div>
 
         {openCategory && (
-          <div className="alarm-editor__presets">
+          <div
+            className="alarm-editor__presets"
+            style={{ '--cat-color': CATEGORIES.find((c) => c.id === openCategory)?.color } as React.CSSProperties}
+          >
             {presets[openCategory].map((p) => (
               <div key={`${p.hour}:${p.minute}`} className="alarm-editor__preset-chip-wrap">
                 <button
