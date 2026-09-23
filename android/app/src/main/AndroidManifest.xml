@@ -75,19 +75,43 @@
                 <action android:name="android.intent.action.PHONE_STATE" />
             </intent-filter>
         </receiver>
+
+        <service
+            android:name=".sleepmode.SleepModeSpeakService"
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback" />
+
+        <receiver
+            android:name=".sleepmode.SleepModeReceiver"
+            android:exported="false" />
+
+        <receiver
+            android:name=".sleepmode.SleepModeBootReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+            </intent-filter>
+        </receiver>
     </application>
 
     <!--
-      Omni Hub is otherwise fully offline. These are for the Alarm feature only, so alarms can
-      fire even when the app is closed:
+      Omni Hub is otherwise fully offline. These are for the Alarm and Sleep Mode features only,
+      so their reminders fire even when the app is closed:
       - RECEIVE_BOOT_COMPLETED / WAKE_LOCK / FOREGROUND_SERVICE(_MEDIA_PLAYBACK): re-arm alarms
-        after reboot and keep the device awake long enough to ring.
-      - POST_NOTIFICATIONS / USE_FULL_SCREEN_INTENT: show the full-screen ringing screen reliably,
-        including over the lock screen.
-      - SCHEDULE_EXACT_ALARM: required by AlarmManager.setAlarmClock() on API 31+. Declaring it
-        here only lets the app request it; on API 33+ it is not auto-granted, so the user must
-        approve it via Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM (AlarmEditor prompts for this
-        before saving an alarm).
+        and Sleep Mode's nightly check-ins after reboot, and keep the device awake long enough to
+        ring or speak.
+      - POST_NOTIFICATIONS / USE_FULL_SCREEN_INTENT: show the full-screen ringing screen reliably
+        (Alarm), including over the lock screen, and the required foreground-service notification
+        while a Sleep Mode reminder is being spoken.
+      - SCHEDULE_EXACT_ALARM: required by AlarmManager.setAlarmClock() on API 31+, used by both
+        Alarm and Sleep Mode's nightly scheduling. Declaring it here only lets the app request it;
+        on API 33+ it is not auto-granted, so the user must approve it via
+        Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM (prompted before saving an alarm, or enabling
+        Sleep Mode).
+      - Sleep Mode never uses Android's Usage Access permission or reads which app is in the
+        foreground. It only checks PowerManager#isInteractive() (is the screen currently on),
+        which needs no special permission, as its "still using the phone" signal.
       - CAMERA / FLASHLIGHT: used only by the QR Scanner, Barcode Scanner and Flashlight tools,
         on-device — no image or video is ever stored or transmitted.
       - READ_PHONE_STATE: only for the Flashlight tool's optional "blink on incoming call" alert

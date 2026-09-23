@@ -74,6 +74,16 @@ export const TOOLS: ToolMeta[] = [
     presentation: 'page',
   },
   {
+    id: 'sleep-mode',
+    name: 'Sleep Mode',
+    shortDescription: 'Nags you to put the phone down',
+    category: 'essentials',
+    color: 'var(--purple)',
+    icon: 'moon',
+    keywords: ['sleep', 'bedtime', 'sleep mode', 'phone addiction', 'screen time', 'wind down', 'nag', 'reminder'],
+    presentation: 'page',
+  },
+  {
     id: 'random-generator',
     name: 'Random Generator',
     shortDescription: 'Dice, coin, number, pick from list',
