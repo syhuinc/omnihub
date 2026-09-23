@@ -206,17 +206,33 @@ export function Notes() {
 
       <div className="notes__content">
         {visibleNotes.length === 0 ? (
-          <p className="notes__empty">
-            {query
-              ? `No notes match "${query}".`
-              : tab === 'trash'
-                ? 'Trash is empty.'
-                : tab === 'favorites'
-                  ? 'No favorites yet. Tap the star on a note to add one.'
-                  : tab === 'pinned'
-                    ? 'No pinned notes yet.'
-                    : 'No notes yet. Tap + to write your first one.'}
-          </p>
+          query ? (
+            <p className="notes__empty">No notes match "{query}".</p>
+          ) : (
+            <div className="notes__hero">
+              <span className="notes__hero-icon">
+                <Icon name="note" size={40} />
+              </span>
+              <h2 className="notes__hero-title">
+                {tab === 'trash'
+                  ? 'Trash is empty'
+                  : tab === 'favorites'
+                    ? 'No favorites yet'
+                    : tab === 'pinned'
+                      ? 'No pinned notes yet'
+                      : 'No notes yet'}
+              </h2>
+              <p className="notes__hero-subtitle">
+                {tab === 'trash'
+                  ? 'Deleted notes show up here.'
+                  : tab === 'favorites'
+                    ? 'Tap the star on a note to add one.'
+                    : tab === 'pinned'
+                      ? 'Pin a note to keep it at the top.'
+                      : 'Tap + to write your first one.'}
+              </p>
+            </div>
+          )
         ) : (
           <ul className="notes__list">
             {visibleNotes.map((note) => {

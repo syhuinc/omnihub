@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { ScreenHeader } from '../../components/ScreenHeader';
+import { Icon } from '../../components/Icon';
 import { useRouter } from '../../app/Router';
 import './TipCalculator.css';
 
@@ -27,9 +28,16 @@ export function TipCalculator() {
 
   return (
     <div className="screen">
-      <ScreenHeader title="Tip Calculator" onBack={back} />
+      <ScreenHeader title="Tip Calculator" subtitle="Work out the tip in seconds" onBack={back} />
 
       <div className="tc__body">
+        <div className="tc__hero">
+          <span className="tc__hero-icon">
+            <Icon name="receipt" size={26} />
+          </span>
+          <p>Enter the bill, pick a tip, done.</p>
+        </div>
+
         <div className="tc__field">
           <label className="tc__label">Bill Amount</label>
           <div className="tc__amount-row">

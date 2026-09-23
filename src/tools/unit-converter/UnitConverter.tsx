@@ -40,7 +40,7 @@ export function UnitConverter() {
 
   return (
     <div className="screen">
-      <ScreenHeader title="Unit Converter" onBack={back} />
+      <ScreenHeader title="Unit Converter" subtitle="Convert between units instantly" onBack={back} />
 
       <div className="uc__tabs">
         {UNIT_CATEGORIES.map((cat) => (
@@ -57,7 +57,12 @@ export function UnitConverter() {
 
       <div className="uc__body">
         <div className="uc__field">
-          <label className="uc__label">From</label>
+          <label className="uc__label">
+            <span className="uc__label-icon">
+              <Icon name="converter" size={13} />
+            </span>
+            From
+          </label>
           <div className="uc__row">
             <input
               className="uc__input"
@@ -85,8 +90,13 @@ export function UnitConverter() {
           <Icon name="converter" size={20} />
         </button>
 
-        <div className="uc__field">
-          <label className="uc__label">To</label>
+        <div className="uc__field uc__field--result">
+          <label className="uc__label">
+            <span className="uc__label-icon uc__label-icon--accent">
+              <Icon name="check" size={13} />
+            </span>
+            To
+          </label>
           <div className="uc__row">
             <div className="uc__result">{result || '—'}</div>
             <select

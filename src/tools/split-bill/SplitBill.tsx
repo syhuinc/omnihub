@@ -32,9 +32,16 @@ export function SplitBill() {
 
   return (
     <div className="screen">
-      <ScreenHeader title="Split Bill" onBack={back} />
+      <ScreenHeader title="Split Bill" subtitle="Fair shares, every time" onBack={back} />
 
       <div className="sb__body">
+        <div className="sb__hero">
+          <span className="sb__hero-icon">
+            <Icon name="user" size={24} />
+          </span>
+          <p>Split any bill evenly between friends.</p>
+        </div>
+
         <div className="sb__field">
           <label className="sb__label">Bill Amount</label>
           <div className="sb__amount-row">

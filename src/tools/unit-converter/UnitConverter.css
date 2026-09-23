@@ -30,12 +30,10 @@
 }
 
 .uc__body {
-  padding: 0 20px;
+  padding: 28px 20px 0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  flex: 1;
   gap: 4px;
 }
 
@@ -53,12 +51,36 @@
   box-shadow: var(--shadow-sm), 0 0 0 3px color-mix(in srgb, var(--accent) 16%, transparent);
 }
 
+.uc__field--result {
+  background: linear-gradient(160deg, color-mix(in srgb, var(--accent) 12%, var(--bg-elevated-2)), var(--bg-elevated));
+  border-color: color-mix(in srgb, var(--accent) 30%, var(--border-strong));
+  box-shadow: var(--shadow-sm), 0 0 20px -12px color-mix(in srgb, var(--accent) 70%, transparent);
+}
+
 .uc__label {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-size: 12px;
   font-weight: 600;
   color: var(--text-secondary);
   margin-bottom: 10px;
+}
+
+.uc__label-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--bg-active);
+  color: var(--text-tertiary);
+}
+
+.uc__label-icon--accent {
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+  color: var(--accent);
 }
 
 .uc__row {
