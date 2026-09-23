@@ -26,11 +26,12 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
+  background: linear-gradient(160deg, var(--bg-elevated-2), var(--bg-elevated));
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
   padding: 16px;
   text-align: left;
+  box-shadow: var(--shadow-sm);
 }
 
 .cl__card-name {
@@ -61,7 +62,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8px 20px -4px rgba(77, 124, 254, 0.5), 0 2px 6px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent), 0 8px 24px -4px color-mix(in srgb, var(--accent) 60%, transparent);
 }
 
 /* Detail */
@@ -139,13 +140,19 @@
 .cl-detail__add-input {
   flex: 1;
   min-width: 0;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
+  background: linear-gradient(160deg, var(--bg-elevated-2), var(--bg-elevated));
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-pill);
   padding: 12px 16px;
   color: var(--text-primary);
   font-size: 15px;
   outline: none;
+  box-shadow: var(--shadow-sm);
+}
+
+.cl-detail__add-input:focus {
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  box-shadow: var(--shadow-sm), 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent);
 }
 
 .cl-detail__add-btn {
@@ -153,11 +160,12 @@
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: var(--accent);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 85%, white 10%), var(--accent));
   color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent), 0 3px 14px -4px color-mix(in srgb, var(--accent) 60%, transparent);
 }
 
 .cl-detail__empty {
@@ -180,10 +188,11 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
+  background: linear-gradient(160deg, var(--bg-elevated-2), var(--bg-elevated));
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
   padding: 12px;
+  box-shadow: var(--shadow-sm);
 }
 
 .cl-detail__checkbox {
@@ -199,8 +208,9 @@
 }
 
 .cl-detail__checkbox--checked {
-  background: var(--green);
-  border-color: var(--green);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--green) 85%, white 10%), var(--green));
+  border-color: transparent;
+  box-shadow: 0 0 10px -2px color-mix(in srgb, var(--green) 60%, transparent);
 }
 
 .cl-detail__item-text {

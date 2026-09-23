@@ -27,13 +27,14 @@
 .notes__card {
   width: 100%;
   text-align: left;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
+  background: linear-gradient(160deg, var(--bg-elevated-2), var(--bg-elevated));
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
   padding: 14px;
   display: flex;
   flex-direction: column;
   gap: 6px;
+  box-shadow: var(--shadow-sm);
 }
 
 .notes__card-header {
@@ -75,7 +76,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8px 20px -4px rgba(77, 124, 254, 0.5), 0 2px 6px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent), 0 8px 24px -4px color-mix(in srgb, var(--accent) 60%, transparent);
 }
 
 /* Editor */
@@ -98,9 +99,10 @@
 }
 
 .note-editor__icon-btn--active {
-  background: var(--yellow);
-  border-color: var(--yellow);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--yellow) 85%, white 10%), var(--yellow));
+  border-color: transparent;
   color: #1a1400;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--yellow) 30%, transparent), 0 3px 14px -4px color-mix(in srgb, var(--yellow) 60%, transparent);
 }
 
 .note-editor__body {
