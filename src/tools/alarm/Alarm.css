@@ -26,10 +26,11 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
+  background: linear-gradient(160deg, var(--bg-elevated-2), var(--bg-elevated));
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
   padding: 14px 16px;
+  box-shadow: var(--shadow-sm);
 }
 
 /* Dim only the content, not the card box itself — the box needs to stay fully
@@ -77,6 +78,7 @@
 
 .alarm__switch--on {
   background: var(--accent-gradient);
+  box-shadow: 0 0 12px -2px color-mix(in srgb, var(--accent) 60%, transparent);
 }
 
 .alarm__switch-knob {
@@ -107,7 +109,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8px 20px -4px rgba(77, 124, 254, 0.5), 0 2px 6px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent), 0 8px 24px -4px color-mix(in srgb, var(--accent) 60%, transparent);
 }
 
 .alarm__debug-btn {
@@ -144,6 +146,7 @@
 .alarm__checkbox--checked {
   background: var(--accent-gradient);
   border-color: transparent;
+  box-shadow: 0 0 10px -2px color-mix(in srgb, var(--accent) 60%, transparent);
 }
 
 .alarm__crash-log {
@@ -245,18 +248,20 @@
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.02em;
   margin: 8px 0 4px;
+  text-shadow: 0 0 26px color-mix(in srgb, var(--accent) 35%, transparent);
 }
 
 .alarm-editor__time-input {
   display: block;
   margin: 0 auto 24px;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
+  background: linear-gradient(160deg, var(--bg-elevated-2), var(--bg-elevated));
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-sm);
   padding: 8px 14px;
   color: var(--text-primary);
   font-size: 15px;
   color-scheme: dark;
+  box-shadow: var(--shadow-sm);
 }
 
 :root[data-theme='light'] .alarm-editor__time-input {
@@ -301,12 +306,13 @@
   align-items: center;
   gap: 6px;
   padding: 12px 4px;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
+  background: linear-gradient(160deg, var(--bg-elevated-2), var(--bg-elevated));
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
   color: var(--text-secondary);
   font-size: 12px;
   font-weight: 600;
+  box-shadow: var(--shadow-sm);
 }
 
 .alarm-editor__category--open {
@@ -330,20 +336,22 @@
   min-height: 36px;
   padding: 0 14px;
   border-radius: var(--radius-pill);
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
+  background: linear-gradient(160deg, var(--bg-elevated-2), var(--bg-elevated));
+  border: 1px solid var(--border-strong);
   color: var(--text-primary);
   font-size: 13px;
   font-weight: 600;
   display: flex;
   align-items: center;
   gap: 6px;
+  box-shadow: var(--shadow-sm);
 }
 
 .alarm-editor__preset-chip--active {
   background: var(--accent-gradient);
   border-color: transparent;
   color: #fff;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent), 0 3px 14px -4px color-mix(in srgb, var(--accent) 60%, transparent);
 }
 
 .alarm-editor__preset-chip--add {
@@ -375,26 +383,29 @@
   min-height: 38px;
   padding: 0 16px;
   border-radius: var(--radius-pill);
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
+  background: linear-gradient(160deg, var(--bg-elevated-2), var(--bg-elevated));
+  border: 1px solid var(--border-strong);
   color: var(--text-secondary);
   font-size: 13px;
   font-weight: 600;
+  box-shadow: var(--shadow-sm);
 }
 
 .alarm-editor__repeat-chip--active {
   background: var(--accent-gradient);
   border-color: transparent;
   color: #fff;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent), 0 3px 14px -4px color-mix(in srgb, var(--accent) 60%, transparent);
 }
 
 .alarm-editor__label-input {
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
+  background: linear-gradient(160deg, var(--bg-elevated-2), var(--bg-elevated));
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-sm);
   padding: 12px 14px;
   color: var(--text-primary);
   font-size: 15px;
+  box-shadow: var(--shadow-sm);
 }
 
 .alarm-editor__label-input::placeholder {
@@ -405,12 +416,13 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
+  background: linear-gradient(160deg, var(--bg-elevated-2), var(--bg-elevated));
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-sm);
   padding: 12px 14px;
   color: var(--text-primary);
   font-size: 15px;
+  box-shadow: var(--shadow-sm);
 }
 
 .alarm-editor__sound-row svg {
@@ -422,10 +434,11 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
+  background: linear-gradient(160deg, var(--bg-elevated-2), var(--bg-elevated));
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-sm);
   padding: 12px 14px;
+  box-shadow: var(--shadow-sm);
 }
 
 .alarm-editor__backup-text {
@@ -461,11 +474,12 @@
   min-height: 36px;
   padding: 0 10px 0 14px;
   border-radius: var(--radius-pill);
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
+  background: linear-gradient(160deg, var(--bg-elevated-2), var(--bg-elevated));
+  border: 1px solid var(--border-strong);
   color: var(--text-primary);
   font-size: 13px;
   font-weight: 600;
+  box-shadow: var(--shadow-sm);
 }
 
 .alarm-editor__backup-offset-chip input {
@@ -529,5 +543,5 @@
   color: #fff;
   font-size: 16px;
   font-weight: 700;
-  box-shadow: 0 8px 20px -6px rgba(77, 124, 254, 0.5);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent), 0 8px 24px -6px color-mix(in srgb, var(--accent) 60%, transparent);
 }

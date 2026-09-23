@@ -26,13 +26,14 @@
   width: 180px;
   height: 180px;
   border-radius: 50%;
-  background: var(--bg-elevated);
-  border: 3px solid var(--border);
+  background: linear-gradient(160deg, var(--bg-elevated-2), var(--bg-elevated));
+  border: 3px solid var(--border-strong);
   color: var(--text-secondary);
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
 }
 
 .fl__toggle--on {
@@ -60,13 +61,14 @@
 }
 
 .fl__alerts {
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
+  background: linear-gradient(160deg, var(--bg-elevated-2), var(--bg-elevated));
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-lg);
   padding: 16px;
   display: flex;
   flex-direction: column;
   gap: 4px;
+  box-shadow: var(--shadow-sm);
 }
 
 .fl__alerts-title {
@@ -124,6 +126,7 @@
 
 .fl__switch--on {
   background: var(--accent-gradient);
+  box-shadow: 0 0 12px -2px color-mix(in srgb, var(--accent) 60%, transparent);
 }
 
 .fl__switch-knob {
