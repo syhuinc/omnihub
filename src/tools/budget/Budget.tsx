@@ -4,16 +4,21 @@ import { Icon } from '../../components/Icon';
 import { useRouter } from '../../app/Router';
 import { useBackHandler } from '../../app/useBackHandler';
 import { storageGet, storageSet, StorageKeys } from '../../storage/db';
+import { hapticTap, hapticWarning } from '../../haptics';
 import { useCloudSync } from '../../cloud/useCloudSync';
-import { EXPENSE_CATEGORIES } from '../expense-tracker/categories';
-import { currentMonthKey, formatMonthLabel } from '../expense-tracker/month';
+import { EXPENSE_CATEGORIES, getCategory } from '../expense-tracker/categories';
+import { currentMonthKey, formatMonthLabel, shiftMonthKey } from '../expense-tracker/month';
 import type { Expense } from '../expense-tracker/types';
 import type { BudgetLimit } from './types';
+import { SetBudget } from './SetBudget';
 import './Budget.css';
 
 function formatMoney(amount: number): string {
   return `$${amount.toFixed(2)}`;
 }
+
+const RING_R = 44;
+const RING_C = 2 * Math.PI * RING_R;
 
 /** Reads budgets, migrating the old `{categoryId: amount}` map shape (pre-sync) into a list on first load. */
 function loadBudgets(): BudgetLimit[] {
@@ -33,8 +38,13 @@ export function Budget() {
   const { back } = useRouter();
   const [budgets, setBudgets] = useState<BudgetLimit[]>(() => loadBudgets());
   const [expenses] = useState<Expense[]>(() => storageGet(StorageKeys.expenses, []));
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [draftValue, setDraftValue] = useState('');
+  const [monthKey, setMonthKey] = useState(currentMonthKey());
+  const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
+  const [showMenu, setShowMenu] = useState(false);
+  const [confirmingResetAll, setConfirmingResetAll] = useState(false);
+
+  useBackHandler(() => setShowMenu(false), showMenu);
+  useBackHandler(() => setConfirmingResetAll(false), confirmingResetAll);
 
   function rawPersist(next: BudgetLimit[]) {
     setBudgets(next);
@@ -43,9 +53,7 @@ export function Budget() {
 
   const { persist } = useCloudSync('budgets', budgets, rawPersist);
 
-  const monthKey = currentMonthKey();
-
-  const budgetMap = useMemo(() => new Map(budgets.map((b) => [b.categoryId, b.amount])), [budgets]);
+  const budgetMap = useMemo(() => new Map(budgets.map((b) => [b.categoryId, b])), [budgets]);
 
   const spentByCategory = useMemo(() => {
     const totals = new Map<string, number>();
@@ -58,107 +66,232 @@ export function Budget() {
 
   const totalBudget = budgets.reduce((sum, b) => sum + b.amount, 0);
   const totalSpent = [...spentByCategory.values()].reduce((sum, v) => sum + v, 0);
+  const usedPct = totalBudget > 0 ? Math.min(100, (totalSpent / totalBudget) * 100) : 0;
+  const remaining = Math.max(0, totalBudget - totalSpent);
 
-  function saveBudget(categoryId: string, value: number) {
+  const isCurrentMonth = monthKey === currentMonthKey();
+  const [year, month] = monthKey.split('-').map(Number);
+  const daysInMonth = new Date(year, month, 0).getDate();
+  const dayOfMonth = isCurrentMonth ? new Date().getDate() : daysInMonth;
+  const daysLeft = Math.max(0, daysInMonth - dayOfMonth);
+  const dailyAverage = dayOfMonth > 0 ? totalSpent / dayOfMonth : 0;
+
+  function saveBudget(categoryId: string, patch: { amount: number; alertEnabled: boolean; alertThresholdPct: number }) {
     const withoutCategory = budgets.filter((b) => b.categoryId !== categoryId);
+    const existing = budgetMap.get(categoryId);
     const next =
-      value > 0
-        ? [...withoutCategory, { id: categoryId, categoryId, amount: value, updatedAt: Date.now() }]
+      patch.amount > 0
+        ? [
+            ...withoutCategory,
+            {
+              id: existing?.id ?? categoryId,
+              categoryId,
+              amount: patch.amount,
+              alertEnabled: patch.alertEnabled,
+              alertThresholdPct: patch.alertThresholdPct,
+              updatedAt: Date.now(),
+            },
+          ]
         : withoutCategory;
     persist(next);
+    setEditingCategoryId(null);
   }
 
-  function startEdit(categoryId: string) {
-    setEditingId(categoryId);
-    const limit = budgetMap.get(categoryId);
-    setDraftValue(limit ? String(limit) : '');
+  function removeBudget(categoryId: string) {
+    hapticWarning();
+    persist(budgets.filter((b) => b.categoryId !== categoryId));
+    setEditingCategoryId(null);
   }
 
-  function commitEdit() {
-    if (!editingId) return;
-    const numeric = parseFloat(draftValue);
-    saveBudget(editingId, Number.isNaN(numeric) || numeric < 0 ? 0 : numeric);
-    setEditingId(null);
+  function resetAll() {
+    hapticWarning();
+    persist([]);
+    setConfirmingResetAll(false);
+    setShowMenu(false);
   }
 
-  useBackHandler(() => {
-    commitEdit();
-    back();
-  }, editingId !== null);
+  if (editingCategoryId) {
+    const category = getCategory(editingCategoryId);
+    const budget = budgetMap.get(editingCategoryId);
+    return (
+      <SetBudget
+        category={category}
+        budget={budget}
+        monthLabel={formatMonthLabel(monthKey)}
+        spent={spentByCategory.get(editingCategoryId) ?? 0}
+        onSave={(patch) => saveBudget(editingCategoryId, patch)}
+        onDelete={() => removeBudget(editingCategoryId)}
+        onClose={() => setEditingCategoryId(null)}
+      />
+    );
+  }
 
   return (
     <div className="screen">
-      <ScreenHeader title="Budget" subtitle={formatMonthLabel(monthKey)} onBack={back} />
+      <ScreenHeader
+        title="Budget"
+        subtitle={formatMonthLabel(monthKey)}
+        onBack={back}
+        action={
+          <button
+            type="button"
+            className="bg__header-btn"
+            onClick={() => {
+              hapticTap();
+              setShowMenu(true);
+            }}
+            aria-label="More options"
+          >
+            <Icon name="more-dots" size={20} />
+          </button>
+        }
+      />
 
-      <div className="bg__summary">
-        <div className="bg__summary-item">
-          <span>Budgeted</span>
-          <strong>{formatMoney(totalBudget)}</strong>
+      <div className="bg__month-nav">
+        <button type="button" onClick={() => setMonthKey(shiftMonthKey(monthKey, -1))} aria-label="Previous month">
+          <Icon name="chevron-right" size={18} className="bg__prev-icon" />
+        </button>
+        <Icon name="calendar" size={15} />
+        <span>{formatMonthLabel(monthKey)}</span>
+        <button type="button" onClick={() => setMonthKey(shiftMonthKey(monthKey, 1))} aria-label="Next month">
+          <Icon name="chevron-right" size={18} />
+        </button>
+      </div>
+
+      <div className="bg__overview">
+        <div className="bg__ring-wrap">
+          <svg className="bg__ring" viewBox="0 0 100 100">
+            <circle className="bg__ring-track" cx="50" cy="50" r={RING_R} />
+            <circle
+              className={`bg__ring-progress${usedPct >= 100 ? ' bg__ring-progress--over' : ''}`}
+              cx="50"
+              cy="50"
+              r={RING_R}
+              style={{ strokeDasharray: RING_C, strokeDashoffset: RING_C * (1 - usedPct / 100) }}
+            />
+          </svg>
+          <div className="bg__ring-center">
+            <strong>{Math.round(usedPct)}%</strong>
+            <span>Used</span>
+          </div>
         </div>
-        <div className="bg__summary-divider" />
-        <div className="bg__summary-item">
-          <span>Spent</span>
-          <strong className={totalSpent > totalBudget && totalBudget > 0 ? 'bg__over' : ''}>
-            {formatMoney(totalSpent)}
-          </strong>
+        <div className="bg__overview-stats">
+          <div className="bg__overview-stat">
+            <span>Total Budget</span>
+            <strong>{formatMoney(totalBudget)}</strong>
+          </div>
+          <div className="bg__overview-stat">
+            <span>Total Spent</span>
+            <strong>{formatMoney(totalSpent)}</strong>
+          </div>
+          <div className={`bg__overview-remaining${remaining === 0 && totalBudget > 0 ? ' bg__overview-remaining--over' : ''}`}>
+            {remaining === 0 && totalBudget > 0 && <Icon name="info" size={14} />}
+            {totalBudget === 0
+              ? 'Set a budget to get started'
+              : remaining === 0
+                ? "You've reached your budget"
+                : `${formatMoney(remaining)} left`}
+          </div>
         </div>
+      </div>
+
+      {isCurrentMonth && (
+        <div className="bg__mini-stats">
+          <div className="bg__mini-stat">
+            <Icon name="wallet" size={16} />
+            <div>
+              <strong>{formatMoney(dailyAverage)}</strong>
+              <span>Daily Average</span>
+            </div>
+          </div>
+          <div className="bg__mini-stat">
+            <Icon name="calendar" size={16} />
+            <div>
+              <strong>{daysLeft}</strong>
+              <span>Days Left</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="bg__list-header">
+        <h2>Category Budgets</h2>
       </div>
 
       <ul className="bg__list">
         {EXPENSE_CATEGORIES.map((cat) => {
           const spent = spentByCategory.get(cat.id) ?? 0;
-          const limit = budgetMap.get(cat.id) ?? 0;
+          const budget = budgetMap.get(cat.id);
+          const limit = budget?.amount ?? 0;
           const hasLimit = limit > 0;
           const pct = hasLimit ? Math.min(100, (spent / limit) * 100) : 0;
           const over = hasLimit && spent > limit;
 
           return (
-            <li key={cat.id} className="bg__card">
-              <div className="bg__card-top">
-                <span className="bg__card-name">
-                  <Icon name={cat.icon} size={16} style={{ color: cat.color }} />
-                  {cat.label}
-                </span>
-                {editingId === cat.id ? (
-                  <input
-                    className="bg__limit-input"
-                    type="number"
-                    inputMode="decimal"
-                    autoFocus
-                    value={draftValue}
-                    onChange={(e) => setDraftValue(e.target.value)}
-                    onBlur={commitEdit}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') commitEdit();
-                    }}
+            <li key={cat.id}>
+              <button type="button" className="bg__card" onClick={() => setEditingCategoryId(cat.id)}>
+                <div className="bg__card-top">
+                  <span className="bg__card-name">
+                    <Icon name={cat.icon} size={16} style={{ color: cat.color }} />
+                    {cat.label}
+                  </span>
+                  <Icon name="chevron-right" size={16} className="bg__card-chevron" />
+                </div>
+                <div className="bg__track">
+                  <div
+                    className="bg__bar"
+                    style={{ width: `${pct}%`, background: over ? 'var(--red)' : cat.color }}
                   />
-                ) : (
-                  <button type="button" className="bg__limit-btn" onClick={() => startEdit(cat.id)}>
-                    {hasLimit ? `Limit ${formatMoney(limit)}` : 'Set limit'}
-                  </button>
-                )}
-              </div>
-
-              {hasLimit && (
-                <>
-                  <div className="bg__track">
-                    <div
-                      className="bg__bar"
-                      style={{ width: `${pct}%`, background: over ? 'var(--red)' : cat.color }}
-                    />
-                  </div>
-                  <div className="bg__card-bottom">
-                    <span className={over ? 'bg__over' : ''}>
-                      {formatMoney(spent)} of {formatMoney(limit)}
-                    </span>
-                    {over && <span className="bg__over-label">Over budget</span>}
-                  </div>
-                </>
-              )}
+                </div>
+                <div className="bg__card-bottom">
+                  <span className={over ? 'bg__over' : ''}>
+                    {formatMoney(spent)} / {hasLimit ? formatMoney(limit) : formatMoney(0)}
+                  </span>
+                  <span className={over ? 'bg__over' : ''}>{hasLimit ? `${Math.round(pct)}%` : '0%'}</span>
+                </div>
+              </button>
             </li>
           );
         })}
       </ul>
+
+      <p className="bg__tip">
+        <Icon name="lightbulb" size={16} />
+        Tip: Set a budget for each category to keep track of your spending and build better habits.
+      </p>
+
+      {showMenu && (
+        <div className="bg__menu-overlay" onClick={() => setShowMenu(false)}>
+          <div className="bg__menu-sheet" onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              className="bg__menu-item bg__menu-item--danger"
+              onClick={() => setConfirmingResetAll(true)}
+            >
+              <Icon name="repeat" size={18} />
+              Reset All Budgets
+            </button>
+            <button type="button" className="bg__menu-cancel" onClick={() => setShowMenu(false)}>
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      {confirmingResetAll && (
+        <div className="bg__menu-overlay" onClick={() => setConfirmingResetAll(false)}>
+          <div className="bg__menu-sheet" onClick={(e) => e.stopPropagation()}>
+            <p className="bg__confirm-text">Remove all category budgets? This can't be undone.</p>
+            <button type="button" className="bg__menu-item bg__menu-item--danger" onClick={resetAll}>
+              <Icon name="trash" size={18} />
+              Reset All
+            </button>
+            <button type="button" className="bg__menu-cancel" onClick={() => setConfirmingResetAll(false)}>
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
