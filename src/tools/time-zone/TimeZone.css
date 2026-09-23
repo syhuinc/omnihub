@@ -1,7 +1,18 @@
+.tz__header-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+}
+
 .tz__tabs {
   display: flex;
   gap: 8px;
-  margin: 0 20px 16px;
   padding: 4px;
   background: var(--bg-elevated);
   border: 1px solid var(--border);
@@ -13,12 +24,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  min-height: 38px;
+  gap: 5px;
+  min-height: 36px;
   border-radius: var(--radius-pill);
   color: var(--text-secondary);
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .tz__tab--active {
@@ -31,51 +43,185 @@
   padding: 0 20px 100px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
 }
 
-.tz__local {
+/* Hero card with globe */
+
+.tz__hero2 {
   position: relative;
-  background: var(--accent-gradient);
+  overflow: hidden;
+  min-height: 190px;
+  background: linear-gradient(160deg, color-mix(in srgb, var(--accent) 14%, var(--bg-elevated)), var(--bg-elevated) 65%);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--border));
   border-radius: var(--radius-lg);
-  padding: 20px;
+  padding: 18px;
+  box-shadow: 0 0 24px -10px color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+.tz__hero2-info {
+  position: relative;
+  z-index: 2;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  color: #fff;
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 35%, transparent), 0 8px 28px -8px color-mix(in srgb, var(--accent) 60%, transparent);
+  gap: 2px;
+  max-width: 62%;
 }
 
-.tz__local-icon {
-  opacity: 0.9;
-  margin-bottom: 2px;
-}
-
-.tz__list-header {
+.tz__hero2-pin {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-}
-
-.tz__list-header strong {
+  gap: 5px;
   font-size: 15px;
   font-weight: 700;
   color: var(--text-primary);
 }
 
-.tz__sort-btn {
+.tz__hero2-pin svg {
+  color: var(--accent);
+}
+
+.tz__hero2-country {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.tz__hero2-time {
+  font-size: 34px;
+  font-weight: 800;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.tz__hero2-time em {
+  font-style: normal;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-left: 3px;
+}
+
+.tz__hero2-date {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+.tz__hero2-globe {
+  position: absolute;
+  right: -30px;
+  bottom: -30px;
+  z-index: 1;
+  opacity: 0.9;
+}
+
+.tz__hero2-daynight {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-end;
+}
+
+.tz__hero2-dn-row {
   display: flex;
   align-items: center;
-  gap: 5px;
-  padding: 6px 11px;
-  border-radius: var(--radius-pill);
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
-  color: var(--text-secondary);
-  font-size: 11px;
-  font-weight: 600;
+  gap: 6px;
+  background: color-mix(in srgb, var(--bg) 55%, transparent);
+  backdrop-filter: blur(4px);
+  border-radius: var(--radius-sm);
+  padding: 5px 8px;
 }
+
+.tz__hero2-dn-row svg {
+  flex-shrink: 0;
+  color: var(--yellow);
+}
+
+.tz__hero2-dn-row:last-child svg {
+  color: var(--blue);
+}
+
+.tz__hero2-dn-row span {
+  display: flex;
+  flex-direction: column;
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  text-align: right;
+  line-height: 1.4;
+}
+
+.tz__hero2-dn-row em {
+  font-style: normal;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-transform: none;
+}
+
+/* Globe illustration */
+
+.globe {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: radial-gradient(circle at 35% 30%, #1c3a6b, #050d1c 75%);
+  box-shadow: 0 0 30px -6px color-mix(in srgb, var(--accent) 60%, transparent), inset 0 0 20px rgba(0, 0, 0, 0.6);
+}
+
+.globe__dots {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  fill: #7fb2ff;
+  opacity: 0.85;
+}
+
+.globe__shade {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 32% 28%, transparent 30%, rgba(0, 0, 0, 0.55) 80%), linear-gradient(200deg, rgba(255, 255, 255, 0.12), transparent 40%);
+  pointer-events: none;
+}
+
+.globe__pin {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 10px;
+  height: 10px;
+}
+
+.globe__pin-dot {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 8px 2px #fff;
+}
+
+.globe__pin-pulse {
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--accent) 60%, transparent);
+  animation: globe-pulse 2s ease-out infinite;
+}
+
+@keyframes globe-pulse {
+  0% { transform: scale(0.6); opacity: 0.8; }
+  100% { transform: scale(2.4); opacity: 0; }
+}
+
+/* Search + tabs */
 
 .tz__conv-hint {
   display: flex;
@@ -94,24 +240,6 @@
   color: var(--text-secondary);
 }
 
-.tz__local-label {
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  opacity: 0.85;
-}
-
-.tz__local-time {
-  font-size: 34px;
-  font-weight: 700;
-}
-
-.tz__local-date {
-  font-size: 13px;
-  opacity: 0.85;
-}
-
 .tz__empty {
   color: var(--text-secondary);
   font-size: 13px;
@@ -119,6 +247,187 @@
   text-align: center;
   padding-top: 24px;
 }
+
+/* World Clock / Favorites rows */
+
+.tz__list2 {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tz__row2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(160deg, var(--bg-elevated-2), var(--bg-elevated));
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  box-shadow: var(--shadow-sm);
+}
+
+.tz__row2--local {
+  border-color: color-mix(in srgb, var(--accent) 50%, var(--border-strong));
+  background: linear-gradient(160deg, color-mix(in srgb, var(--accent) 10%, var(--bg-elevated-2)), var(--bg-elevated));
+}
+
+.tz__row2-flag {
+  flex-shrink: 0;
+  font-size: 26px;
+  line-height: 1;
+}
+
+.tz__row2-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.tz__row2-name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.tz__row2-fav-icon {
+  color: var(--yellow);
+}
+
+.tz__local-badge {
+  font-style: normal;
+  font-size: 9px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--accent-gradient);
+  padding: 2px 7px;
+  border-radius: var(--radius-pill);
+}
+
+.tz__row2-country {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.tz__row2-zone {
+  font-size: 10px;
+  color: var(--text-tertiary);
+}
+
+.tz__row2-diff {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.tz__row2-time-col {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+}
+
+.tz__row2-time-pill {
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-active);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.tz__row2-time-pill--local {
+  background: var(--accent-gradient);
+  border-color: transparent;
+  color: #fff;
+}
+
+.tz__row2-date {
+  font-size: 10px;
+  color: var(--text-tertiary);
+}
+
+.tz__row2-menu {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-tertiary);
+}
+
+/* Add-a-city suggestions */
+
+.tz__suggest {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tz__suggest-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.tz__suggest-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tz__suggest-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  background: var(--bg-active);
+  color: var(--accent);
+}
+
+.tz__suggest-flag {
+  font-size: 20px;
+}
+
+.tz__suggest-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.tz__suggest-info strong {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.tz__suggest-info span {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+/* Time Converter list (reused for the plain sun/moon-period rows) */
 
 .tz__list {
   list-style: none;
@@ -219,20 +528,7 @@
   color: var(--text-secondary);
 }
 
-.tz__fab {
-  position: fixed;
-  right: max(20px, var(--safe-right));
-  bottom: calc(20px + var(--safe-bottom));
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  background: var(--accent-gradient);
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent), 0 8px 24px -4px color-mix(in srgb, var(--accent) 60%, transparent);
-}
+/* Sheets */
 
 .tz__sheet {
   position: fixed;
@@ -266,40 +562,37 @@
   margin-bottom: 12px;
 }
 
-.tz__pick-list {
-  list-style: none;
-  margin: 0 0 12px;
-  padding: 0;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.tz__pick-item {
-  width: 100%;
+.tz__menu-item {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 12px 14px;
-  border-radius: var(--radius-sm);
-  background: var(--bg-active);
+  gap: 10px;
+  min-height: 48px;
+  padding: 0 4px;
   color: var(--text-primary);
-}
-
-.tz__pick-item strong {
   font-size: 14px;
   font-weight: 600;
-  display: block;
+  border-top: 1px solid var(--border);
 }
 
-.tz__pick-country {
-  font-size: 12px;
-  color: var(--text-secondary);
+.tz__menu-item:first-of-type {
+  border-top: none;
+}
+
+.tz__menu-item--danger {
+  color: var(--red);
+}
+
+.tz__menu-item--active {
+  color: var(--accent);
+}
+
+.tz__menu-check {
+  margin-left: auto;
 }
 
 .tz__sheet-close {
   min-height: 44px;
+  margin-top: 8px;
   border-radius: var(--radius-sm);
   background: var(--bg-active);
   color: var(--text-primary);

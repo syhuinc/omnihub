@@ -2,28 +2,39 @@ import { useEffect, useMemo, useState } from 'react';
 import { ScreenHeader } from '../../components/ScreenHeader';
 import { Icon } from '../../components/Icon';
 import { SearchBar } from '../../components/SearchBar';
-import { SwipeToDelete } from '../../components/SwipeToDelete';
 import { WheelTimePicker } from '../alarm/WheelTimePicker';
 import { useRouter } from '../../app/Router';
 import { useBackHandler } from '../../app/useBackHandler';
 import { storageGet, storageSet, StorageKeys } from '../../storage/db';
-import { hapticSelect } from '../../haptics';
-import { CITIES, getCityById } from './cities';
-import { dayOffsetLabel, dayPeriod, formatOffsetDiff, offsetHoursForSort } from './offset';
+import { hapticSelect, hapticTap } from '../../haptics';
+import { CITIES, getCityById, getCityByTimeZone, type City } from './cities';
+import {
+  dayOffsetLabel,
+  dayPeriod,
+  formatFullDate,
+  formatTimeLower,
+  formatWorldClockDiff,
+  formatZoneLabel,
+  friendlyZoneName,
+  offsetHoursForSort,
+} from './offset';
+import { getSunTimes } from './sunTimes';
+import { EarthGlobe } from './EarthGlobe';
 import './TimeZone.css';
 
-const DEFAULT_CITY_IDS = ['new-york', 'london', 'kuala-lumpur', 'mumbai', 'tokyo'];
-type Tab = 'clock' | 'converter';
+const DEFAULT_CITY_IDS = ['kuala-lumpur', 'new-york', 'london', 'mumbai', 'tokyo', 'sydney'];
+type Tab = 'clock' | 'favorites' | 'converter';
 type SortMode = 'added' | 'offset' | 'name';
 
 export function TimeZone() {
   const { back } = useRouter();
   const [cityIds, setCityIds] = useState<string[]>(() => storageGet(StorageKeys.timeZoneCities, DEFAULT_CITY_IDS));
+  const [favoriteIds, setFavoriteIds] = useState<string[]>(() => storageGet(StorageKeys.timeZoneFavorites, []));
   const [now, setNow] = useState(new Date());
-  const [addOpen, setAddOpen] = useState(false);
-  const [addSearch, setAddSearch] = useState('');
-  const [openSwipeId, setOpenSwipeId] = useState<string | null>(null);
   const [tab, setTab] = useState<Tab>('clock');
+  const [search, setSearch] = useState('');
+  const [menuCity, setMenuCity] = useState<City | null>(null);
+  const [showSortSheet, setShowSortSheet] = useState(false);
   const [sortMode, setSortMode] = useState<SortMode>('added');
   const [convHour, setConvHour] = useState(now.getHours());
   const [convMinute, setConvMinute] = useState(now.getMinutes());
@@ -33,43 +44,73 @@ export function TimeZone() {
     return () => clearInterval(interval);
   }, []);
 
-  useBackHandler(() => setAddOpen(false), addOpen);
+  useBackHandler(() => {
+    if (menuCity) setMenuCity(null);
+    else if (showSortSheet) setShowSortSheet(false);
+  }, Boolean(menuCity) || showSortSheet);
 
-  function persist(next: string[]) {
+  function persistCities(next: string[]) {
     setCityIds(next);
     storageSet(StorageKeys.timeZoneCities, next);
   }
 
+  function persistFavorites(next: string[]) {
+    setFavoriteIds(next);
+    storageSet(StorageKeys.timeZoneFavorites, next);
+  }
+
   function addCity(id: string) {
-    if (cityIds.includes(id)) return;
     hapticSelect();
-    persist([...cityIds, id]);
-    setAddOpen(false);
-    setAddSearch('');
+    if (!cityIds.includes(id)) persistCities([...cityIds, id]);
+    setSearch('');
   }
 
   function removeCity(id: string) {
-    persist(cityIds.filter((c) => c !== id));
+    persistCities(cityIds.filter((c) => c !== id));
+    if (favoriteIds.includes(id)) persistFavorites(favoriteIds.filter((f) => f !== id));
+    setMenuCity(null);
   }
 
-  const cities = useMemo(() => cityIds.map(getCityById).filter((c): c is NonNullable<typeof c> => !!c), [cityIds]);
+  function toggleFavorite(id: string) {
+    hapticSelect();
+    persistFavorites(favoriteIds.includes(id) ? favoriteIds.filter((f) => f !== id) : [...favoriteIds, id]);
+    setMenuCity(null);
+  }
 
-  const sortedCities = useMemo(() => {
-    if (sortMode === 'name') return [...cities].sort((a, b) => a.name.localeCompare(b.name));
-    if (sortMode === 'offset') return [...cities].sort((a, b) => offsetHoursForSort(a.timeZone, now) - offsetHoursForSort(b.timeZone, now));
-    return cities;
-  }, [cities, sortMode, now]);
+  const localTimeZone = useMemo(() => Intl.DateTimeFormat().resolvedOptions().timeZone, []);
+  const localCity = useMemo(() => getCityByTimeZone(localTimeZone), [localTimeZone]);
+  const localSunTimes = useMemo(
+    () => (localCity ? getSunTimes(now, localCity.lat, localCity.lon) : null),
+    [localCity, now],
+  );
 
-  const addableCities = useMemo(() => {
-    const q = addSearch.trim().toLowerCase();
-    return CITIES.filter((c) => !cityIds.includes(c.id)).filter(
-      (c) => !q || c.name.toLowerCase().includes(q) || c.country.toLowerCase().includes(q),
+  const cities = useMemo(() => cityIds.map(getCityById).filter((c): c is City => !!c), [cityIds]);
+  const favoriteCities = useMemo(() => cities.filter((c) => favoriteIds.includes(c.id)), [cities, favoriteIds]);
+
+  function sortList(list: City[]): City[] {
+    if (sortMode === 'name') return [...list].sort((a, b) => a.name.localeCompare(b.name));
+    if (sortMode === 'offset') return [...list].sort((a, b) => offsetHoursForSort(a.timeZone, now) - offsetHoursForSort(b.timeZone, now));
+    return list;
+  }
+
+  function filterBySearch(list: City[]): City[] {
+    const q = search.trim().toLowerCase();
+    if (!q) return list;
+    return list.filter(
+      (c) => c.name.toLowerCase().includes(q) || c.country.toLowerCase().includes(q) || c.timeZone.toLowerCase().includes(q),
     );
-  }, [cityIds, addSearch]);
+  }
 
-  const localTime = now.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
-  const localDate = now.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
-  const localPeriod = dayPeriod(Intl.DateTimeFormat().resolvedOptions().timeZone, now);
+  const visibleClock = useMemo(() => sortList(filterBySearch(cities)), [cities, search, sortMode, now]); // eslint-disable-line react-hooks/exhaustive-deps
+  const visibleFavorites = useMemo(() => sortList(filterBySearch(favoriteCities)), [favoriteCities, search, sortMode, now]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const addSuggestions = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q || tab !== 'clock') return [];
+    return CITIES.filter((c) => !cityIds.includes(c.id))
+      .filter((c) => c.name.toLowerCase().includes(q) || c.country.toLowerCase().includes(q))
+      .slice(0, 6);
+  }, [search, cityIds, tab]);
 
   const convertBase = useMemo(() => {
     const base = new Date(now);
@@ -77,57 +118,176 @@ export function TimeZone() {
     return base;
   }, [convHour, convMinute, now]);
 
+  function renderRow(city: City) {
+    const isLocal = city.timeZone === localTimeZone;
+    const isFavorite = favoriteIds.includes(city.id);
+    const time = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: city.timeZone });
+    const dateLabel = now.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', timeZone: city.timeZone });
+    return (
+      <li key={city.id}>
+        <div className={`tz__row2${isLocal ? ' tz__row2--local' : ''}`}>
+          <span className="tz__row2-flag">{city.flag}</span>
+          <div className="tz__row2-info">
+            <span className="tz__row2-name">
+              {city.name}
+              {isLocal && <em className="tz__local-badge">Local</em>}
+              {isFavorite && <Icon name="star" size={11} className="tz__row2-fav-icon" />}
+            </span>
+            <span className="tz__row2-country">{city.country}</span>
+            <span className="tz__row2-zone">{formatZoneLabel(city.timeZone, now)}</span>
+            {!isLocal && <span className="tz__row2-diff">{formatWorldClockDiff(city.timeZone, now)}</span>}
+          </div>
+          <div className="tz__row2-time-col">
+            <span className={`tz__row2-time-pill${isLocal ? ' tz__row2-time-pill--local' : ''}`}>
+              {time.replace(/(AM|PM)/i, (m) => m.toLowerCase())}
+            </span>
+            <span className="tz__row2-date">{dateLabel}</span>
+          </div>
+          <button type="button" className="tz__row2-menu" onClick={() => setMenuCity(city)} aria-label="More options">
+            <Icon name="more-dots" size={16} />
+          </button>
+        </div>
+      </li>
+    );
+  }
+
   return (
     <div className="screen">
-      <ScreenHeader title="Time Zone" subtitle="Your world, right on time" onBack={back} />
+      <ScreenHeader
+        title="Time Zone"
+        subtitle="Explore time around the world"
+        onBack={back}
+        action={
+          <button type="button" className="tz__header-btn" onClick={() => setShowSortSheet(true)} aria-label="Sort">
+            <Icon name="more-dots" size={18} />
+          </button>
+        }
+      />
 
-      <div className="tz__tabs">
-        <button type="button" className={`tz__tab${tab === 'clock' ? ' tz__tab--active' : ''}`} onClick={() => setTab('clock')}>
-          <Icon name="globe" size={15} /> World Clock
-        </button>
-        <button type="button" className={`tz__tab${tab === 'converter' ? ' tz__tab--active' : ''}`} onClick={() => setTab('converter')}>
-          <Icon name="repeat" size={15} /> Converter
-        </button>
-      </div>
-
-      {tab === 'clock' ? (
-        <div className="tz__body">
-          <div className="tz__local">
-            <Icon name={localPeriod} size={22} className="tz__local-icon" />
-            <span className="tz__local-label">Your Time</span>
-            <span className="tz__local-time">{localTime}</span>
-            <span className="tz__local-date">{localDate}</span>
+      <div className="tz__body">
+        <div className="tz__hero2">
+          <div className="tz__hero2-info">
+            <span className="tz__hero2-pin">
+              <Icon name="pin" size={13} />
+              {localCity ? localCity.name : friendlyZoneName(localTimeZone)}
+            </span>
+            <span className="tz__hero2-country">
+              {localCity ? `${localCity.country} ` : ''}({formatZoneLabel(localTimeZone, now).replace(/^GMT[+-][\d:]+\s?/, '') || formatZoneLabel(localTimeZone, now)})
+            </span>
+            <span className="tz__hero2-time">
+              {formatTimeLower(now).replace(/\s?(am|pm)/i, '')}
+              <em>{now.getHours() < 12 ? 'am' : 'pm'}</em>
+            </span>
+            <span className="tz__hero2-date">{formatFullDate(now)}</span>
           </div>
 
-          {cities.length > 0 && (
-            <div className="tz__list-header">
-              <strong>World Clock ({cities.length})</strong>
-              <button
-                type="button"
-                className="tz__sort-btn"
-                onClick={() => {
-                  hapticSelect();
-                  setSortMode((m) => (m === 'added' ? 'offset' : m === 'offset' ? 'name' : 'added'));
-                }}
-              >
-                <Icon name="sort" size={13} />
-                Sort: {sortMode === 'added' ? 'Added' : sortMode === 'offset' ? 'Time' : 'Name'}
-              </button>
-            </div>
+          {localCity && (
+            <>
+              <div className="tz__hero2-globe">
+                <EarthGlobe lat={localCity.lat} lon={localCity.lon} />
+              </div>
+              {localSunTimes && (
+                <div className="tz__hero2-daynight">
+                  <div className="tz__hero2-dn-row">
+                    <Icon name="sun" size={13} />
+                    <span>
+                      Day
+                      <em>
+                        {formatTimeLower(localSunTimes.sunrise, localCity.timeZone)} – {formatTimeLower(localSunTimes.sunset, localCity.timeZone)}
+                      </em>
+                    </span>
+                  </div>
+                  <div className="tz__hero2-dn-row">
+                    <Icon name="moon" size={13} />
+                    <span>
+                      Night
+                      <em>
+                        {formatTimeLower(localSunTimes.sunset, localCity.timeZone)} – {formatTimeLower(localSunTimes.sunrise, localCity.timeZone)}
+                      </em>
+                    </span>
+                  </div>
+                </div>
+              )}
+            </>
           )}
+        </div>
 
-          {cities.length === 0 ? (
-            <p className="tz__empty">No cities added yet. Tap + to add one.</p>
+        {tab !== 'converter' && (
+          <SearchBar value={search} onChange={setSearch} placeholder="Search city, country or time zone..." />
+        )}
+
+        <div className="tz__tabs">
+          <button type="button" className={`tz__tab${tab === 'clock' ? ' tz__tab--active' : ''}`} onClick={() => setTab('clock')}>
+            <Icon name="clock" size={14} /> World Clock
+          </button>
+          <button type="button" className={`tz__tab${tab === 'favorites' ? ' tz__tab--active' : ''}`} onClick={() => setTab('favorites')}>
+            <Icon name="star" size={14} /> Favorites
+          </button>
+          <button type="button" className={`tz__tab${tab === 'converter' ? ' tz__tab--active' : ''}`} onClick={() => setTab('converter')}>
+            <Icon name="repeat" size={14} /> Time Converter
+          </button>
+        </div>
+
+        {tab === 'clock' && (
+          <>
+            {visibleClock.length === 0 ? (
+              <p className="tz__empty">{search ? 'No added cities match.' : 'No cities added yet — search above to add one.'}</p>
+            ) : (
+              <ul className="tz__list2">{visibleClock.map(renderRow)}</ul>
+            )}
+
+            {addSuggestions.length > 0 && (
+              <div className="tz__suggest">
+                <span className="tz__suggest-label">Add a city</span>
+                <ul className="tz__suggest-list">
+                  {addSuggestions.map((city) => (
+                    <li key={city.id}>
+                      <button type="button" className="tz__suggest-item" onClick={() => addCity(city.id)}>
+                        <span className="tz__suggest-flag">{city.flag}</span>
+                        <span className="tz__suggest-info">
+                          <strong>{city.name}</strong>
+                          <span>{city.country}</span>
+                        </span>
+                        <Icon name="plus" size={16} />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </>
+        )}
+
+        {tab === 'favorites' &&
+          (visibleFavorites.length === 0 ? (
+            <p className="tz__empty">
+              {favoriteCities.length === 0
+                ? 'No favorites yet — open a city’s ⋮ menu on World Clock and add it here.'
+                : 'No favorites match.'}
+            </p>
           ) : (
-            <ul className="tz__list">
-              {sortedCities.map((city) => {
-                const time = now.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', timeZone: city.timeZone });
-                const date = now.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', timeZone: city.timeZone });
-                const dayLabel = dayOffsetLabel(city.timeZone, now);
-                const period = dayPeriod(city.timeZone, now);
-                return (
-                  <li key={city.id}>
-                    <SwipeToDelete id={city.id} openId={openSwipeId} onOpenChange={setOpenSwipeId} onDelete={() => removeCity(city.id)}>
+            <ul className="tz__list2">{visibleFavorites.map(renderRow)}</ul>
+          ))}
+
+        {tab === 'converter' && (
+          <>
+            <div className="tz__conv-hint">
+              <Icon name="info" size={16} />
+              <span>Pick a time in your local zone to see what it is everywhere else.</span>
+            </div>
+
+            <WheelTimePicker hour={convHour} minute={convMinute} onChange={(h, m) => { setConvHour(h); setConvMinute(m); }} />
+
+            {cities.length === 0 ? (
+              <p className="tz__empty">Add a city on World Clock to convert times.</p>
+            ) : (
+              <ul className="tz__list">
+                {cities.map((city) => {
+                  const time = convertBase.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', timeZone: city.timeZone });
+                  const dayLabel = dayOffsetLabel(city.timeZone, convertBase);
+                  const period = dayPeriod(city.timeZone, convertBase);
+                  return (
+                    <li key={city.id}>
                       <div className="tz__row">
                         <span className={`tz__row-period tz__row-period--${period}`}>
                           <Icon name={period} size={18} />
@@ -137,89 +297,63 @@ export function TimeZone() {
                             {city.name}
                             {dayLabel && <em className="tz__row-day-badge">{dayLabel}</em>}
                           </span>
-                          <span className="tz__row-diff">{formatOffsetDiff(city.timeZone, now)}</span>
+                          <span className="tz__row-diff">{city.country}</span>
                         </span>
                         <span className="tz__row-time-block">
                           <span className="tz__row-time">{time}</span>
-                          <span className="tz__row-date">{date}</span>
                         </span>
                       </div>
-                    </SwipeToDelete>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
-        </div>
-      ) : (
-        <div className="tz__body">
-          <div className="tz__conv-hint">
-            <Icon name="info" size={16} />
-            <span>Pick a time in your local zone to see what it is everywhere else.</span>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </>
+        )}
+      </div>
+
+      {menuCity && (
+        <div className="tz__sheet" onClick={() => setMenuCity(null)}>
+          <div className="tz__sheet-content" onClick={(e) => e.stopPropagation()}>
+            <h2>
+              {menuCity.flag} {menuCity.name}
+            </h2>
+            <button type="button" className="tz__menu-item" onClick={() => toggleFavorite(menuCity.id)}>
+              <Icon name="star" size={16} />
+              {favoriteIds.includes(menuCity.id) ? 'Remove from Favorites' : 'Add to Favorites'}
+            </button>
+            <button type="button" className="tz__menu-item tz__menu-item--danger" onClick={() => removeCity(menuCity.id)}>
+              <Icon name="trash" size={16} />
+              Remove City
+            </button>
+            <button type="button" className="tz__sheet-close" onClick={() => setMenuCity(null)}>
+              Close
+            </button>
           </div>
-
-          <WheelTimePicker hour={convHour} minute={convMinute} onChange={(h, m) => { setConvHour(h); setConvMinute(m); }} />
-
-          {cities.length === 0 ? (
-            <p className="tz__empty">Add a city on the World Clock tab to convert times.</p>
-          ) : (
-            <ul className="tz__list">
-              {cities.map((city) => {
-                const time = convertBase.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', timeZone: city.timeZone });
-                const dayLabel = dayOffsetLabel(city.timeZone, convertBase);
-                const period = dayPeriod(city.timeZone, convertBase);
-                return (
-                  <li key={city.id}>
-                    <div className="tz__row">
-                      <span className={`tz__row-period tz__row-period--${period}`}>
-                        <Icon name={period} size={18} />
-                      </span>
-                      <span className="tz__row-info">
-                        <span className="tz__row-name">
-                          {city.name}
-                          {dayLabel && <em className="tz__row-day-badge">{dayLabel}</em>}
-                        </span>
-                        <span className="tz__row-diff">{city.country}</span>
-                      </span>
-                      <span className="tz__row-time-block">
-                        <span className="tz__row-time">{time}</span>
-                      </span>
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
         </div>
       )}
 
-      <button type="button" className="tz__fab" onClick={() => setAddOpen(true)} aria-label="Add city">
-        <Icon name="plus" size={24} />
-      </button>
-
-      {addOpen && (
-        <div className="tz__sheet" onClick={() => setAddOpen(false)}>
+      {showSortSheet && (
+        <div className="tz__sheet" onClick={() => setShowSortSheet(false)}>
           <div className="tz__sheet-content" onClick={(e) => e.stopPropagation()}>
-            <h2>Add a City</h2>
-            <SearchBar value={addSearch} onChange={setAddSearch} placeholder="Search cities or countries..." autoFocus />
-            {addableCities.length === 0 ? (
-              <p className="tz__empty">{addSearch ? 'No matches.' : 'All cities added.'}</p>
-            ) : (
-              <ul className="tz__pick-list">
-                {addableCities.map((city) => (
-                  <li key={city.id}>
-                    <button type="button" className="tz__pick-item" onClick={() => addCity(city.id)}>
-                      <span>
-                        <strong>{city.name}</strong>
-                        <span className="tz__pick-country">{city.country}</span>
-                      </span>
-                      <Icon name="plus" size={16} />
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-            <button type="button" className="tz__sheet-close" onClick={() => setAddOpen(false)}>
+            <h2>Sort By</h2>
+            {(['added', 'offset', 'name'] as SortMode[]).map((mode) => (
+              <button
+                key={mode}
+                type="button"
+                className={`tz__menu-item${sortMode === mode ? ' tz__menu-item--active' : ''}`}
+                onClick={() => {
+                  hapticTap();
+                  setSortMode(mode);
+                  setShowSortSheet(false);
+                }}
+              >
+                <Icon name={mode === 'added' ? 'plus' : mode === 'offset' ? 'clock' : 'sort'} size={16} />
+                {mode === 'added' ? 'Order Added' : mode === 'offset' ? 'Time Offset' : 'City Name'}
+                {sortMode === mode && <Icon name="check" size={16} className="tz__menu-check" />}
+              </button>
+            ))}
+            <button type="button" className="tz__sheet-close" onClick={() => setShowSortSheet(false)}>
               Close
             </button>
           </div>

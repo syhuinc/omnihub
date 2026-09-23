@@ -29,6 +29,7 @@ export const StorageKeys = {
   percentageHistory: `${PREFIX}percentage.history`,
   people: `${PREFIX}age.people`,
   debtDefaultCurrency: `${PREFIX}debt.defaultCurrency`,
+  timeZoneFavorites: `${PREFIX}timeZone.favorites`,
 } as const;
 
 export function storageGet<T>(key: string, fallback: T): T {
