@@ -60,6 +60,23 @@
   text-align: center;
 }
 
+.home__myphone-pill {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: color-mix(in srgb, var(--blue) 20%, var(--bg-elevated));
+  color: var(--blue);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--blue) 35%, transparent), 0 0 12px -2px var(--blue);
+}
+
+.home__myphone-pill:active {
+  background: color-mix(in srgb, var(--blue) 30%, var(--bg-elevated));
+}
+
 .home__grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));

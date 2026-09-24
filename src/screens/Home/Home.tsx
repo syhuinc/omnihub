@@ -65,12 +65,20 @@ export function Home() {
     storageSet(StorageKeys.homeMyPhonePosition, 'top');
   }
 
+  function showMyPhone() {
+    const next = { ...sections, myPhone: true };
+    setSections(next);
+    storageSet(StorageKeys.homeSections, next);
+  }
+
   function restoreSections() {
     setSections(DEFAULT_SECTIONS);
     storageSet(StorageKeys.homeSections, DEFAULT_SECTIONS);
   }
 
-  const hasHiddenSections = !sections.recommended || !sections.quickActions || !sections.myPhone;
+  // myPhone has its own dedicated inline restore banner (right where the card lives) instead of
+  // sharing the generic "Show hidden sections" button — keeps one obvious way back per section.
+  const hasHiddenSections = !sections.recommended || !sections.quickActions;
 
   function toggleMyPhonePosition() {
     const next: MyPhonePosition = myPhonePosition === 'top' ? 'afterPinned' : 'top';
@@ -102,7 +110,17 @@ export function Home() {
 
   return (
     <div className="screen home">
-      <ScreenHeader title={`${greeting()} \u{1F44B}`} subtitle="What do you need today?" />
+      <ScreenHeader
+        title={`${greeting()} \u{1F44B}`}
+        subtitle="What do you need today?"
+        action={
+          !sections.myPhone ? (
+            <button type="button" className="home__myphone-pill" onClick={showMyPhone} aria-label="Show My Phone card">
+              <Icon name="smartphone" size={18} />
+            </button>
+          ) : undefined
+        }
+      />
 
       {!query && sections.myPhone && myPhonePosition === 'top' && (
         <PhoneStatusCard atTop onHide={hideMyPhone} onTogglePosition={toggleMyPhonePosition} />
