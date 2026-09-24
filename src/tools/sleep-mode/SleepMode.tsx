@@ -7,14 +7,11 @@ import { hapticSelect, hapticTap, hapticWarning } from '../../haptics';
 import { WheelTimePicker } from '../alarm/WheelTimePicker';
 import { SleepModePlugin, DEFAULT_SLEEP_MODE_CONFIG, type SleepModeConfig, type SleepModeStatus } from '../../sleep-mode/plugin';
 import { INTERVAL_OPTIONS_MIN, WIND_DOWN_ACTIONS } from './types';
-import { AiPersonalityScreen } from './AiPersonalityScreen';
-import { PersonalizationScreen } from './PersonalizationScreen';
-import { ReminderExampleScreen } from './ReminderExampleScreen';
+import { HomePersonalitySection } from './HomePersonalitySection';
 import { WindDownMode } from './WindDownMode';
 import { SleepSounds } from './SleepSounds';
 import { SleepInsights } from './SleepInsights';
-import { SleepModeAI } from './SleepModeAI';
-import { SleepSettingsScreen, type SettingsDestination } from './SleepSettingsScreen';
+import { SleepModeAiTab } from './SleepModeAiTab';
 import { SleepTabBar, type SleepTab } from './SleepTabBar';
 import { heroBanner } from '../../assets/sleep-mode';
 import './SleepMode.css';
@@ -31,10 +28,9 @@ function formatTimeOfDay(ms: number): string {
 }
 
 type TimeField = 'bedtime' | 'wake';
-type SubScreen = SleepTab | 'wind-down' | SettingsDestination;
+type SubScreen = SleepTab | 'wind-down';
 
-const TAB_SCREENS = new Set<SubScreen>(['main', 'sleep-insights', 'sleep-sounds', 'settings']);
-const SETTINGS_SUB_SCREENS = new Set<SubScreen>(['ai-personality', 'personalization', 'reminder-example', 'sleep-mode-ai']);
+const TAB_SCREENS = new Set<SubScreen>(['main', 'sleep-insights', 'sleep-sounds', 'ai']);
 
 export function SleepMode() {
   const { back } = useRouter();
@@ -46,10 +42,7 @@ export function SleepMode() {
   const [windDownInitialAction, setWindDownInitialAction] = useState<string | undefined>(undefined);
 
   useBackHandler(() => setTimeSheet(null), timeSheet !== null);
-  useBackHandler(
-    () => setScreen(SETTINGS_SUB_SCREENS.has(screen) ? 'settings' : 'main'),
-    screen !== 'main' && timeSheet === null,
-  );
+  useBackHandler(() => setScreen('main'), screen !== 'main' && timeSheet === null);
 
   useEffect(() => {
     SleepModePlugin.status()
@@ -124,18 +117,6 @@ export function SleepMode() {
     setScreen(tab);
   }
 
-  if (screen === 'ai-personality') {
-    return <AiPersonalityScreen config={config} onBack={() => setScreen('settings')} onPersist={persist} />;
-  }
-  if (screen === 'personalization') {
-    return <PersonalizationScreen config={config} onBack={() => setScreen('settings')} onPersist={persist} />;
-  }
-  if (screen === 'reminder-example') {
-    return <ReminderExampleScreen onBack={() => setScreen('settings')} />;
-  }
-  if (screen === 'sleep-mode-ai') {
-    return <SleepModeAI onBack={() => setScreen('settings')} />;
-  }
   if (screen === 'wind-down') {
     return (
       <WindDownMode
@@ -152,21 +133,12 @@ export function SleepMode() {
     body = <SleepInsights onBack={() => setScreen('main')} />;
   } else if (screen === 'sleep-sounds') {
     body = <SleepSounds onBack={() => setScreen('main')} />;
-  } else if (screen === 'settings') {
-    body = <SleepSettingsScreen onBack={() => setScreen('main')} onNavigate={(dest) => setScreen(dest)} />;
+  } else if (screen === 'ai') {
+    body = <SleepModeAiTab onBack={() => setScreen('main')} />;
   } else {
     body = (
       <div className="screen">
-        <ScreenHeader
-          title="Sleep Mode"
-          subtitle="Your bedtime companion"
-          onBack={back}
-          action={
-            <button type="button" className="sm__header-gear" onClick={() => setScreen('settings')} aria-label="Settings">
-              <Icon name="settings" size={19} />
-            </button>
-          }
-        />
+        <ScreenHeader title="Sleep Mode" subtitle="Your bedtime companion" onBack={back} />
 
         <div className="sm__body">
           <div className="sm__banner">
@@ -216,6 +188,8 @@ export function SleepMode() {
               </button>
             </div>
           )}
+
+          <HomePersonalitySection config={config} onPersist={persist} />
 
           <section className="sm__section">
             <h2>

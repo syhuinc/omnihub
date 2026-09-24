@@ -2,13 +2,13 @@ import { Icon, type IconName } from '../../components/Icon';
 import { hapticSelect } from '../../haptics';
 import './SleepMode.css';
 
-export type SleepTab = 'main' | 'sleep-insights' | 'sleep-sounds' | 'settings';
+export type SleepTab = 'main' | 'sleep-insights' | 'sleep-sounds' | 'ai';
 
 const TABS: { id: SleepTab; label: string; icon: IconName }[] = [
   { id: 'main', label: 'Home', icon: 'home' },
   { id: 'sleep-insights', label: 'Insights', icon: 'trending-up' },
   { id: 'sleep-sounds', label: 'Sounds', icon: 'music' },
-  { id: 'settings', label: 'Settings', icon: 'settings' },
+  { id: 'ai', label: 'AI', icon: 'cpu' },
 ];
 
 interface SleepTabBarProps {
