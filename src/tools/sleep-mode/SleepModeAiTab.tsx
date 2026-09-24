@@ -26,14 +26,18 @@ export function SleepModeAiTab({ onBack }: SleepModeAiTabProps) {
   const [sampleText, setSampleText] = useState<string | null>(null);
   const [sampleAvatarId, setSampleAvatarId] = useState<string | null>(null);
   const [sampleLoading, setSampleLoading] = useState(false);
+  const [burstKey, setBurstKey] = useState(0);
   const comingSoonRef = useRef<HTMLDivElement>(null);
 
-  const sampleAvatar = PERSONALITY_META.find((p) => p.id === sampleAvatarId)?.image;
+  const samplePersonality = PERSONALITY_META.find((p) => p.id === sampleAvatarId);
+  const sampleAvatar = samplePersonality?.image;
+  const sampleEmoji = samplePersonality?.emoji;
 
   async function previewPersonality(id: string) {
     hapticTap();
     const recorded = SAMPLE_AUDIO[id];
     setSampleAvatarId(id);
+    setBurstKey((k) => k + 1);
     if (!recorded) {
       setSampleText(null);
       return;
@@ -97,6 +101,11 @@ export function SleepModeAiTab({ onBack }: SleepModeAiTabProps) {
           <div className="sm__sample-bubble">
             <span className="sm__sample-avatar">
               <img src={sampleAvatar} alt="" />
+              {sampleEmoji && (
+                <span key={burstKey} className="sm__sample-emoji-burst" aria-hidden="true">
+                  {sampleEmoji}
+                </span>
+              )}
             </span>
             <p className="sm__sample-text">{sampleLoading ? 'Loading…' : sampleText}</p>
             <span className="sm__sample-wave" aria-hidden="true">

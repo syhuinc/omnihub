@@ -18,8 +18,11 @@ export function HomePersonalitySection({ config, onPersist }: HomePersonalitySec
   const [sampleText, setSampleText] = useState<string | null>(null);
   const [sampleAvatarId, setSampleAvatarId] = useState<string | null>(null);
   const [sampleLoading, setSampleLoading] = useState(false);
+  const [burstKey, setBurstKey] = useState(0);
 
-  const sampleAvatar = PERSONALITY_META.find((p) => p.id === sampleAvatarId)?.image;
+  const samplePersonality = PERSONALITY_META.find((p) => p.id === sampleAvatarId);
+  const sampleAvatar = samplePersonality?.image;
+  const sampleEmoji = samplePersonality?.emoji;
 
   function selectPersonality(id: SleepPersonality) {
     hapticSelect();
@@ -29,6 +32,7 @@ export function HomePersonalitySection({ config, onPersist }: HomePersonalitySec
   async function hearSample() {
     hapticTap();
     setSampleAvatarId(config.personality);
+    setBurstKey((k) => k + 1);
 
     const recorded = SAMPLE_AUDIO[config.personality];
     if (recorded) {
@@ -103,6 +107,11 @@ export function HomePersonalitySection({ config, onPersist }: HomePersonalitySec
         <div className="sm__sample-bubble">
           <span className="sm__sample-avatar">
             <img src={sampleAvatar} alt="" />
+            {sampleEmoji && (
+              <span key={burstKey} className="sm__sample-emoji-burst" aria-hidden="true">
+                {sampleEmoji}
+              </span>
+            )}
           </span>
           <p className="sm__sample-text">{sampleText}</p>
           <span className="sm__sample-wave" aria-hidden="true">
