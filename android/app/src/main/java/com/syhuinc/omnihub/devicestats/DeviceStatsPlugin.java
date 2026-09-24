@@ -43,18 +43,28 @@ import java.util.Enumeration;
 @CapacitorPlugin(
         name = "DeviceStatsPlugin",
         permissions = {
+                // Two separate aliases, not one: Capacitor requires every string under an alias
+                // to be granted before it reports the alias as granted. READ_EXTERNAL_STORAGE is
+                // capped at maxSdkVersion 32 in the manifest, so on Android 13+ it always reads as
+                // denied — if it shared an alias with the granular media permissions, it would
+                // permanently drag that alias to "denied" even after the user granted the ones
+                // that actually apply on their OS version.
                 @Permission(
                         strings = {
                                 Manifest.permission.READ_MEDIA_IMAGES,
                                 Manifest.permission.READ_MEDIA_VIDEO,
-                                Manifest.permission.READ_MEDIA_AUDIO,
-                                Manifest.permission.READ_EXTERNAL_STORAGE
+                                Manifest.permission.READ_MEDIA_AUDIO
                         },
-                        alias = "media"
-                )
+                        alias = "media33"
+                ),
+                @Permission(strings = { Manifest.permission.READ_EXTERNAL_STORAGE }, alias = "mediaLegacy")
         }
 )
 public class DeviceStatsPlugin extends Plugin {
+
+    private String mediaAlias() {
+        return Build.VERSION.SDK_INT >= 33 ? "media33" : "mediaLegacy";
+    }
 
     @PluginMethod
     public void getStats(PluginCall call) {
@@ -185,19 +195,19 @@ public class DeviceStatsPlugin extends Plugin {
     @PluginMethod
     public void checkMediaPermission(PluginCall call) {
         JSObject ret = new JSObject();
-        ret.put("granted", getPermissionState("media").toString().equals("granted"));
+        ret.put("granted", getPermissionState(mediaAlias()).toString().equals("granted"));
         call.resolve(ret);
     }
 
     @PluginMethod
     public void requestMediaPermission(PluginCall call) {
-        requestPermissionForAlias("media", call, "onMediaPermissionResult");
+        requestPermissionForAlias(mediaAlias(), call, "onMediaPermissionResult");
     }
 
     @PermissionCallback
     private void onMediaPermissionResult(PluginCall call) {
         JSObject ret = new JSObject();
-        ret.put("granted", getPermissionState("media").toString().equals("granted"));
+        ret.put("granted", getPermissionState(mediaAlias()).toString().equals("granted"));
         call.resolve(ret);
     }
 
@@ -209,7 +219,7 @@ public class DeviceStatsPlugin extends Plugin {
      */
     @PluginMethod
     public void getStorageBreakdown(PluginCall call) {
-        if (!getPermissionState("media").toString().equals("granted")) {
+        if (!getPermissionState(mediaAlias()).toString().equals("granted")) {
             call.reject("media permission not granted");
             return;
         }
