@@ -157,6 +157,18 @@ export function PhoneCenter() {
           </div>
         </div>
 
+        <div className="pc2__health-card">
+          <span className="pc2__health-icon">
+            <Icon name="heart" size={22} />
+          </span>
+          <strong>Phone Health Check</strong>
+          <span>Test your phone's hardware and system</span>
+          <button type="button" className="pc2__health-btn" onClick={() => navigate('/health-check')}>
+            Run Health Check
+            <Icon name="chevron-right" size={16} />
+          </button>
+        </div>
+
         <button type="button" className="pc2__row" onClick={() => navigate('/device-info')}>
           <span className="pc2__row-icon">
             <Icon name="info" size={18} />

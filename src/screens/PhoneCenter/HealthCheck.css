@@ -1,0 +1,239 @@
+.hc__ring-wrap {
+  position: relative;
+  align-self: center;
+  width: 140px;
+  height: 140px;
+}
+
+.hc__ring-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+
+.hc__ring-text strong {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.hc__ring-text span {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.hc__summary {
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.hc__list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.hc__row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  text-align: left;
+}
+
+.hc__badge {
+  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.hc__badge--checking {
+  color: var(--text-tertiary);
+}
+
+.hc__badge--untested {
+  color: var(--blue);
+}
+
+.hc__badge--pass,
+.hc__badge--fail {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hc__badge--pass {
+  background: color-mix(in srgb, var(--green) 20%, transparent);
+  color: var(--green);
+}
+
+.hc__badge--fail {
+  background: color-mix(in srgb, var(--red) 20%, transparent);
+  color: var(--red);
+}
+
+.hc__run-again {
+  min-height: 48px;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(135deg, var(--blue), var(--purple));
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+/* Interactive test overlays */
+
+.hct__overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 20px;
+}
+
+.hct__overlay--dark {
+  background: var(--bg);
+}
+
+.hct__close {
+  position: absolute;
+  top: calc(16px + var(--safe-top));
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.1);
+  color: inherit;
+}
+
+.hct__center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  max-width: 320px;
+  text-align: center;
+}
+
+.hct__hint {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--text-primary);
+}
+
+.hct__big-icon {
+  color: var(--blue);
+}
+
+.hct__btn {
+  min-height: 48px;
+  padding: 0 28px;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--border-strong);
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.hct__btn--pass {
+  background: var(--green);
+  border-color: var(--green);
+  color: #fff;
+}
+
+.hct__btn--fail {
+  background: transparent;
+  border-color: var(--red);
+  color: var(--red);
+}
+
+.hct__yn {
+  display: flex;
+  gap: 10px;
+}
+
+.hct__touch-grid {
+  flex: 1;
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-template-rows: repeat(8, 1fr);
+  gap: 4px;
+  touch-action: none;
+}
+
+.hct__touch-cell {
+  border-radius: var(--radius-sm);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+}
+
+.hct__touch-cell--on {
+  background: color-mix(in srgb, var(--green) 30%, var(--bg-elevated));
+  border-color: var(--green);
+}
+
+.hct__touch-footer {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 4px;
+}
+
+.hct__touch-footer span {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.hct__video {
+  width: 100%;
+  max-width: 280px;
+  aspect-ratio: 3 / 4;
+  border-radius: var(--radius-md);
+  object-fit: cover;
+  background: #000;
+}
+
+.hct__sensor-bar {
+  width: 220px;
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-active);
+  overflow: hidden;
+}
+
+.hct__sensor-bar-fill {
+  height: 100%;
+  background: var(--blue);
+  transition: width 0.2s linear;
+}

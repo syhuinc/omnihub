@@ -11,6 +11,7 @@ export interface DeviceStats {
   ramTotalBytes: number;
   ramAvailBytes: number;
   wifiConnected: boolean;
+  hasInternetConnection: boolean;
   ipAddress: string;
   wifiRxMbps: number;
   wifiTxMbps: number;
@@ -98,6 +99,7 @@ class DeviceStatsPluginWeb extends WebPlugin implements DeviceStatsPluginInterfa
       ramTotalBytes: ramGb * 1024 * 1024 * 1024,
       ramAvailBytes: 0,
       wifiConnected: navigator.onLine,
+      hasInternetConnection: navigator.onLine,
       ipAddress: '',
       wifiRxMbps: 0,
       wifiTxMbps: 0,

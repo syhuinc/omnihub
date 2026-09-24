@@ -117,6 +117,7 @@ public class DeviceStatsPlugin extends Plugin {
 
         boolean wifiConnected = isWifiConnected(context);
         ret.put("wifiConnected", wifiConnected);
+        ret.put("hasInternetConnection", hasInternetConnection(context));
         ret.put("ipAddress", getIpAddress());
 
         // Link speed / signal bars need ACCESS_FINE_LOCATION on modern Android — only read them
@@ -375,6 +376,20 @@ public class DeviceStatsPlugin extends Plugin {
             if (network == null) return false;
             NetworkCapabilities caps = cm.getNetworkCapabilities(network);
             return caps != null && caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /** Any usable network — Wi-Fi, cellular, or ethernet — not just Wi-Fi. */
+    private boolean hasInternetConnection(Context context) {
+        try {
+            ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+            if (cm == null) return false;
+            Network network = cm.getActiveNetwork();
+            if (network == null) return false;
+            NetworkCapabilities caps = cm.getNetworkCapabilities(network);
+            return caps != null && caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
         } catch (Exception e) {
             return false;
         }
