@@ -251,6 +251,37 @@ public class SleepModeSpeakService extends Service {
 
     private void startForegroundWithNotification(String text, String personality) {
         String emoji = PERSONALITY_EMOJI.getOrDefault(personality, DEFAULT_EMOJI);
+
+        // The custom RemoteViews card is new and unproven across OEMs/API levels -- never let a
+        // bug in it (or in actually posting it, e.g. a Binder transaction size limit) crash the
+        // whole service and take the app down with it. Any failure anywhere in that path falls
+        // back to the plain notification that's always worked.
+        try {
+            postForeground(richNotificationBuilder(text, personality, emoji));
+        } catch (Exception e) {
+            Log.e(TAG, "Rich notification failed, falling back to plain text", e);
+            try {
+                postForeground(plainNotificationBuilder(text, emoji));
+            } catch (Exception e2) {
+                Log.e(TAG, "Plain notification also failed, stopping", e2);
+                stopSelf();
+            }
+        }
+    }
+
+    private void postForeground(NotificationCompat.Builder builder) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            ServiceCompat.startForeground(
+                    this,
+                    NOTIFICATION_ID,
+                    builder.build(),
+                    android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK);
+        } else {
+            startForeground(NOTIFICATION_ID, builder.build());
+        }
+    }
+
+    private NotificationCompat.Builder richNotificationBuilder(String text, String personality, String emoji) {
         String[] parts = splitHeadlineAndBody(text);
         String headline = parts[0];
         String body = parts[1];
@@ -278,7 +309,7 @@ public class SleepModeSpeakService extends Service {
         expanded.setOnClickPendingIntent(R.id.notif_btn_primary, actionPendingIntent(SleepModeReceiver.ACTION_STOP_TONIGHT));
         expanded.setOnClickPendingIntent(R.id.notif_btn_secondary, actionPendingIntent(SleepModeReceiver.ACTION_SNOOZE));
 
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
+        return new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
                 .setContentTitle(emoji + " Sleep Mode")
                 .setContentText(headline)
@@ -289,16 +320,21 @@ public class SleepModeSpeakService extends Service {
                 .setCategory(NotificationCompat.CATEGORY_REMINDER)
                 .setOngoing(false)
                 .setAutoCancel(false);
+    }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            ServiceCompat.startForeground(
-                    this,
-                    NOTIFICATION_ID,
-                    builder.build(),
-                    android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK);
-        } else {
-            startForeground(NOTIFICATION_ID, builder.build());
-        }
+    private NotificationCompat.Builder plainNotificationBuilder(String text, String emoji) {
+        String title = emoji + " Sleep Mode";
+        return new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
+                .setContentTitle(title)
+                .setContentText(text)
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(text).setBigContentTitle(title))
+                .setPriority(NotificationCompat.PRIORITY_LOW)
+                .setCategory(NotificationCompat.CATEGORY_REMINDER)
+                .setOngoing(false)
+                .setAutoCancel(false)
+                .addAction(android.R.drawable.ic_popup_reminder, "5 more minutes", actionPendingIntent(SleepModeReceiver.ACTION_SNOOZE))
+                .addAction(android.R.drawable.ic_menu_close_clear_cancel, "I'm going to sleep", actionPendingIntent(SleepModeReceiver.ACTION_STOP_TONIGHT));
     }
 
     private PendingIntent actionPendingIntent(String action) {
