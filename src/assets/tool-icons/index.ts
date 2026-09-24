@@ -22,6 +22,7 @@ import qrScanner from './qr-scanner.webp';
 import barcodeScanner from './barcode-scanner.webp';
 import subscriptionCalculator from './subscription-calculator.webp';
 import debtCalculator from './debt-calculator.webp';
+import sleepMode from './sleep-mode.webp';
 
 export const TOOL_ICON_IMAGES: Record<string, string> = {
   calculator,
@@ -48,4 +49,5 @@ export const TOOL_ICON_IMAGES: Record<string, string> = {
   'barcode-scanner': barcodeScanner,
   'subscription-calculator': subscriptionCalculator,
   'debt-calculator': debtCalculator,
+  'sleep-mode': sleepMode,
 };
