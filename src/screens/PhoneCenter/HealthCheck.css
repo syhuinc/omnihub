@@ -224,6 +224,20 @@
   background: #000;
 }
 
+.hct__switch-cam {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 16px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-strong);
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 600;
+}
+
 .hct__sensor-bar {
   width: 220px;
   height: 6px;
