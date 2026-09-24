@@ -57,6 +57,8 @@ export interface SleepModePluginInterface {
   requestExactAlarmPermission(): Promise<void>;
   checkFullScreenIntentPermission(): Promise<{ granted: boolean }>;
   requestFullScreenIntentPermission(): Promise<void>;
+  checkOverlayPermission(): Promise<{ granted: boolean }>;
+  requestOverlayPermission(): Promise<void>;
 }
 
 export const DEFAULT_SLEEP_MODE_CONFIG: SleepModeConfig = {
@@ -162,6 +164,14 @@ class SleepModePluginWeb extends WebPlugin implements SleepModePluginInterface {
   }
 
   async requestFullScreenIntentPermission(): Promise<void> {
+    // no-op in browser
+  }
+
+  async checkOverlayPermission(): Promise<{ granted: boolean }> {
+    return { granted: true };
+  }
+
+  async requestOverlayPermission(): Promise<void> {
     // no-op in browser
   }
 }

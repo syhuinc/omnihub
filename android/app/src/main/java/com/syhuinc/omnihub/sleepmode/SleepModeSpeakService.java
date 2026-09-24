@@ -268,6 +268,14 @@ public class SleepModeSpeakService extends Service {
         } else {
             startForeground(NOTIFICATION_ID, builder.build());
         }
+
+        try {
+            SleepNagOverlay.show(this, text, personality);
+        } catch (Throwable t) {
+            // Same rule as everywhere else in this method: the notification above has already
+            // posted independently, so a problem here should never take the reminder down with it.
+            Log.w(TAG, "Failed to show nag overlay", t);
+        }
     }
 
     private PendingIntent actionPendingIntent(String action) {
@@ -289,6 +297,7 @@ public class SleepModeSpeakService extends Service {
 
     /** Dismisses the lingering reminder notification once Snooze/Stop for tonight has been tapped. */
     public static void clearNotification(Context context) {
+        SleepNagOverlay.dismiss();
         NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         if (nm != null) nm.cancel(NOTIFICATION_ID);
     }

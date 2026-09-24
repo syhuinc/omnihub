@@ -117,6 +117,14 @@
         on API 33+ it is not auto-granted, so the user must approve it via
         Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM (prompted before saving an alarm, or enabling
         Sleep Mode).
+      - SYSTEM_ALERT_WINDOW: lets Sleep Mode's illustrated reminder card (SleepNagOverlay) draw on
+        top of whatever's on screen when a reminder fires, the only way to do that while the
+        device is unlocked and in active use (a notification's full-screen intent is only honored
+        automatically while locked or the screen is off - not helpful here, since Sleep Mode only
+        ever nags while the screen is already on). Declaring it here only lets the app request it;
+        the user must separately grant "Display over other apps" via
+        Settings.ACTION_MANAGE_OVERLAY_PERMISSION (prompted from the Sleep Mode screen). Without
+        it, the reminder still posts as a normal heads-up notification.
       - Sleep Mode never uses Android's Usage Access permission or reads which app is in the
         foreground. It only checks PowerManager#isInteractive() (is the screen currently on),
         which needs no special permission, as its "still using the phone" signal.
@@ -140,6 +148,7 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.FLASHLIGHT" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />

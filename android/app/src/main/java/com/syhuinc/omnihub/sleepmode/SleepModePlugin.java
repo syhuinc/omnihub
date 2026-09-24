@@ -209,4 +209,29 @@ public class SleepModePlugin extends Plugin {
                 getContext().getSystemService(android.content.Context.NOTIFICATION_SERVICE);
         return nm != null && nm.canUseFullScreenIntent();
     }
+
+    /**
+     * The actual mechanism the illustrated nag card uses to pop up automatically while the phone
+     * is unlocked and in active use (see SleepNagOverlay's own doc for why full-screen intent
+     * doesn't do that job, despite looking like the obvious fit). "Display over other apps" is a
+     * separate, more invasive-sounding permission than the full-screen intent one, so this is
+     * checked/requested independently rather than folded into that flow.
+     */
+    @PluginMethod
+    public void checkOverlayPermission(PluginCall call) {
+        JSObject ret = new JSObject();
+        ret.put("granted", android.provider.Settings.canDrawOverlays(getContext()));
+        call.resolve(ret);
+    }
+
+    @PluginMethod
+    public void requestOverlayPermission(PluginCall call) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            Intent intent = new Intent(android.provider.Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
+            intent.setData(Uri.parse("package:" + getContext().getPackageName()));
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            getContext().startActivity(intent);
+        }
+        call.resolve();
+    }
 }

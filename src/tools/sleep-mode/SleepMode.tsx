@@ -38,6 +38,7 @@ export function SleepMode() {
   const [timeSheet, setTimeSheet] = useState<TimeField | null>(null);
   const [needsExactAlarmPermission, setNeedsExactAlarmPermission] = useState(false);
   const [needsFullScreenPermission, setNeedsFullScreenPermission] = useState(false);
+  const [needsOverlayPermission, setNeedsOverlayPermission] = useState(false);
   const [screen, setScreen] = useState<SubScreen>('main');
   const [windDownAutoStart, setWindDownAutoStart] = useState(false);
   const [windDownInitialAction, setWindDownInitialAction] = useState<string | undefined>(undefined);
@@ -55,6 +56,9 @@ export function SleepMode() {
         if (status.enabled) {
           SleepModePlugin.checkFullScreenIntentPermission()
             .then((r) => setNeedsFullScreenPermission(!r.granted))
+            .catch(() => {});
+          SleepModePlugin.checkOverlayPermission()
+            .then((r) => setNeedsOverlayPermission(!r.granted))
             .catch(() => {});
         }
       })
@@ -104,14 +108,22 @@ export function SleepMode() {
 
     try {
       const fullScreen = await SleepModePlugin.checkFullScreenIntentPermission();
-      if (!fullScreen.granted) {
-        setNeedsFullScreenPermission(true);
-        await SleepModePlugin.requestFullScreenIntentPermission();
-        // Unlike the exact-alarm permission, this one isn't required for reminders to work at
-        // all (the notification still shows and can be tapped) — just for the illustrated card
-        // to pop up on its own, so Sleep Mode still turns on below rather than blocking on it.
+      setNeedsFullScreenPermission(!fullScreen.granted);
+      // Unlike the exact-alarm permission, neither this nor the overlay permission below is
+      // required for reminders to work at all (the notification still shows and can be tapped) —
+      // just for the illustrated card to pop up on its own, so Sleep Mode still turns on below
+      // rather than blocking on either one.
+    } catch {
+      // web fallback / unsupported platform — proceed anyway
+    }
+
+    try {
+      const overlay = await SleepModePlugin.checkOverlayPermission();
+      if (!overlay.granted) {
+        setNeedsOverlayPermission(true);
+        await SleepModePlugin.requestOverlayPermission();
       } else {
-        setNeedsFullScreenPermission(false);
+        setNeedsOverlayPermission(false);
       }
     } catch {
       // web fallback / unsupported platform — proceed anyway
@@ -206,12 +218,25 @@ export function SleepMode() {
             </div>
           )}
 
+          {needsOverlayPermission && (
+            <div className="sm__warning">
+              <Icon name="info" size={16} />
+              <span>
+                For the reminder card to pop up on its own while you're using your phone, grant "Display over other apps" for
+                Omni Hub in Settings. Without it, you'll still get the notification — just tap it to open the card.
+              </span>
+              <button type="button" className="sm__warning-action" onClick={() => SleepModePlugin.requestOverlayPermission()}>
+                Open Settings
+              </button>
+            </div>
+          )}
+
           {needsFullScreenPermission && (
             <div className="sm__warning">
               <Icon name="info" size={16} />
               <span>
-                For the reminder card to pop up on its own, grant "Full screen notifications" for Omni Hub in Settings. Without
-                it, tapping the notification still opens it.
+                For the reminder card to also show if a reminder catches you with the phone locked, grant "Full screen
+                notifications" for Omni Hub in Settings.
               </span>
               <button
                 type="button"
