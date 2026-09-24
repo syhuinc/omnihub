@@ -180,13 +180,15 @@ export function AudioTest({ onComplete, onCancel }: TestProps) {
   );
 }
 
-export function CameraTest({ onComplete, onCancel }: TestProps) {
+interface CameraTestProps extends TestProps {
+  facing: 'user' | 'environment';
+}
+
+function CameraTestImpl({ onComplete, onCancel, facing }: CameraTestProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const [status, setStatus] = useState<'loading' | 'ready' | 'error' | 'timeout'>('loading');
   const [attempt, setAttempt] = useState(0);
-  const [facing, setFacing] = useState<'user' | 'environment'>('environment');
-  const [multiCamera, setMultiCamera] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -196,10 +198,10 @@ export function CameraTest({ onComplete, onCancel }: TestProps) {
       if (!cancelled) setStatus((s) => (s === 'loading' ? 'timeout' : s));
     }, 8000);
 
-    // {ideal: facing} (not a bare string or {exact: facing}) asks for that camera without
-    // making it a hard requirement — a device that can't satisfy it falls back to whatever
-    // camera it has instead of rejecting or hanging, which is what caused the original
-    // "stuck on Starting camera forever" bug with a plain facingMode: 'environment'.
+    // {ideal: facing} (not a bare string or {exact: facing}) asks for that specific camera
+    // without making it a hard requirement — a device that can't satisfy it falls back to
+    // whatever camera it has instead of rejecting or hanging, which is what caused the
+    // original "stuck on Starting camera forever" bug with a plain facingMode: 'environment'.
     navigator.mediaDevices
       ?.getUserMedia({ video: { facingMode: { ideal: facing } } })
       .then((stream) => {
@@ -210,10 +212,6 @@ export function CameraTest({ onComplete, onCancel }: TestProps) {
         }
         streamRef.current = stream;
         setStatus('ready');
-        navigator.mediaDevices
-          .enumerateDevices()
-          .then((devices) => setMultiCamera(devices.filter((d) => d.kind === 'videoinput').length > 1))
-          .catch(() => {});
       })
       .catch(() => {
         window.clearTimeout(timeoutId);
@@ -226,13 +224,6 @@ export function CameraTest({ onComplete, onCancel }: TestProps) {
       streamRef.current?.getTracks().forEach((t) => t.stop());
     };
   }, [attempt, facing]);
-
-  function switchCamera() {
-    hapticTap();
-    streamRef.current?.getTracks().forEach((t) => t.stop());
-    streamRef.current = null;
-    setFacing((f) => (f === 'environment' ? 'user' : 'environment'));
-  }
 
   // Runs after the 'ready' render has actually mounted the <video> element — assigning
   // srcObject inside the getUserMedia .then() above was a no-op, because that callback
@@ -288,14 +279,8 @@ export function CameraTest({ onComplete, onCancel }: TestProps) {
         {status === 'ready' && (
           <>
             {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
-            <video ref={videoRef} autoPlay playsInline muted className="hct__video" />
-            {multiCamera && (
-              <button type="button" className="hct__switch-cam" onClick={switchCamera}>
-                <Icon name="converter" size={14} />
-                Switch to {facing === 'environment' ? 'Front' : 'Rear'} Camera
-              </button>
-            )}
-            <p className="hct__hint">Does the camera preview look clear and focused?</p>
+            <video ref={videoRef} autoPlay playsInline muted className={`hct__video${facing === 'user' ? ' hct__video--mirror' : ''}`} />
+            <p className="hct__hint">Does the {facing === 'user' ? 'front' : 'rear'} camera preview look clear and focused?</p>
             <div className="hct__yn">
               <button type="button" className="hct__btn hct__btn--fail" onClick={() => onComplete(false)}>
                 No
@@ -309,6 +294,14 @@ export function CameraTest({ onComplete, onCancel }: TestProps) {
       </div>
     </div>
   );
+}
+
+export function FrontCameraTest(props: TestProps) {
+  return <CameraTestImpl {...props} facing="user" />;
+}
+
+export function RearCameraTest(props: TestProps) {
+  return <CameraTestImpl {...props} facing="environment" />;
 }
 
 const SENSOR_DURATION_MS = 6000;

@@ -4,11 +4,21 @@ import { Icon, type IconName } from '../../components/Icon';
 import { useRouter } from '../../app/Router';
 import { DeviceStatsPlugin, type DeviceStats } from '../../device-stats/plugin';
 import { hapticTap } from '../../haptics';
-import { DisplayTest, TouchTest, AudioTest, CameraTest, SensorTest } from './HealthCheckTests';
+import { DisplayTest, TouchTest, AudioTest, FrontCameraTest, RearCameraTest, SensorTest } from './HealthCheckTests';
 import './PhoneCenter.css';
 import './HealthCheck.css';
 
-type CheckId = 'battery' | 'storage' | 'memory' | 'connectivity' | 'display' | 'touch' | 'audio' | 'camera' | 'sensors';
+type CheckId =
+  | 'battery'
+  | 'storage'
+  | 'memory'
+  | 'connectivity'
+  | 'display'
+  | 'touch'
+  | 'audio'
+  | 'frontCamera'
+  | 'rearCamera'
+  | 'sensors';
 type Result = 'checking' | 'pass' | 'fail' | 'untested';
 
 interface CheckDef {
@@ -26,7 +36,8 @@ const CHECKS: CheckDef[] = [
   { id: 'display', label: 'Display', desc: 'Screen colors render correctly', icon: 'image', interactive: true },
   { id: 'touch', label: 'Touch', desc: 'Touch response across the screen', icon: 'target', interactive: true },
   { id: 'audio', label: 'Audio', desc: 'Speaker and microphone', icon: 'volume', interactive: true },
-  { id: 'camera', label: 'Camera', desc: 'Front and rear camera preview', icon: 'camera', interactive: true },
+  { id: 'frontCamera', label: 'Front Camera', desc: 'Selfie camera preview', icon: 'camera', interactive: true },
+  { id: 'rearCamera', label: 'Rear Camera', desc: 'Main camera preview', icon: 'camera', interactive: true },
   { id: 'sensors', label: 'Sensors', desc: 'Gyroscope, accelerometer, etc.', icon: 'gyroscope', interactive: true },
   { id: 'connectivity', label: 'Connectivity', desc: 'Wi-Fi and mobile network', icon: 'wifi', interactive: false },
 ];
@@ -35,7 +46,8 @@ const TEST_COMPONENTS: Partial<Record<CheckId, typeof DisplayTest>> = {
   display: DisplayTest,
   touch: TouchTest,
   audio: AudioTest,
-  camera: CameraTest,
+  frontCamera: FrontCameraTest,
+  rearCamera: RearCameraTest,
   sensors: SensorTest,
 };
 
@@ -49,7 +61,8 @@ export function HealthCheck() {
     display: 'untested',
     touch: 'untested',
     audio: 'untested',
-    camera: 'untested',
+    frontCamera: 'untested',
+    rearCamera: 'untested',
     sensors: 'untested',
   });
   const [activeTest, setActiveTest] = useState<CheckId | null>(null);
@@ -83,7 +96,8 @@ export function HealthCheck() {
       display: 'untested',
       touch: 'untested',
       audio: 'untested',
-      camera: 'untested',
+      frontCamera: 'untested',
+      rearCamera: 'untested',
       sensors: 'untested',
     }));
   }
