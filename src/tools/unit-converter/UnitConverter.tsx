@@ -58,7 +58,7 @@ export function UnitConverter() {
       <div className="uc__body">
         <div className="uc__field">
           <label className="uc__label">
-            <span className="uc__label-icon">
+            <span className="uc__label-icon uc__label-icon--purple">
               <Icon name="converter" size={13} />
             </span>
             From

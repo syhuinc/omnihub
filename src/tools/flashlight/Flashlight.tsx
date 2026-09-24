@@ -245,7 +245,7 @@ export function Flashlight() {
             </div>
 
             <div className="fl__alert-row">
-              <span className="fl__alert-icon">
+              <span className="fl__alert-icon fl__alert-icon--blue">
                 <Icon name="clock" size={16} />
               </span>
               <span className="fl__alert-info">
@@ -263,7 +263,7 @@ export function Flashlight() {
             </div>
 
             <div className="fl__alert-row">
-              <span className="fl__alert-icon">
+              <span className="fl__alert-icon fl__alert-icon--purple">
                 <Icon name="bell" size={16} />
               </span>
               <span className="fl__alert-info">
@@ -283,7 +283,7 @@ export function Flashlight() {
             </div>
 
             <div className="fl__alert-row">
-              <span className="fl__alert-icon">
+              <span className="fl__alert-icon fl__alert-icon--orange">
                 <Icon name="info" size={16} />
               </span>
               <span className="fl__alert-info">
@@ -304,7 +304,7 @@ export function Flashlight() {
 
             {!alerts.notificationAccessGranted && (
               <button type="button" className="fl__access-row" onClick={openNotificationAccess}>
-                <span className="fl__alert-icon">
+                <span className="fl__alert-icon fl__alert-icon--green">
                   <Icon name="settings" size={16} />
                 </span>
                 <span className="fl__alert-info">

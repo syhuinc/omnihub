@@ -74,8 +74,11 @@
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: var(--bg-active);
-  color: var(--text-tertiary);
+}
+
+.uc__label-icon--purple {
+  background: color-mix(in srgb, var(--purple) 22%, transparent);
+  color: var(--purple);
 }
 
 .uc__label-icon--accent {

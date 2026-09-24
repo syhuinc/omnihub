@@ -174,8 +174,26 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--text-secondary);
-  background: var(--bg-active);
+}
+
+.fl__alert-icon--blue {
+  color: var(--blue);
+  background: color-mix(in srgb, var(--blue) 18%, transparent);
+}
+
+.fl__alert-icon--purple {
+  color: var(--purple);
+  background: color-mix(in srgb, var(--purple) 18%, transparent);
+}
+
+.fl__alert-icon--orange {
+  color: var(--orange);
+  background: color-mix(in srgb, var(--orange) 18%, transparent);
+}
+
+.fl__alert-icon--green {
+  color: var(--green);
+  background: color-mix(in srgb, var(--green) 18%, transparent);
 }
 
 .fl__alert-info {
