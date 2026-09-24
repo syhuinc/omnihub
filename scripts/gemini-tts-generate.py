@@ -46,7 +46,7 @@ CHANNELS = 1
 
 VOICE_MAP = {
     "gentle": "Vindemiatrix",   # described as a gentle tone in Google's voice list
-    "friendly": "Achird",       # described as friendly
+    "friendly": "Vindemiatrix", # same voice as Gentle -- matches the real reminder-line audio
     "teasing": "Puck",          # described as upbeat/playful
     "strict": "Kore",           # described as firm
     "savage": "Fenrir",         # described as excitable/sharp

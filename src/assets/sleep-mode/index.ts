@@ -42,7 +42,7 @@ export const SOUND_IMAGES: Record<string, string> = {
  */
 export const SAMPLE_AUDIO: Record<string, { audio: string; text: string }> = {
   gentle: { audio: sampleGentle, text: "Hey, it's getting late. Let's get some rest. You did great today." },
-  friendly: { audio: sampleFriendly, text: "Still awake, mate? Let's get some sleep! Your pillow is waiting." },
+  friendly: { audio: sampleFriendly, text: "It's time to sleep. Good night!" },
   teasing: { audio: sampleTeasing, text: 'Still on your phone? Interesting strategy for being a morning person.' },
   strict: { audio: sampleStrict, text: "It's your bedtime. No more scrolling. Phone down. Now." },
   savage: { audio: sampleSavage, text: "It's 12:45 AM and you're still scrolling? At this point, your pillow has given up on you." },
