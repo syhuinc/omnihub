@@ -28,6 +28,8 @@ either voice should change; swap VOICE_MAP and delete that personality's files t
 import base64
 import json
 import os
+import re
+import time
 import urllib.request
 import urllib.error
 import wave
@@ -161,6 +163,12 @@ FRIENDLY_LINES = [
 ]
 
 
+# Minimum gap between requests to stay under a 10-requests-per-minute quota, plus how
+# many times to retry a rate-limited (429) request before giving up on that one line.
+MIN_REQUEST_GAP_SECONDS = 6.5
+MAX_RETRIES = 5
+
+
 def generate(name: str, personality: str, text: str, out_dir: str) -> None:
     out_path = os.path.join(out_dir, f"{name}.wav")
     if os.path.exists(out_path):
@@ -184,11 +192,26 @@ def generate(name: str, personality: str, text: str, out_dir: str) -> None:
         headers={"Content-Type": "application/json"},
         method="POST",
     )
-    try:
-        with urllib.request.urlopen(req, timeout=60) as resp:
-            payload = json.loads(resp.read())
-    except urllib.error.HTTPError as e:
-        print(f"  FAILED {name}: HTTP {e.code} - {e.read().decode('utf-8', 'replace')}")
+
+    payload = None
+    for attempt in range(1, MAX_RETRIES + 1):
+        try:
+            with urllib.request.urlopen(req, timeout=60) as resp:
+                payload = json.loads(resp.read())
+            break
+        except urllib.error.HTTPError as e:
+            error_body = e.read().decode("utf-8", "replace")
+            if e.code == 429 and attempt < MAX_RETRIES:
+                match = re.search(r'"retryDelay":\s*"(\d+)', error_body)
+                wait = int(match.group(1)) + 2 if match else 30
+                print(f"  rate limited on {name}, waiting {wait}s (attempt {attempt}/{MAX_RETRIES})...")
+                time.sleep(wait)
+                continue
+            print(f"  FAILED {name}: HTTP {e.code} - {error_body}")
+            return
+
+    if payload is None:
+        print(f"  FAILED {name}: out of retries")
         return
 
     try:
@@ -204,6 +227,7 @@ def generate(name: str, personality: str, text: str, out_dir: str) -> None:
         wf.setframerate(SAMPLE_RATE)
         wf.writeframes(pcm)
     print(f"  saved {out_path} (voice: {voice})")
+    time.sleep(MIN_REQUEST_GAP_SECONDS)
 
 
 # Both Gentle and Friendly currently generate with the same female voice.
