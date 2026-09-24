@@ -219,7 +219,6 @@ export function PercentageCalculator() {
                     setAText(e.target.value);
                     setComputed(null);
                   }}
-                  autoFocus
                 />
               </div>
               {mode === 'of' && <span className="pc__field-suffix">%</span>}

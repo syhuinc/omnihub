@@ -15,7 +15,7 @@ export function BottomNav() {
   return (
     <nav className="bottom-nav">
       {TABS.map((tab) => {
-        const active = tab.path === '/' ? path === '/' : path.startsWith(tab.path);
+        const active = tab.path === '/' ? path === '/' : path === tab.path || path.startsWith(`${tab.path}/`);
         return (
           <button
             key={tab.path}
