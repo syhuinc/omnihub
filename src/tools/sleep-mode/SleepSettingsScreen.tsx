@@ -11,14 +11,14 @@ interface MenuRow {
   label: string;
   desc: string;
   color: string;
-  badge?: 'pro';
+  badge?: 'ai';
 }
 
 const MENU_ROWS: MenuRow[] = [
   { screen: 'ai-personality', icon: 'user', label: 'AI Personality', desc: 'Choose how you want to be reminded', color: 'var(--purple)' },
   { screen: 'personalization', icon: 'settings', label: 'Personalization', desc: 'Make your sleep companion more you', color: 'var(--pink)' },
   { screen: 'reminder-example', icon: 'note', label: 'Reminder Example', desc: 'See different messages in action', color: 'var(--blue)' },
-  { screen: 'sleep-mode-ai', icon: 'crown', label: 'Sleep Mode AI', desc: 'Take it to the next level', color: '#f6c453', badge: 'pro' },
+  { screen: 'sleep-mode-ai', icon: 'activity', label: 'Sleep Mode AI', desc: 'Coming soon — see what\'s planned', color: 'var(--purple)', badge: 'ai' },
 ];
 
 interface SleepSettingsScreenProps {
@@ -49,7 +49,7 @@ export function SleepSettingsScreen({ onBack, onNavigate }: SleepSettingsScreenP
               <span className="sm__menu-text">
                 <span className="sm__menu-label-row">
                   <strong>{row.label}</strong>
-                  {row.badge === 'pro' && <span className="sm__badge sm__badge--pro">PRO</span>}
+                  {row.badge === 'ai' && <span className="sm__badge sm__badge--ai">AI</span>}
                 </span>
                 <span>{row.desc}</span>
               </span>

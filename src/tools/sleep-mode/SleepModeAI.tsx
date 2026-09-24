@@ -31,9 +31,9 @@ export function SleepModeAI({ onBack }: SleepModeAIProps) {
     <div className="screen">
       <ScreenHeader
         title="Sleep Mode AI"
-        subtitle="Upgrade to get AI-powered bedtime reminders with unique messages"
+        subtitle="AI-powered bedtime reminders with unique messages, coming soon"
         onBack={onBack}
-        action={<span className="sm__badge sm__badge--pro">PRO</span>}
+        action={<span className="sm__badge sm__badge--ai">AI</span>}
       />
 
       <div className="sm__body">
@@ -59,8 +59,8 @@ export function SleepModeAI({ onBack }: SleepModeAIProps) {
         </ul>
 
         <button type="button" className="smp__upgrade-btn" onClick={scrollToComingSoon}>
-          <Icon name="crown" size={16} />
-          Upgrade to Pro
+          <Icon name="activity" size={16} />
+          See What's Coming
           <Icon name="chevron-right" size={14} />
         </button>
 

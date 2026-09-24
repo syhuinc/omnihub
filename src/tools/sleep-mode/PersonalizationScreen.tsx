@@ -95,7 +95,6 @@ export function PersonalizationScreen({ config, onBack, onPersist }: Personaliza
           <>
             <div className="sm__section-header">
               <h2>Tell us about you (optional)</h2>
-              <span className={`sm__badge sm__badge--pro`}>PRO</span>
             </div>
 
             <div className="sm__field-list">
@@ -130,8 +129,8 @@ export function PersonalizationScreen({ config, onBack, onPersist }: Personaliza
 
             <p className="sm__pro-note">
               Interests get woven into some reminders. Custom notes are saved for a future Sleep
-              Mode AI pass and don't change reminders yet — everything here is optional and
-              genuinely usable today, no Pro purchase required.
+              Mode AI pass and don't change reminders yet — everything here is optional, free, and
+              genuinely usable today.
             </p>
           </>
         )}

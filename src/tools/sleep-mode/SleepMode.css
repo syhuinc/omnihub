@@ -742,11 +742,6 @@
   color: var(--green);
 }
 
-.sm__badge--pro {
-  background: linear-gradient(135deg, #f6c453, #e0a530);
-  color: #402c04;
-}
-
 .sm__badge--ai {
   background: color-mix(in srgb, var(--purple) 24%, transparent);
   color: var(--purple);
