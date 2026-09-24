@@ -34,6 +34,8 @@ public class SleepModeData {
     public int nagCount;
     public long lastNagMillis; // 0 if never nagged this session
     public String recentKeysCsv = ""; // last few MessageBank pick keys, comma-joined, for anti-repeat
+    /** Beats before this timestamp are skipped silently — set by the "Snooze"/"Stop for tonight" notification actions. 0 = not muted. */
+    public long mutedUntilMillis;
 
     public SleepModeData() {}
 
@@ -56,6 +58,7 @@ public class SleepModeData {
         o.put("nagCount", nagCount);
         o.put("lastNagMillis", lastNagMillis);
         o.put("recentKeysCsv", recentKeysCsv);
+        o.put("mutedUntilMillis", mutedUntilMillis);
         return o;
     }
 
@@ -78,6 +81,7 @@ public class SleepModeData {
         d.nagCount = o.optInt("nagCount", 0);
         d.lastNagMillis = o.optLong("lastNagMillis", 0);
         d.recentKeysCsv = o.optString("recentKeysCsv", "");
+        d.mutedUntilMillis = o.optLong("mutedUntilMillis", 0);
         return d;
     }
 

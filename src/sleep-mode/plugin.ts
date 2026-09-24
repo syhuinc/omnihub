@@ -26,6 +26,8 @@ export interface SleepModeConfig {
 export interface SleepModeStatus extends SleepModeConfig {
   sessionStartMillis: number;
   nagCount: number;
+  /** 0 if not muted — set by tapping "Snooze" or "Stop for tonight" on the reminder notification. */
+  mutedUntilMillis: number;
 }
 
 /** One completed night. Real, measured data only — never fabricated. */
@@ -101,11 +103,11 @@ function buildWebPreviewHistory(): SleepSession[] {
 }
 
 class SleepModePluginWeb extends WebPlugin implements SleepModePluginInterface {
-  private state: SleepModeStatus = { ...DEFAULT_SLEEP_MODE_CONFIG, sessionStartMillis: 0, nagCount: 0 };
+  private state: SleepModeStatus = { ...DEFAULT_SLEEP_MODE_CONFIG, sessionStartMillis: 0, nagCount: 0, mutedUntilMillis: 0 };
   private history: SleepSession[] = buildWebPreviewHistory();
 
   async configure(options: SleepModeConfig): Promise<{ armed: boolean }> {
-    this.state = { ...options, sessionStartMillis: 0, nagCount: 0 };
+    this.state = { ...options, sessionStartMillis: 0, nagCount: 0, mutedUntilMillis: 0 };
     return { armed: options.enabled };
   }
 

@@ -23,8 +23,23 @@ import java.util.Set;
 public class SleepModeReceiver extends BroadcastReceiver {
     private static final int MAX_RECENT_KEYS = 10;
 
+    public static final String ACTION_SNOOZE = "com.syhuinc.omnihub.sleepmode.SNOOZE";
+    public static final String ACTION_STOP_TONIGHT = "com.syhuinc.omnihub.sleepmode.STOP_TONIGHT";
+    private static final long SNOOZE_MS = 60 * 60_000L;
+
     @Override
     public void onReceive(Context context, Intent intent) {
+        String action = intent.getAction();
+        if (ACTION_SNOOZE.equals(action)) {
+            mute(context, System.currentTimeMillis() + SNOOZE_MS);
+            return;
+        }
+        if (ACTION_STOP_TONIGHT.equals(action)) {
+            SleepModeData data = SleepModeStore.load(context);
+            mute(context, SleepModeScheduler.wakeMillisForSession(data));
+            return;
+        }
+
         SleepModeData data = SleepModeStore.load(context);
         if (!data.enabled) return;
 
@@ -35,6 +50,7 @@ public class SleepModeReceiver extends BroadcastReceiver {
             data.sessionStartMillis = now;
             data.nagCount = 0;
             data.recentKeysCsv = "";
+            data.mutedUntilMillis = 0;
         }
 
         long wakeMillis = SleepModeScheduler.wakeMillisForSession(data);
@@ -53,13 +69,21 @@ public class SleepModeReceiver extends BroadcastReceiver {
             return;
         }
 
-        if (isScreenOn(context)) {
+        if (now >= data.mutedUntilMillis && isScreenOn(context)) {
             speak(context, data);
         }
 
         SleepModeStore.save(context, data);
         long nextBeat = now + Math.max(1, data.intervalMin) * 60_000L;
         SleepModeScheduler.scheduleBeat(context, nextBeat);
+    }
+
+    /** Silences remaining beats until `untilMillis` and clears the reminder notification right away. */
+    private void mute(Context context, long untilMillis) {
+        SleepModeData data = SleepModeStore.load(context);
+        data.mutedUntilMillis = untilMillis;
+        SleepModeStore.save(context, data);
+        SleepModeSpeakService.clearNotification(context);
     }
 
     private boolean isScreenOn(Context context) {

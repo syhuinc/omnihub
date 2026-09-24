@@ -192,6 +192,31 @@
   margin-top: 1px;
 }
 
+.sm__warning--muted {
+  align-items: center;
+  background: color-mix(in srgb, var(--purple) 12%, var(--bg-elevated));
+  border-color: color-mix(in srgb, var(--purple) 35%, var(--border));
+}
+
+.sm__warning--muted svg {
+  color: var(--purple);
+  margin-top: 0;
+}
+
+.sm__warning--muted span {
+  flex: 1;
+}
+
+.sm__warning-action {
+  flex-shrink: 0;
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--purple) 22%, transparent);
+  color: var(--purple);
+  font-size: 12px;
+  font-weight: 700;
+}
+
 /* Switch (shared: hero toggle + small inline toggle) */
 
 .sm__switch {

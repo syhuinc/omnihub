@@ -4,7 +4,7 @@ import { Icon } from '../../components/Icon';
 import { useRouter } from '../../app/Router';
 import { hapticSelect, hapticTap, hapticWarning } from '../../haptics';
 import { WheelTimePicker } from '../alarm/WheelTimePicker';
-import { SleepModePlugin, DEFAULT_SLEEP_MODE_CONFIG, type SleepModeConfig } from '../../sleep-mode/plugin';
+import { SleepModePlugin, DEFAULT_SLEEP_MODE_CONFIG, type SleepModeConfig, type SleepModeStatus } from '../../sleep-mode/plugin';
 import { INTERVAL_OPTIONS_MIN, WIND_DOWN_ACTIONS } from './types';
 import { AiPersonalityScreen } from './AiPersonalityScreen';
 import { PersonalizationScreen } from './PersonalizationScreen';
@@ -24,6 +24,11 @@ function formatTime(hour: number, minute: number): string {
   return `${h12}:${minute.toString().padStart(2, '0')} ${period}`;
 }
 
+function formatTimeOfDay(ms: number): string {
+  const d = new Date(ms);
+  return formatTime(d.getHours(), d.getMinutes());
+}
+
 type TimeField = 'bedtime' | 'wake';
 type SubScreen = SleepTab | 'wind-down' | SettingsDestination;
 
@@ -31,7 +36,7 @@ const TAB_SCREENS = new Set<SubScreen>(['main', 'sleep-insights', 'sleep-sounds'
 
 export function SleepMode() {
   const { back } = useRouter();
-  const [config, setConfig] = useState<SleepModeConfig>(DEFAULT_SLEEP_MODE_CONFIG);
+  const [config, setConfig] = useState<SleepModeStatus>({ ...DEFAULT_SLEEP_MODE_CONFIG, sessionStartMillis: 0, nagCount: 0, mutedUntilMillis: 0 });
   const [timeSheet, setTimeSheet] = useState<TimeField | null>(null);
   const [needsExactAlarmPermission, setNeedsExactAlarmPermission] = useState(false);
   const [screen, setScreen] = useState<SubScreen>('main');
@@ -47,7 +52,9 @@ export function SleepMode() {
   }, []);
 
   async function persist(next: SleepModeConfig) {
-    setConfig(next);
+    // configure() always restarts scheduling from a clean session on the native side, so mirror
+    // that here rather than carrying over stale session/mute state from before the edit.
+    setConfig({ ...next, sessionStartMillis: 0, nagCount: 0, mutedUntilMillis: 0 });
     try {
       await SleepModePlugin.configure(next);
     } catch {
@@ -189,6 +196,16 @@ export function SleepMode() {
             <div className="sm__warning">
               <Icon name="info" size={16} />
               <span>Sleep Mode needs the "Alarms &amp; reminders" permission. Grant it in Settings, then turn Sleep Mode on again.</span>
+            </div>
+          )}
+
+          {config.mutedUntilMillis > Date.now() && (
+            <div className="sm__warning sm__warning--muted">
+              <Icon name="volume" size={16} />
+              <span>Reminders paused until {formatTimeOfDay(config.mutedUntilMillis)}.</span>
+              <button type="button" className="sm__warning-action" onClick={() => persist(config)}>
+                Resume
+              </button>
             </div>
           )}
 

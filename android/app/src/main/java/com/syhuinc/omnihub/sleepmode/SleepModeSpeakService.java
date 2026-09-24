@@ -2,6 +2,7 @@ package com.syhuinc.omnihub.sleepmode;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -131,8 +132,10 @@ public class SleepModeSpeakService extends Service {
                 .setContentText("Reminding you it's time to sleep")
                 .setPriority(NotificationCompat.PRIORITY_LOW)
                 .setCategory(NotificationCompat.CATEGORY_REMINDER)
-                .setOngoing(true)
-                .setAutoCancel(false);
+                .setOngoing(false)
+                .setAutoCancel(false)
+                .addAction(android.R.drawable.ic_popup_reminder, "Snooze 1h", actionPendingIntent(SleepModeReceiver.ACTION_SNOOZE))
+                .addAction(android.R.drawable.ic_menu_close_clear_cancel, "Stop for tonight", actionPendingIntent(SleepModeReceiver.ACTION_STOP_TONIGHT));
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             ServiceCompat.startForeground(
@@ -143,6 +146,19 @@ public class SleepModeSpeakService extends Service {
         } else {
             startForeground(NOTIFICATION_ID, builder.build());
         }
+    }
+
+    private PendingIntent actionPendingIntent(String action) {
+        Intent intent = new Intent(this, SleepModeReceiver.class).setAction(action);
+        int flags = PendingIntent.FLAG_UPDATE_CURRENT;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) flags |= PendingIntent.FLAG_IMMUTABLE;
+        return PendingIntent.getBroadcast(this, action.hashCode(), intent, flags);
+    }
+
+    /** Dismisses the lingering reminder notification once Snooze/Stop for tonight has been tapped. */
+    public static void clearNotification(Context context) {
+        NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        if (nm != null) nm.cancel(NOTIFICATION_ID);
     }
 
     private void createChannel() {
@@ -178,7 +194,9 @@ public class SleepModeSpeakService extends Service {
             tts = null;
         }
         if (wakeLock != null && wakeLock.isHeld()) wakeLock.release();
-        ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE);
+        // DETACH, not REMOVE: leaves the notification (with its Snooze / Stop for tonight actions)
+        // up after speaking finishes, since that's the only realistic window to tap them in.
+        ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_DETACH);
     }
 
     @Override
