@@ -207,9 +207,6 @@ export function CameraTest({ onComplete, onCancel }: TestProps) {
           return;
         }
         streamRef.current = stream;
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-        }
         setStatus('ready');
       })
       .catch(() => {
@@ -223,6 +220,17 @@ export function CameraTest({ onComplete, onCancel }: TestProps) {
       streamRef.current?.getTracks().forEach((t) => t.stop());
     };
   }, [attempt]);
+
+  // Runs after the 'ready' render has actually mounted the <video> element — assigning
+  // srcObject inside the getUserMedia .then() above was a no-op, because that callback
+  // fires before the setStatus('ready') that gates the <video> into existence even
+  // renders, so videoRef.current was still null at that point every single time. That's
+  // why the preview never showed anything (a broken-media placeholder, stream or not).
+  useEffect(() => {
+    if (status === 'ready' && videoRef.current && streamRef.current) {
+      videoRef.current.srcObject = streamRef.current;
+    }
+  }, [status]);
 
   function retry() {
     hapticTap();
