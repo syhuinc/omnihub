@@ -9,18 +9,17 @@ export interface PersonalityMeta {
   image?: string;
   icon?: string;
   color: string;
-  pro: boolean;
-  /** True for the placeholder "Custom" row — not a real, selectable personality yet. */
-  comingSoon?: boolean;
+  /** 'normal' personalities are free and selectable today; 'ai' ones are shown but locked until Sleep Mode AI exists. */
+  tier: 'normal' | 'ai';
 }
 
 export const PERSONALITY_META: PersonalityMeta[] = [
-  { id: 'gentle', label: 'Gentle', description: 'Soft, caring nudges', emoji: '🍃', image: PERSONALITY_IMAGES.gentle, color: 'var(--green)', pro: true },
-  { id: 'friendly', label: 'Friendly', description: 'Casual, upbeat check-ins', emoji: '😊', image: PERSONALITY_IMAGES.friendly, color: 'var(--yellow)', pro: true },
-  { id: 'teasing', label: 'Teasing', description: 'Playful ribbing', emoji: '😆', image: PERSONALITY_IMAGES.teasing, color: 'var(--orange)', pro: true },
-  { id: 'strict', label: 'Strict', description: 'Firm, no-nonsense', emoji: '🛡️', image: PERSONALITY_IMAGES.strict, color: 'var(--blue)', pro: true },
-  { id: 'savage', label: 'Savage', description: 'Sharp roasts, all in fun', emoji: '🔥', image: PERSONALITY_IMAGES.savage, color: 'var(--red)', pro: true },
-  { id: 'custom', label: 'Custom', description: 'Create your own AI personality', emoji: '🎨', icon: 'palette', color: 'var(--purple)', pro: true, comingSoon: true },
+  { id: 'gentle', label: 'Gentle', description: 'Soft, caring nudges', emoji: '🍃', image: PERSONALITY_IMAGES.gentle, color: 'var(--green)', tier: 'normal' },
+  { id: 'friendly', label: 'Friendly', description: 'Casual, upbeat check-ins', emoji: '😊', image: PERSONALITY_IMAGES.friendly, color: 'var(--yellow)', tier: 'normal' },
+  { id: 'teasing', label: 'Teasing', description: 'Playful ribbing', emoji: '😆', image: PERSONALITY_IMAGES.teasing, color: 'var(--orange)', tier: 'ai' },
+  { id: 'strict', label: 'Strict', description: 'Firm, no-nonsense', emoji: '🛡️', image: PERSONALITY_IMAGES.strict, color: 'var(--blue)', tier: 'ai' },
+  { id: 'savage', label: 'Savage', description: 'Sharp roasts, all in fun', emoji: '🔥', image: PERSONALITY_IMAGES.savage, color: 'var(--red)', tier: 'ai' },
+  { id: 'custom', label: 'Custom', description: 'Create your own AI personality', emoji: '🎨', icon: 'palette', color: 'var(--purple)', tier: 'ai' },
 ];
 
 export interface RelationshipOption {

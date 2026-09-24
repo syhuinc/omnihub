@@ -12,19 +12,29 @@ interface AiPersonalityScreenProps {
   onPersist: (next: SleepModeConfig) => void;
 }
 
+type Tier = 'normal' | 'ai';
+
 export function AiPersonalityScreen({ config, onBack, onPersist }: AiPersonalityScreenProps) {
+  const currentMeta = PERSONALITY_META.find((p) => p.id === config.personality);
+  const [tab, setTab] = useState<Tier>(currentMeta?.tier === 'ai' ? 'ai' : 'normal');
   const [sampleText, setSampleText] = useState<string | null>(null);
   const [sampleLoading, setSampleLoading] = useState(false);
   const [comingSoonId, setComingSoonId] = useState<string | null>(null);
 
-  function selectPersonality(id: SleepPersonality | 'custom') {
+  function selectTab(next: Tier) {
     hapticSelect();
-    if (id === 'custom') {
-      setComingSoonId('custom');
+    setTab(next);
+    setComingSoonId(null);
+  }
+
+  function selectPersonality(id: SleepPersonality | 'custom', tier: Tier) {
+    hapticSelect();
+    if (tier === 'ai') {
+      setComingSoonId(id);
       return;
     }
     setComingSoonId(null);
-    onPersist({ ...config, personality: id });
+    onPersist({ ...config, personality: id as SleepPersonality });
   }
 
   async function hearSample() {
@@ -45,49 +55,82 @@ export function AiPersonalityScreen({ config, onBack, onPersist }: AiPersonality
     }
   }
 
+  const visible = PERSONALITY_META.filter((p) => p.tier === tab);
+
   return (
     <div className="screen">
       <ScreenHeader title="AI Personalities" subtitle="Choose how your Sleep Mode AI talks to you" onBack={onBack} />
 
       <div className="sm__body">
+        <div className="si__range-tabs">
+          <button
+            type="button"
+            className={`si__range-tab${tab === 'normal' ? ' si__range-tab--active' : ''}`}
+            onClick={() => selectTab('normal')}
+          >
+            Normal
+          </button>
+          <button
+            type="button"
+            className={`si__range-tab${tab === 'ai' ? ' si__range-tab--active' : ''}`}
+            onClick={() => selectTab('ai')}
+          >
+            AI
+          </button>
+        </div>
+
+        {tab === 'ai' && (
+          <p className="sm__pro-note">
+            Sleep Mode AI isn't built yet, so these are locked — you can see what's coming, but
+            they're not selectable until the AI backend is ready.
+          </p>
+        )}
+
         <div className="sm__personality-list">
-          {PERSONALITY_META.map((p) => (
-            <button
-              key={p.id}
-              type="button"
-              className={`sm__personality${config.personality === p.id ? ' sm__personality--active' : ''}`}
-              onClick={() => selectPersonality(p.id)}
-            >
-              <span className="sm__personality-emoji" style={{ '--emoji-color': p.color } as CSSProperties}>
-                {p.image ? <img src={p.image} alt="" /> : <Icon name={(p.icon ?? 'user') as never} size={18} />}
-              </span>
-              <span className="sm__personality-info">
-                <span className="sm__personality-label-row">
-                  <span className="sm__personality-label">{p.label}</span>
-                  <span className={`sm__badge${p.pro ? ' sm__badge--pro' : ' sm__badge--free'}`}>
-                    {p.pro ? 'PRO' : 'Free'}
-                  </span>
+          {visible.map((p) => {
+            const locked = p.tier === 'ai';
+            return (
+              <button
+                key={p.id}
+                type="button"
+                className={`sm__personality${config.personality === p.id ? ' sm__personality--active' : ''}${locked ? ' sm__personality--locked' : ''}`}
+                onClick={() => selectPersonality(p.id, p.tier)}
+              >
+                <span className="sm__personality-emoji" style={{ '--emoji-color': p.color } as CSSProperties}>
+                  {p.image ? <img src={p.image} alt="" /> : <Icon name={(p.icon ?? 'user') as never} size={18} />}
                 </span>
-                <span className="sm__personality-desc">{p.description}</span>
-                {comingSoonId === p.id && <span className="sm__personality-soon">Coming soon — not built yet</span>}
-              </span>
-              <span className="sm__radio" aria-hidden="true" />
-            </button>
-          ))}
+                <span className="sm__personality-info">
+                  <span className="sm__personality-label-row">
+                    <span className="sm__personality-label">{p.label}</span>
+                    <span className={`sm__badge${locked ? ' sm__badge--ai' : ' sm__badge--free'}`}>
+                      {locked ? 'AI' : 'Free'}
+                    </span>
+                  </span>
+                  <span className="sm__personality-desc">{p.description}</span>
+                  {comingSoonId === p.id && <span className="sm__personality-soon">Coming soon — not built yet</span>}
+                </span>
+                {locked ? (
+                  <Icon name="lock" size={16} className="sm__time-chevron" />
+                ) : (
+                  <span className="sm__radio" aria-hidden="true" />
+                )}
+              </button>
+            );
+          })}
         </div>
 
         <button type="button" className="sm__sample-btn" onClick={hearSample} disabled={sampleLoading}>
           <Icon name="activity" size={16} />
           <span className="sm__sample-btn-text">
             {sampleLoading ? 'Loading…' : 'Hear a sample'}
-            <small>Preview how each personality sounds</small>
+            <small>Preview your current personality</small>
           </span>
           <Icon name="chevron-right" size={14} />
         </button>
         {sampleText && (
           <div className="sm__sample-bubble">
             <span className="sm__sample-avatar">
-              <img src={PERSONALITY_META.find((p) => p.id === config.personality)?.image} alt="" />
+              <img src={currentMeta?.image} alt="" />
             </span>
             <p className="sm__sample-text">{sampleText}</p>
             <span className="sm__sample-wave" aria-hidden="true">
@@ -97,12 +140,6 @@ export function AiPersonalityScreen({ config, onBack, onPersist }: AiPersonality
             </span>
           </div>
         )}
-
-        <p className="sm__pro-note">
-          All personalities are marked Pro to match what's coming, but Gentle through Savage work
-          today — Sleep Mode Pro billing isn't live yet, so nothing here is actually locked. Custom
-          is the one exception: it's a preview of what's next, not something you can use yet.
-        </p>
       </div>
     </div>
   );

@@ -401,6 +401,14 @@
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--purple) 25%, transparent);
 }
 
+.sm__personality--locked {
+  opacity: 0.55;
+}
+
+.sm__personality--locked .sm__personality-emoji {
+  filter: grayscale(0.4);
+}
+
 .sm__personality-emoji {
   flex-shrink: 0;
   width: 40px;
@@ -737,6 +745,11 @@
 .sm__badge--pro {
   background: linear-gradient(135deg, #f6c453, #e0a530);
   color: #402c04;
+}
+
+.sm__badge--ai {
+  background: color-mix(in srgb, var(--purple) 24%, transparent);
+  color: var(--purple);
 }
 
 .sm__personality-label-row {

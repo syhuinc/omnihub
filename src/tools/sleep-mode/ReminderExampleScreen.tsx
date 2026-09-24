@@ -18,8 +18,8 @@ interface ExampleRow {
 // Illustrative escalation, not a real log — Sleep Insights is where genuinely logged data lives.
 const EXAMPLE_TIMES = ['12:00 AM', '12:15 AM', '12:30 AM', '12:30 AM', '1:00 AM'];
 
-// "Custom" isn't a real personality yet, so it has no messages to preview.
-const REAL_PERSONALITIES = PERSONALITY_META.filter((p) => !p.comingSoon);
+// AI-tier personalities aren't selectable yet, so there's nothing real to preview for them.
+const REAL_PERSONALITIES = PERSONALITY_META.filter((p) => p.tier === 'normal');
 
 export function ReminderExampleScreen({ onBack }: ReminderExampleScreenProps) {
   const [rows, setRows] = useState<ExampleRow[] | null>(null);
@@ -68,9 +68,7 @@ export function ReminderExampleScreen({ onBack }: ReminderExampleScreenProps) {
               <div className="sm__example-body">
                 <div className="sm__example-head">
                   <strong>{row.personality.label}</strong>
-                  <span className={`sm__badge${row.personality.pro ? ' sm__badge--pro' : ' sm__badge--free'}`}>
-                    {row.personality.pro ? 'PRO' : 'Free'}
-                  </span>
+                  <span className="sm__badge sm__badge--free">Free</span>
                   <span className="sm__example-time">{row.time}</span>
                 </div>
                 <p className="sm__example-text">{row.text || '…'}</p>
