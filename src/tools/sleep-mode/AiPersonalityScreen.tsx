@@ -4,6 +4,7 @@ import { Icon } from '../../components/Icon';
 import { hapticSelect, hapticTap } from '../../haptics';
 import { SleepModePlugin, type SleepModeConfig, type SleepPersonality } from '../../sleep-mode/plugin';
 import { PERSONALITY_META } from './types';
+import { SAMPLE_AUDIO } from '../../assets/sleep-mode';
 import './SleepMode.css';
 
 interface AiPersonalityScreenProps {
@@ -18,8 +19,11 @@ export function AiPersonalityScreen({ config, onBack, onPersist }: AiPersonality
   const currentMeta = PERSONALITY_META.find((p) => p.id === config.personality);
   const [tab, setTab] = useState<Tier>(currentMeta?.tier === 'ai' ? 'ai' : 'normal');
   const [sampleText, setSampleText] = useState<string | null>(null);
+  const [sampleAvatarId, setSampleAvatarId] = useState<string | null>(null);
   const [sampleLoading, setSampleLoading] = useState(false);
   const [comingSoonId, setComingSoonId] = useState<string | null>(null);
+
+  const sampleAvatar = PERSONALITY_META.find((p) => p.id === sampleAvatarId)?.image;
 
   function selectTab(next: Tier) {
     hapticSelect();
@@ -31,14 +35,42 @@ export function AiPersonalityScreen({ config, onBack, onPersist }: AiPersonality
     hapticSelect();
     if (locked) {
       setComingSoonId(id);
+      // Even though it's not selectable yet, play its real recorded voice as a teaser if we have
+      // one — better than leaving a locked row completely silent.
+      playRecordedSample(id);
       return;
     }
     setComingSoonId(null);
     onPersist({ ...config, personality: id as SleepPersonality });
   }
 
+  /** Plays the real recording for `id` if one exists. Returns false so callers can fall back. */
+  async function playRecordedSample(id: string): Promise<boolean> {
+    const recorded = SAMPLE_AUDIO[id];
+    if (!recorded) return false;
+    setSampleText(recorded.text);
+    setSampleAvatarId(id);
+    setSampleLoading(true);
+    const audio = new Audio(recorded.audio);
+    audio.onended = () => setSampleLoading(false);
+    audio.onerror = () => setSampleLoading(false);
+    try {
+      await audio.play();
+    } catch {
+      setSampleLoading(false);
+    }
+    return true;
+  }
+
   async function hearSample() {
     hapticTap();
+
+    // A real recorded voice for the personalities that have one — same fixed line every time,
+    // since the audio is pre-recorded and can't say something new. The live nightly nags still
+    // use on-device TTS with the full varied message bank; this is just the preview.
+    if (await playRecordedSample(config.personality)) return;
+
+    setSampleAvatarId(config.personality);
     setSampleLoading(true);
     try {
       const { text } = await SleepModePlugin.previewMessage({
@@ -133,7 +165,7 @@ export function AiPersonalityScreen({ config, onBack, onPersist }: AiPersonality
         {sampleText && (
           <div className="sm__sample-bubble">
             <span className="sm__sample-avatar">
-              <img src={currentMeta?.image} alt="" />
+              <img src={sampleAvatar} alt="" />
             </span>
             <p className="sm__sample-text">{sampleText}</p>
             <span className="sm__sample-wave" aria-hidden="true">
