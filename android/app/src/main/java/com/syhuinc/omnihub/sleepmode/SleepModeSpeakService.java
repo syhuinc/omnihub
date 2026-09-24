@@ -22,7 +22,9 @@ import android.util.Log;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.ServiceCompat;
 
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -46,8 +48,21 @@ public class SleepModeSpeakService extends Service {
     public static final String EXTRA_TEXT = "text";
     public static final String EXTRA_FORCE_AUDIBLE = "forceAudible";
     public static final String EXTRA_AUDIO_RES_ID = "audioResId";
+    public static final String EXTRA_PERSONALITY = "personality";
 
     private static final String TAG = "SleepModeSpeak";
+
+    /** Matches PERSONALITY_META's emoji in the web layer (src/tools/sleep-mode/types.ts), so the
+     *  notification's personality reads the same everywhere. */
+    private static final Map<String, String> PERSONALITY_EMOJI = new HashMap<>();
+    static {
+        PERSONALITY_EMOJI.put("gentle", "🍃");
+        PERSONALITY_EMOJI.put("friendly", "😊");
+        PERSONALITY_EMOJI.put("teasing", "😆");
+        PERSONALITY_EMOJI.put("strict", "🛡️");
+        PERSONALITY_EMOJI.put("savage", "🔥");
+    }
+    private static final String DEFAULT_EMOJI = "🌙";
 
     private static final String CHANNEL_ID = "omnihub_sleep_mode";
     private static final int NOTIFICATION_ID = 992;
@@ -72,12 +87,13 @@ public class SleepModeSpeakService extends Service {
         String text = intent != null ? intent.getStringExtra(EXTRA_TEXT) : null;
         boolean forceAudible = intent != null && intent.getBooleanExtra(EXTRA_FORCE_AUDIBLE, false);
         int audioResId = intent != null ? intent.getIntExtra(EXTRA_AUDIO_RES_ID, 0) : 0;
+        String personality = intent != null ? intent.getStringExtra(EXTRA_PERSONALITY) : null;
         if (text == null || text.isEmpty()) {
             stopSelf();
             return START_NOT_STICKY;
         }
 
-        startForegroundWithNotification();
+        startForegroundWithNotification(text, personality);
         acquireWakeLock();
         if (audioResId == 0 || !playClip(audioResId, forceAudible)) {
             speak(text, forceAudible);
@@ -205,11 +221,15 @@ public class SleepModeSpeakService extends Service {
         }
     }
 
-    private void startForegroundWithNotification() {
+    private void startForegroundWithNotification(String text, String personality) {
+        String emoji = PERSONALITY_EMOJI.getOrDefault(personality, DEFAULT_EMOJI);
+        String title = emoji + " Sleep Mode";
+
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
-                .setContentTitle("Sleep Mode")
-                .setContentText("Reminding you it's time to sleep")
+                .setContentTitle(title)
+                .setContentText(text)
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(text).setBigContentTitle(title))
                 .setPriority(NotificationCompat.PRIORITY_LOW)
                 .setCategory(NotificationCompat.CATEGORY_REMINDER)
                 .setOngoing(false)

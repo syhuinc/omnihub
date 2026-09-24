@@ -109,6 +109,7 @@ public class SleepModeReceiver extends BroadcastReceiver {
 
         Intent serviceIntent = new Intent(context, SleepModeSpeakService.class);
         serviceIntent.putExtra(SleepModeSpeakService.EXTRA_TEXT, pick.text);
+        serviceIntent.putExtra(SleepModeSpeakService.EXTRA_PERSONALITY, data.personality);
         if (clipResId != 0) {
             serviceIntent.putExtra(SleepModeSpeakService.EXTRA_AUDIO_RES_ID, clipResId);
         }
