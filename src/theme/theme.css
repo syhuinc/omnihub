@@ -75,7 +75,7 @@ body {
   padding: 0;
   height: 100%;
   overflow: hidden;
-  overscroll-behavior-y: none;
+  overscroll-behavior: none;
 }
 
 /* While a barcode/QR scan is active, the native camera preview renders behind the
