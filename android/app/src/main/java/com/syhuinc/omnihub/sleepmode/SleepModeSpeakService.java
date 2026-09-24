@@ -15,12 +15,14 @@ import android.os.Looper;
 import android.os.PowerManager;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
+import android.speech.tts.Voice;
 import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.ServiceCompat;
 
 import java.util.Locale;
+import java.util.Set;
 
 /**
  * Speaks one short Sleep Mode reminder line through Android's built-in TextToSpeech engine, as a
@@ -85,17 +87,25 @@ public class SleepModeSpeakService extends Service {
                 return;
             }
 
-            int langResult = tts.setLanguage(Locale.getDefault());
+            Locale activeLocale = Locale.getDefault();
+            int langResult = tts.setLanguage(activeLocale);
             if (langResult == TextToSpeech.LANG_MISSING_DATA || langResult == TextToSpeech.LANG_NOT_SUPPORTED) {
                 // Fall back to US English before giving up entirely - most devices have this
                 // voice installed even when the device's own locale's voice data isn't.
-                langResult = tts.setLanguage(Locale.US);
+                activeLocale = Locale.US;
+                langResult = tts.setLanguage(activeLocale);
             }
             if (langResult == TextToSpeech.LANG_MISSING_DATA || langResult == TextToSpeech.LANG_NOT_SUPPORTED) {
                 Log.w(TAG, "No usable TTS voice/language available (result=" + langResult + ")");
                 stopSelf();
                 return;
             }
+
+            selectBestOfflineVoice(activeLocale);
+            // A hair slower than the engine default so lines land more like a spoken nudge than a
+            // screen reader rattling off text - most complaints about TTS "sounding robotic" are
+            // really about the default rate being a little too brisk and flat.
+            tts.setSpeechRate(0.92f);
 
             tts.setAudioAttributes(new AudioAttributes.Builder()
                     .setUsage(forceAudible ? AudioAttributes.USAGE_MEDIA : AudioAttributes.USAGE_NOTIFICATION_EVENT)
@@ -123,6 +133,33 @@ public class SleepModeSpeakService extends Service {
             Bundle params = new Bundle();
             tts.speak(text, TextToSpeech.QUEUE_FLUSH, params, UTTERANCE_ID);
         });
+    }
+
+    /**
+     * setLanguage() alone often lands on the engine's lowest-latency voice rather than its best
+     * one, which is the biggest reason TTS output can sound flat/robotic. Pick the
+     * highest-quality voice for the active language that doesn't require a network connection -
+     * reminders fire on a schedule with no guarantee of connectivity, so an offline voice that
+     * always works beats a nicer one that might silently fail to speak at all.
+     */
+    private void selectBestOfflineVoice(Locale locale) {
+        if (tts == null) return;
+        try {
+            Set<Voice> voices = tts.getVoices();
+            if (voices == null) return;
+            Voice best = null;
+            for (Voice v : voices) {
+                if (v.isNetworkConnectionRequired()) continue;
+                if (v.getFeatures() != null && v.getFeatures().contains(TextToSpeech.Engine.KEY_FEATURE_NOT_INSTALLED)) continue;
+                if (!v.getLocale().getLanguage().equals(locale.getLanguage())) continue;
+                if (best == null || v.getQuality() > best.getQuality()) best = v;
+            }
+            if (best != null) tts.setVoice(best);
+        } catch (Exception e) {
+            // Some engines throw on getVoices()/setVoice() in odd states - the language-only
+            // selection from setLanguage() is a perfectly fine fallback if this fails.
+            Log.w(TAG, "Voice selection failed, keeping engine default", e);
+        }
     }
 
     private void startForegroundWithNotification() {
