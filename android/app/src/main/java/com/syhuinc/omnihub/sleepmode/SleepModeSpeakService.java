@@ -64,11 +64,13 @@ public class SleepModeSpeakService extends Service {
     }
     private static final String DEFAULT_EMOJI = "🌙";
 
-    // v2: channel importance is locked in at creation time and can't be raised by shipping a code
-    // change alone -- devices that already had the old "omnihub_sleep_mode" channel from an
-    // earlier install are stuck at whatever importance it was first created with. A new id forces
-    // Android to create a fresh channel at the higher importance below.
-    private static final String CHANNEL_ID = "omnihub_sleep_mode_v2";
+    // v3: channel importance is locked in at creation time and can't be raised by shipping a code
+    // change alone -- devices that already have an earlier "omnihub_sleep_mode*" channel are stuck
+    // at whatever importance it was first created with, so every importance bump needs a new id.
+    // IMPORTANCE_DEFAULT (v2) still only posts silently to the shade/status bar -- it never pops up
+    // as a heads-up banner. IMPORTANCE_HIGH is what actually produces the on-screen "pop up" this
+    // was supposed to have from the start.
+    private static final String CHANNEL_ID = "omnihub_sleep_mode_v3";
     private static final int NOTIFICATION_ID = 992;
     private static final String UTTERANCE_ID = "sleepmode_utterance";
     /** Safety net in case the TTS engine never reports completion for some reason. */
@@ -247,7 +249,7 @@ public class SleepModeSpeakService extends Service {
                 .setContentTitle(title)
                 .setContentText(text)
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(text).setBigContentTitle(title))
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setCategory(NotificationCompat.CATEGORY_REMINDER)
                 .setOngoing(false)
                 .setAutoCancel(false)
@@ -283,7 +285,7 @@ public class SleepModeSpeakService extends Service {
             NotificationManager nm = getSystemService(NotificationManager.class);
             if (nm != null && nm.getNotificationChannel(CHANNEL_ID) == null) {
                 NotificationChannel channel = new NotificationChannel(
-                        CHANNEL_ID, "Sleep Mode", NotificationManager.IMPORTANCE_DEFAULT);
+                        CHANNEL_ID, "Sleep Mode", NotificationManager.IMPORTANCE_HIGH);
                 channel.setDescription("Sleep Mode's spoken bedtime reminders");
                 // No channel sound -- the reminder's own recorded voice clip/TTS is the audio.
                 channel.setSound(null, null);
