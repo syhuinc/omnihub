@@ -10,11 +10,11 @@ import soundOcean from './sound-ocean.webp';
 import soundNightAmbience from './sound-night-ambience.webp';
 import soundCampfire from './sound-campfire.webp';
 import soundCafe from './sound-cafe.webp';
-import sampleGentle from './sample-audio/sample-gentle.mp3';
-import sampleFriendly from './sample-audio/sample-friendly.mp3';
-import sampleTeasing from './sample-audio/sample-teasing.mp3';
-import sampleStrict from './sample-audio/sample-strict.mp3';
-import sampleSavage from './sample-audio/sample-savage.mp3';
+import sampleGentle from './sample-audio/sample-gentle.wav';
+import sampleFriendly from './sample-audio/sample-friendly.wav';
+import sampleTeasing from './sample-audio/sample-teasing.wav';
+import sampleStrict from './sample-audio/sample-strict.wav';
+import sampleSavage from './sample-audio/sample-savage.wav';
 
 export { heroBanner };
 
@@ -36,8 +36,8 @@ export const SOUND_IMAGES: Record<string, string> = {
 };
 
 /**
- * Real, pre-recorded voice samples (ElevenLabs) for the "Hear a sample" preview — one fixed line
- * per personality, matching the character-art reference. Not used for the actual nightly nags,
+ * Real, pre-recorded voice samples (Gemini API TTS) for the "Hear a sample" preview — one fixed
+ * line per personality, matching the character-art reference. Not used for the actual nightly nags,
  * which need live on-device TTS since their text is dynamic (name, wake time, interests).
  */
 export const SAMPLE_AUDIO: Record<string, { audio: string; text: string }> = {
