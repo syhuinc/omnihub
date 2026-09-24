@@ -14,7 +14,7 @@ Each personality gets its own voice + style prompt so the tone matches the chara
 Uses only the Python standard library (urllib + wave) -- no pip install needed.
 
 Setup:
-    Set the GEMINI_API_KEY environment variable (from https://aistudio.google.com/apikey).
+    Set the OMNI_HUB_GEMINI_API_KEY environment variable (from https://aistudio.google.com/apikey).
 
 Run:
     python3 gemini-tts-generate.py
@@ -35,7 +35,7 @@ import urllib.request
 import urllib.error
 import wave
 
-API_KEY = os.environ.get("GEMINI_API_KEY")
+API_KEY = os.environ.get("OMNI_HUB_GEMINI_API_KEY") or os.environ.get("GEMINI_API_KEY")
 MODEL = os.environ.get("GEMINI_TTS_MODEL", "gemini-2.5-flash-preview-tts")
 ENDPOINT = f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL}:generateContent"
 
@@ -133,7 +133,7 @@ def generate(name: str, personality: str, style: str, text: str, out_dir: str) -
 
 def main() -> None:
     if not API_KEY:
-        raise SystemExit("Set GEMINI_API_KEY first (get one at https://aistudio.google.com/apikey)")
+        raise SystemExit("Set OMNI_HUB_GEMINI_API_KEY first (get one at https://aistudio.google.com/apikey)")
 
     out_dir = "output"
     os.makedirs(out_dir, exist_ok=True)
