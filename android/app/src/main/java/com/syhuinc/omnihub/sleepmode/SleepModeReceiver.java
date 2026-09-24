@@ -105,8 +105,13 @@ public class SleepModeReceiver extends BroadcastReceiver {
                 recentKeys
         );
 
+        int clipResId = SleepModeClipBank.resIdFor(context, pick.key);
+
         Intent serviceIntent = new Intent(context, SleepModeSpeakService.class);
         serviceIntent.putExtra(SleepModeSpeakService.EXTRA_TEXT, pick.text);
+        if (clipResId != 0) {
+            serviceIntent.putExtra(SleepModeSpeakService.EXTRA_AUDIO_RES_ID, clipResId);
+        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             context.startForegroundService(serviceIntent);
         } else {
