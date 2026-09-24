@@ -69,14 +69,13 @@ public class SleepModeSpeakService extends Service {
     }
     private static final String DEFAULT_EMOJI = "🌙";
 
-    /** One matching cat expression per personality for the notification's banner art. */
+    /** One matching cat expression per personality for the notification's banner art. Only
+     *  Gentle/Friendly for now -- Teasing/Strict/Savage aren't actually selectable yet (locked,
+     *  AI tier), so they fall back to the generic banner if this ever gets hit for them. */
     private static final Map<String, Integer> PERSONALITY_BANNER = new HashMap<>();
     static {
         PERSONALITY_BANNER.put("gentle", R.drawable.sleep_notification_banner_gentle);
         PERSONALITY_BANNER.put("friendly", R.drawable.sleep_notification_banner_friendly);
-        PERSONALITY_BANNER.put("teasing", R.drawable.sleep_notification_banner_teasing);
-        PERSONALITY_BANNER.put("strict", R.drawable.sleep_notification_banner_strict);
-        PERSONALITY_BANNER.put("savage", R.drawable.sleep_notification_banner_savage);
     }
     private static final int DEFAULT_BANNER = R.drawable.sleep_notification_banner;
 
