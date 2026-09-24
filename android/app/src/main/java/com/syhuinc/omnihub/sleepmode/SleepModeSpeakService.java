@@ -18,19 +18,14 @@ import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 import android.speech.tts.Voice;
 import android.util.Log;
-import android.widget.RemoteViews;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.ServiceCompat;
-
-import com.syhuinc.omnihub.R;
 
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Speaks one short Sleep Mode reminder line through Android's built-in TextToSpeech engine, as a
@@ -69,16 +64,6 @@ public class SleepModeSpeakService extends Service {
     }
     private static final String DEFAULT_EMOJI = "🌙";
 
-    /** One matching cat expression per personality for the notification's banner art. Only
-     *  Gentle/Friendly for now -- Teasing/Strict/Savage aren't actually selectable yet (locked,
-     *  AI tier), so they fall back to the generic banner if this ever gets hit for them. */
-    private static final Map<String, Integer> PERSONALITY_BANNER = new HashMap<>();
-    static {
-        PERSONALITY_BANNER.put("gentle", R.drawable.sleep_notification_banner_gentle);
-        PERSONALITY_BANNER.put("friendly", R.drawable.sleep_notification_banner_friendly);
-    }
-    private static final int DEFAULT_BANNER = R.drawable.sleep_notification_banner;
-
     private static final String CHANNEL_ID = "omnihub_sleep_mode";
     private static final int NOTIFICATION_ID = 992;
     private static final String UTTERANCE_ID = "sleepmode_utterance";
@@ -112,9 +97,6 @@ public class SleepModeSpeakService extends Service {
             startForegroundWithNotification(text, personality);
             acquireWakeLock();
         } catch (Throwable t) {
-            // A foreground service MUST call startForeground() promptly or the OS kills the app
-            // outright, so this can't be allowed to throw uncaught. If even this fails, there's
-            // nothing more to safely do -- stop cleanly instead of crashing.
             Log.e(TAG, "Failed to start foreground notification, stopping", t);
             stopSelf();
             return START_NOT_STICKY;
@@ -252,89 +234,11 @@ public class SleepModeSpeakService extends Service {
         }
     }
 
-    /** Splits a MessageBank line into a short headline (first sentence) plus the rest as detail,
-     *  matching the card's headline/body split -- e.g. "It's time to sleep. Good night!" becomes
-     *  headline "It's time to sleep." and body "Good night!". Falls back to using the whole line
-     *  as the headline with no body if there's no natural split point. */
-    private String[] splitHeadlineAndBody(String text) {
-        Matcher m = Pattern.compile("^(.+?[.!?])\\s+(.+)$").matcher(text);
-        if (m.matches()) {
-            return new String[] { m.group(1), m.group(2) };
-        }
-        return new String[] { text, null };
-    }
-
     private void startForegroundWithNotification(String text, String personality) {
         String emoji = PERSONALITY_EMOJI.getOrDefault(personality, DEFAULT_EMOJI);
-
-        // The custom RemoteViews card is new and unproven across OEMs/API levels -- never let a
-        // bug in it (or in actually posting it, e.g. a Binder transaction size limit) crash the
-        // whole service and take the app down with it. Any failure anywhere in that path falls
-        // back to the plain notification that's always worked.
-        try {
-            postForeground(richNotificationBuilder(text, personality, emoji));
-        } catch (Throwable t) {
-            Log.e(TAG, "Rich notification failed, falling back to plain text", t);
-            postForeground(plainNotificationBuilder(text, emoji));
-        }
-    }
-
-    private void postForeground(NotificationCompat.Builder builder) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            ServiceCompat.startForeground(
-                    this,
-                    NOTIFICATION_ID,
-                    builder.build(),
-                    android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK);
-        } else {
-            startForeground(NOTIFICATION_ID, builder.build());
-        }
-    }
-
-    private NotificationCompat.Builder richNotificationBuilder(String text, String personality, String emoji) {
-        String[] parts = splitHeadlineAndBody(text);
-        String headline = parts[0];
-        String body = parts[1];
-
-        RemoteViews collapsed = new RemoteViews(getPackageName(), R.layout.notification_sleep_mode_collapsed);
-        collapsed.setTextViewText(R.id.notif_emoji, emoji);
-        collapsed.setTextViewText(R.id.notif_headline, headline);
-        if (body != null) {
-            collapsed.setTextViewText(R.id.notif_body, body);
-            collapsed.setViewVisibility(R.id.notif_body, android.view.View.VISIBLE);
-        } else {
-            collapsed.setViewVisibility(R.id.notif_body, android.view.View.GONE);
-        }
-
-        RemoteViews expanded = new RemoteViews(getPackageName(), R.layout.notification_sleep_mode_expanded);
-        expanded.setImageViewResource(R.id.notif_banner, PERSONALITY_BANNER.getOrDefault(personality, DEFAULT_BANNER));
-        expanded.setTextViewText(R.id.notif_emoji_big, emoji);
-        expanded.setTextViewText(R.id.notif_headline_big, headline);
-        if (body != null) {
-            expanded.setTextViewText(R.id.notif_body_big, body);
-            expanded.setViewVisibility(R.id.notif_body_big, android.view.View.VISIBLE);
-        } else {
-            expanded.setViewVisibility(R.id.notif_body_big, android.view.View.GONE);
-        }
-        expanded.setOnClickPendingIntent(R.id.notif_btn_primary, actionPendingIntent(SleepModeReceiver.ACTION_STOP_TONIGHT));
-        expanded.setOnClickPendingIntent(R.id.notif_btn_secondary, actionPendingIntent(SleepModeReceiver.ACTION_SNOOZE));
-
-        return new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
-                .setContentTitle(emoji + " Sleep Mode")
-                .setContentText(headline)
-                .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
-                .setCustomContentView(collapsed)
-                .setCustomBigContentView(expanded)
-                .setPriority(NotificationCompat.PRIORITY_LOW)
-                .setCategory(NotificationCompat.CATEGORY_REMINDER)
-                .setOngoing(false)
-                .setAutoCancel(false);
-    }
-
-    private NotificationCompat.Builder plainNotificationBuilder(String text, String emoji) {
         String title = emoji + " Sleep Mode";
-        return new NotificationCompat.Builder(this, CHANNEL_ID)
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
                 .setContentTitle(title)
                 .setContentText(text)
@@ -345,6 +249,16 @@ public class SleepModeSpeakService extends Service {
                 .setAutoCancel(false)
                 .addAction(android.R.drawable.ic_popup_reminder, "5 more minutes", actionPendingIntent(SleepModeReceiver.ACTION_SNOOZE))
                 .addAction(android.R.drawable.ic_menu_close_clear_cancel, "I'm going to sleep", actionPendingIntent(SleepModeReceiver.ACTION_STOP_TONIGHT));
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            ServiceCompat.startForeground(
+                    this,
+                    NOTIFICATION_ID,
+                    builder.build(),
+                    android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK);
+        } else {
+            startForeground(NOTIFICATION_ID, builder.build());
+        }
     }
 
     private PendingIntent actionPendingIntent(String action) {
