@@ -88,7 +88,11 @@ export type IconName =
   | 'zap'
   | 'package'
   | 'pause'
-  | 'volume';
+  | 'volume'
+  | 'smartphone'
+  | 'wifi'
+  | 'cpu'
+  | 'database';
 
 interface IconProps {
   name: IconName;
@@ -324,6 +328,10 @@ const paths: Record<IconName, React.ReactNode> = {
   battery: <path d="M3 8a1 1 0 0 1 1-1h13a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1ZM19 10.5h2v3h-2Z" />,
   zap: <path d="M13 2 4 14h6l-1 8 9-12h-6Z" />,
   package: <path d="m3.5 8 8.5-4.5L20.5 8 12 12.5 3.5 8ZM3.5 8v8l8.5 4.5m0-8V20.5m0-8L20.5 8v8L12 20.5" />,
+  smartphone: <path d="M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Z M11 18h2" />,
+  wifi: <path d="M1.4 9a16 16 0 0 1 21.2 0 M5 12.55a11 11 0 0 1 14.08 0 M8.53 16.11a6 6 0 0 1 6.95 0 M12 20h.01" />,
+  cpu: <path d="M6 4h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z M9 9h6v6H9Z M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 14h3M1 9h3M1 14h3" />,
+  database: <path d="M3 5a9 3 0 1 0 18 0a9 3 0 1 0-18 0 M3 5v14a9 3 0 0 0 18 0V5 M3 12a9 3 0 0 0 18 0" />,
 };
 
 export function Icon({ name, size = 20, strokeWidth = 2, className, style }: IconProps) {

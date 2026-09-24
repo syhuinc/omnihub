@@ -9,6 +9,7 @@ import { searchTools } from '../../search/searchIndex';
 import { storageGet, storageSet, StorageKeys } from '../../storage/db';
 import { loadPinnedToolIds, savePinnedToolIds } from '../../tools/pinnedTools';
 import { PinnedToolsGrid } from './PinnedToolsGrid';
+import { PhoneStatusCard } from './PhoneStatusCard';
 import type { ToolMeta } from '../../types';
 import './Home.css';
 
@@ -29,17 +30,24 @@ function greeting(): string {
 interface HomeSections {
   recommended: boolean;
   quickActions: boolean;
+  myPhone: boolean;
 }
 
-const DEFAULT_SECTIONS: HomeSections = { recommended: true, quickActions: true };
+type MyPhonePosition = 'top' | 'afterPinned';
+
+const DEFAULT_SECTIONS: HomeSections = { recommended: true, quickActions: true, myPhone: true };
 
 export function Home() {
   const { navigate } = useRouter();
   const [query, setQuery] = useState('');
   const [pinnedIds, setPinnedIds] = useState<string[]>(loadPinnedToolIds);
   const [editingPinned, setEditingPinned] = useState(false);
-  const [sections, setSections] = useState<HomeSections>(() =>
-    storageGet(StorageKeys.homeSections, DEFAULT_SECTIONS),
+  const [sections, setSections] = useState<HomeSections>(() => ({
+    ...DEFAULT_SECTIONS,
+    ...storageGet(StorageKeys.homeSections, DEFAULT_SECTIONS),
+  }));
+  const [myPhonePosition, setMyPhonePosition] = useState<MyPhonePosition>(() =>
+    storageGet(StorageKeys.homeMyPhonePosition, 'top' as MyPhonePosition),
   );
 
   function hideSection(key: keyof HomeSections) {
@@ -53,7 +61,13 @@ export function Home() {
     storageSet(StorageKeys.homeSections, DEFAULT_SECTIONS);
   }
 
-  const hasHiddenSections = !sections.recommended || !sections.quickActions;
+  const hasHiddenSections = !sections.recommended || !sections.quickActions || !sections.myPhone;
+
+  function toggleMyPhonePosition() {
+    const next: MyPhonePosition = myPhonePosition === 'top' ? 'afterPinned' : 'top';
+    setMyPhonePosition(next);
+    storageSet(StorageKeys.homeMyPhonePosition, next);
+  }
 
   const pinnedTools = pinnedIds.map(getToolById).filter((t): t is ToolMeta => !!t);
   const recommended = TOOLS.filter((tool) => !pinnedIds.includes(tool.id)).slice(0, 4);
@@ -80,6 +94,10 @@ export function Home() {
   return (
     <div className="screen home">
       <ScreenHeader title={`${greeting()} \u{1F44B}`} subtitle="What do you need today?" />
+
+      {!query && sections.myPhone && myPhonePosition === 'top' && (
+        <PhoneStatusCard atTop onHide={() => hideSection('myPhone')} onTogglePosition={toggleMyPhonePosition} />
+      )}
 
       <div className="home__search">
         <SearchBar value={query} onChange={setQuery} placeholder="Search tools, or anything..." />
@@ -156,6 +174,10 @@ export function Home() {
               </div>
             )}
           </div>
+
+          {sections.myPhone && myPhonePosition === 'afterPinned' && (
+            <PhoneStatusCard atTop={false} onHide={() => hideSection('myPhone')} onTogglePosition={toggleMyPhonePosition} />
+          )}
 
           <button type="button" className="home__banner" onClick={() => navigate('/tools')}>
             <div className="home__banner-glow" />

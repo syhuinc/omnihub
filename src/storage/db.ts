@@ -10,6 +10,7 @@ export const StorageKeys = {
   budgets: `${PREFIX}budgets`,
   randomLists: `${PREFIX}random.lists`,
   homeSections: `${PREFIX}home.sections`,
+  homeMyPhonePosition: `${PREFIX}home.myPhonePosition`,
   vaultSalt: `${PREFIX}vault.salt`,
   vaultCanary: `${PREFIX}vault.canary`,
   vaultNotes: `${PREFIX}vault.notes`,
