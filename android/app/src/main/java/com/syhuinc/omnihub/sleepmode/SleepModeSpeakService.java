@@ -118,6 +118,19 @@ public class SleepModeSpeakService extends Service {
             Log.e(TAG, "Speaking/playback failed", t);
         }
 
+        // Deliberately last, and deferred to the next looper pass rather than called inline:
+        // the overlay is a purely cosmetic extra on top of a reminder that's already fully
+        // underway (notification posted, audio started) by this point. Whatever WindowManager
+        // does under the hood on a given device/OEM, it must never be able to delay or interfere
+        // with the two things that actually matter having already happened first.
+        safetyHandler.post(() -> {
+            try {
+                SleepNagOverlay.show(this, text, personality);
+            } catch (Throwable t) {
+                Log.w(TAG, "Failed to show nag overlay", t);
+            }
+        });
+
         safetyHandler.removeCallbacks(safetyStop);
         safetyHandler.postDelayed(safetyStop, MAX_SPEAK_MS);
 
@@ -267,14 +280,6 @@ public class SleepModeSpeakService extends Service {
                     android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK);
         } else {
             startForeground(NOTIFICATION_ID, builder.build());
-        }
-
-        try {
-            SleepNagOverlay.show(this, text, personality);
-        } catch (Throwable t) {
-            // Same rule as everywhere else in this method: the notification above has already
-            // posted independently, so a problem here should never take the reminder down with it.
-            Log.w(TAG, "Failed to show nag overlay", t);
         }
     }
 
