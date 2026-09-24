@@ -69,6 +69,17 @@ public class SleepModeSpeakService extends Service {
     }
     private static final String DEFAULT_EMOJI = "🌙";
 
+    /** One matching cat expression per personality for the notification's banner art. */
+    private static final Map<String, Integer> PERSONALITY_BANNER = new HashMap<>();
+    static {
+        PERSONALITY_BANNER.put("gentle", R.drawable.sleep_notification_banner_gentle);
+        PERSONALITY_BANNER.put("friendly", R.drawable.sleep_notification_banner_friendly);
+        PERSONALITY_BANNER.put("teasing", R.drawable.sleep_notification_banner_teasing);
+        PERSONALITY_BANNER.put("strict", R.drawable.sleep_notification_banner_strict);
+        PERSONALITY_BANNER.put("savage", R.drawable.sleep_notification_banner_savage);
+    }
+    private static final int DEFAULT_BANNER = R.drawable.sleep_notification_banner;
+
     private static final String CHANNEL_ID = "omnihub_sleep_mode";
     private static final int NOTIFICATION_ID = 992;
     private static final String UTTERANCE_ID = "sleepmode_utterance";
@@ -255,6 +266,7 @@ public class SleepModeSpeakService extends Service {
         }
 
         RemoteViews expanded = new RemoteViews(getPackageName(), R.layout.notification_sleep_mode_expanded);
+        expanded.setImageViewResource(R.id.notif_banner, PERSONALITY_BANNER.getOrDefault(personality, DEFAULT_BANNER));
         expanded.setTextViewText(R.id.notif_emoji_big, emoji);
         expanded.setTextViewText(R.id.notif_headline_big, headline);
         if (body != null) {
