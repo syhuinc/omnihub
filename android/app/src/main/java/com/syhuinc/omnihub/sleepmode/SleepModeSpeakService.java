@@ -118,16 +118,20 @@ public class SleepModeSpeakService extends Service {
             Log.e(TAG, "Speaking/playback failed", t);
         }
 
-        // SleepNagOverlay.show() is temporarily disabled here. Audio (playClip()/speak() above,
-        // unchanged code that was reliably working before the overlay existed) has now failed on
-        // two different builds and two different reminder lines since the overlay was added, with
-        // volume/DND already ruled out as the cause. A WindowManager.addView() of a
-        // TYPE_APPLICATION_OVERLAY window touches the graphics stack natively - if that's crashing
-        // the process on this device/OEM, no amount of Java try/catch here could ever contain it,
-        // which would explain why wrapping and reordering the call (both already tried) changed
-        // nothing. Disabling the call entirely isolates whether that theory is right before
-        // re-attempting it. See SleepNagOverlay's own doc for why it exists.
-        // TODO: re-enable (or find a safer way to show it) once audio is confirmed reliable again.
+        // Re-enabled after confirming (by disabling it) that this was indeed what was breaking
+        // audio. SleepNagOverlay now renders its view in software and without elevation
+        // specifically to avoid the GPU/hardware-compositor bug class most likely to have been
+        // crashing the process natively - see SleepNagOverlay.show()'s own comment. Still
+        // deferred to the next looper pass, strictly after audio has already been kicked off
+        // above, so even if this somehow fails again, it can never take the reminder's audio
+        // down with it a third time.
+        safetyHandler.post(() -> {
+            try {
+                SleepNagOverlay.show(this, text, personality);
+            } catch (Throwable t) {
+                Log.w(TAG, "Failed to show nag overlay", t);
+            }
+        });
 
         safetyHandler.removeCallbacks(safetyStop);
         safetyHandler.postDelayed(safetyStop, MAX_SPEAK_MS);

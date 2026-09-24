@@ -64,6 +64,13 @@ final class SleepNagOverlay {
             if (wm == null) return;
 
             View view = LayoutInflater.from(appContext).inflate(R.layout.overlay_sleep_nag_card, null);
+            // Renders this view subtree in software rather than on a hardware layer. A
+            // TYPE_APPLICATION_OVERLAY surface is composited outside any app window's normal
+            // rendering path, and GPU/hardware-compositor bugs specific to that path on a given
+            // OEM's graphics stack are a well-known source of native crashes that no Java
+            // try/catch can ever contain - forcing software rendering for just this small view
+            // sidesteps that class of bug entirely, at a negligible cost for something this size.
+            view.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
 
             TextView bodyText = view.findViewById(R.id.nag_body);
             if (text != null && !text.isEmpty()) bodyText.setText(text);

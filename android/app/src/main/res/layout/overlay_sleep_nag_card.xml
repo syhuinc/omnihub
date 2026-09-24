@@ -18,8 +18,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:background="@drawable/sleep_nag_card_bg"
-        android:clipToOutline="true"
-        android:elevation="8dp">
+        android:clipToOutline="true">
 
         <ImageView
             android:id="@+id/nag_illustration"
