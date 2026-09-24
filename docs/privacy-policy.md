@@ -1,6 +1,6 @@
 # Privacy Policy for Omni Hub
 
-**Last updated:** 2026
+**Last updated:** September 2026
 
 Omni Hub is an offline-first utility app. Everything works fully on your device with no account needed. Signing in with Google is entirely optional and only unlocks syncing some of your data across your own devices — nothing else changes, and nothing is shared, sold, or used for ads or analytics either way.
 
@@ -37,13 +37,16 @@ Your PIN is never stored anywhere, on-device or in the cloud — only used to de
 
 Omni Hub does not access your microphone or contacts. It requests these permissions, all used only to make features work, never to collect or transmit data beyond what's described above:
 
-- **Internet / network access** — required only for the optional Google Sign-In and cloud sync described above. Unused unless you sign in.
+- **Internet / network access** — required only for the optional Google Sign-In and cloud sync described above. Unused unless you sign in. Omni Hub separately checks (but does not use to connect anywhere) whether you currently have a Wi-Fi or mobile connection, to show connection status on the "My Phone" card and Phone Health Check.
 - **Vibrate** — haptic feedback (tap and completion vibrations).
 - **Alarms, notifications, and background wake permissions** (schedule alarms, post notifications, run in the foreground briefly while an alarm rings, keep the device awake for that, show the ringing screen over the lock screen, and restart alarms after the device reboots) — all used solely by the **Alarm** feature, so an alarm you set still rings even if Omni Hub is closed. None of this involves any network access.
-- **Camera / flashlight** — used only by the **QR Scanner**, **Barcode Scanner**, and **Flashlight** tools, entirely on your device. No photo, video, or scanned image is ever saved or transmitted; a scanned code's decoded text stays on-device too.
+- **Camera / flashlight** — used by the **QR Scanner**, **Barcode Scanner**, and **Flashlight** tools, and by the **Phone Health Check**'s Front Camera and Rear Camera tests (Phone Center) to show you a live preview so you can confirm your cameras work. In every case the preview is shown to you only, entirely on your device — no photo, video, or scanned image is ever saved or transmitted; a scanned code's decoded text stays on-device too.
 - **Phone state** (optional, off by default) — used only by the **Flashlight** tool's "Flash Alerts" setting to detect when your phone starts or stops ringing, so it can blink the flash for an incoming call. Omni Hub never reads phone numbers, call logs, or call content.
 - **Notification access** (optional, off by default, granted separately in Android Settings) — used only by the same "Flash Alerts" setting to detect that some other app posted a notification, so it can blink the flash. Omni Hub never reads, stores, or transmits any notification's content.
-- **Location** — used only by the **Compass** tool's optional location, altitude, and accuracy display. Read entirely on-device to show where you are on that one screen; never stored, logged, or transmitted anywhere.
+- **Location** — used by the **Compass** tool's optional location, altitude, and accuracy display, and optionally by the **Phone Center**'s Connection card to show your Wi-Fi signal strength and link speed (Android requires location access to read these two specific Wi-Fi details; Omni Hub never reads or uses your actual location for this). Read entirely on-device; never stored, logged, or transmitted anywhere.
+- **Photos, Videos, and Audio** (optional, requested only if you open **Phone Center ▸ Storage Details**) — used only to show how much space your photos, videos, and audio files take up. Omni Hub reads file sizes and counts from your media library; it never opens, previews, uploads, or transmits the files themselves.
+
+Two more things Phone Center and Phone Health Check read, neither of which needs a permission prompt and neither of which is ever stored or transmitted: your device's battery level/temperature, total and free storage, total RAM, and Wi-Fi connection status (for the "My Phone" card and related screens); and motion-sensor readings like your accelerometer (only while you're actively running the Sensors test in Phone Health Check, to confirm the sensor responds when you move your phone).
 
 ## Alarm
 
