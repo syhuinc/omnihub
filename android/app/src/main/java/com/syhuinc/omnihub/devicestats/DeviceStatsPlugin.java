@@ -6,9 +6,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
+import android.net.Uri;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.BatteryManager;
@@ -16,6 +18,8 @@ import android.os.Build;
 import android.os.Environment;
 import android.os.StatFs;
 import android.os.SystemClock;
+import android.provider.MediaStore;
+import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.WindowManager;
@@ -27,6 +31,8 @@ import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
+import com.getcapacitor.annotation.Permission;
+import com.getcapacitor.annotation.PermissionCallback;
 
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -34,7 +40,20 @@ import java.util.Collections;
 import java.util.Enumeration;
 
 /** Real, on-device battery/storage/RAM/WiFi/device-spec readings for the "My Phone" card and Phone Center. */
-@CapacitorPlugin(name = "DeviceStatsPlugin")
+@CapacitorPlugin(
+        name = "DeviceStatsPlugin",
+        permissions = {
+                @Permission(
+                        strings = {
+                                Manifest.permission.READ_MEDIA_IMAGES,
+                                Manifest.permission.READ_MEDIA_VIDEO,
+                                Manifest.permission.READ_MEDIA_AUDIO,
+                                Manifest.permission.READ_EXTERNAL_STORAGE
+                        },
+                        alias = "media"
+                )
+        }
+)
 public class DeviceStatsPlugin extends Plugin {
 
     @PluginMethod
@@ -90,16 +109,18 @@ public class DeviceStatsPlugin extends Plugin {
         ret.put("wifiConnected", wifiConnected);
         ret.put("ipAddress", getIpAddress());
 
-        // Link speed needs ACCESS_FINE_LOCATION on modern Android — only read it if that's
-        // already granted (e.g. from barcode scanning) rather than prompting for it here just
-        // for a "nice to have" number on a phone-info screen.
+        // Link speed / signal bars need ACCESS_FINE_LOCATION on modern Android — only read them
+        // if that's already granted (e.g. from barcode scanning) rather than prompting for it
+        // here just for "nice to have" numbers on a phone-info screen.
         if (wifiConnected && hasLocationPermission(context)) {
             int[] speeds = getWifiLinkSpeedMbps(context);
             ret.put("wifiRxMbps", speeds[0]);
             ret.put("wifiTxMbps", speeds[1]);
+            ret.put("wifiSignalBars", getWifiSignalBars(context));
         } else {
             ret.put("wifiRxMbps", 0);
             ret.put("wifiTxMbps", 0);
+            ret.put("wifiSignalBars", -1);
         }
 
         call.resolve(ret);
@@ -161,6 +182,128 @@ public class DeviceStatsPlugin extends Plugin {
         call.resolve(ret);
     }
 
+    @PluginMethod
+    public void checkMediaPermission(PluginCall call) {
+        JSObject ret = new JSObject();
+        ret.put("granted", getPermissionState("media").toString().equals("granted"));
+        call.resolve(ret);
+    }
+
+    @PluginMethod
+    public void requestMediaPermission(PluginCall call) {
+        requestPermissionForAlias("media", call, "onMediaPermissionResult");
+    }
+
+    @PermissionCallback
+    private void onMediaPermissionResult(PluginCall call) {
+        JSObject ret = new JSObject();
+        ret.put("granted", getPermissionState("media").toString().equals("granted"));
+        call.resolve(ret);
+    }
+
+    /**
+     * Real Photos/Videos/Audio sizes via MediaStore — deliberately doesn't attempt Apps,
+     * Documents, Downloads or duplicate-file detection, since accurate versions of those need
+     * MANAGE_EXTERNAL_STORAGE or PACKAGE_USAGE_STATS, both far more invasive than this feature
+     * needs to justify.
+     */
+    @PluginMethod
+    public void getStorageBreakdown(PluginCall call) {
+        if (!getPermissionState("media").toString().equals("granted")) {
+            call.reject("media permission not granted");
+            return;
+        }
+        JSObject ret = new JSObject();
+        ret.put("photosBytes", sumMediaSize(MediaStore.Images.Media.EXTERNAL_CONTENT_URI));
+        ret.put("photosCount", countMedia(MediaStore.Images.Media.EXTERNAL_CONTENT_URI));
+        ret.put("videosBytes", sumMediaSize(MediaStore.Video.Media.EXTERNAL_CONTENT_URI));
+        ret.put("videosCount", countMedia(MediaStore.Video.Media.EXTERNAL_CONTENT_URI));
+        ret.put("audioBytes", sumMediaSize(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI));
+        ret.put("audioCount", countMedia(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI));
+        call.resolve(ret);
+    }
+
+    private long sumMediaSize(Uri collection) {
+        long total = 0;
+        try (Cursor cursor = getContext().getContentResolver().query(
+                collection, new String[]{MediaStore.MediaColumns.SIZE}, null, null, null)) {
+            if (cursor != null) {
+                int sizeIdx = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.SIZE);
+                while (cursor.moveToNext()) {
+                    total += cursor.getLong(sizeIdx);
+                }
+            }
+        } catch (Exception e) {
+            return 0;
+        }
+        return total;
+    }
+
+    private int countMedia(Uri collection) {
+        try (Cursor cursor = getContext().getContentResolver().query(
+                collection, new String[]{MediaStore.MediaColumns._ID}, null, null, null)) {
+            return cursor != null ? cursor.getCount() : 0;
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    /** Opens the system Storage settings screen — no in-app deletion, the user stays in control. */
+    @PluginMethod
+    public void openStorageSettings(PluginCall call) {
+        try {
+            Intent intent = new Intent(Settings.ACTION_INTERNAL_STORAGE_SETTINGS);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            getContext().startActivity(intent);
+        } catch (Exception e) {
+            // some OEMs don't ship this screen — fall back to general settings
+            Intent intent = new Intent(Settings.ACTION_SETTINGS);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            getContext().startActivity(intent);
+        }
+        call.resolve();
+    }
+
+    /** Opens the system's quick Wi-Fi panel (toggle + picker) without leaving the app. */
+    @PluginMethod
+    public void openWifiPanel(PluginCall call) {
+        try {
+            Intent intent = new Intent(Settings.Panel.ACTION_WIFI);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            getContext().startActivity(intent);
+        } catch (Exception e) {
+            Intent intent = new Intent(Settings.ACTION_WIFI_SETTINGS);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            getContext().startActivity(intent);
+        }
+        call.resolve();
+    }
+
+    /** Opens the system's quick volume panel — apps can't silently change ringer mode any more. */
+    @PluginMethod
+    public void openSoundPanel(PluginCall call) {
+        try {
+            Intent intent = new Intent(Settings.Panel.ACTION_VOLUME);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            getContext().startActivity(intent);
+        } catch (Exception e) {
+            Intent intent = new Intent(Settings.ACTION_SOUND_SETTINGS);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            getContext().startActivity(intent);
+        }
+        call.resolve();
+    }
+
+    /** Opens this app's own system settings page (permissions, notifications, storage usage). */
+    @PluginMethod
+    public void openAppSettings(PluginCall call) {
+        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+        intent.setData(Uri.parse("package:" + getContext().getPackageName()));
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        getContext().startActivity(intent);
+        call.resolve();
+    }
+
     private boolean hasLocationPermission(Context context) {
         return ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED;
@@ -180,6 +323,19 @@ public class DeviceStatsPlugin extends Plugin {
             return new int[]{linkSpeed, linkSpeed};
         } catch (Exception e) {
             return new int[]{0, 0};
+        }
+    }
+
+    /** 0-4 signal bars from RSSI, -1 if unavailable. */
+    private int getWifiSignalBars(Context context) {
+        try {
+            WifiManager wm = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+            if (wm == null) return -1;
+            WifiInfo info = wm.getConnectionInfo();
+            if (info == null) return -1;
+            return WifiManager.calculateSignalLevel(info.getRssi(), 5);
+        } catch (Exception e) {
+            return -1;
         }
     }
 

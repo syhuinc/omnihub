@@ -14,6 +14,17 @@ export interface DeviceStats {
   ipAddress: string;
   wifiRxMbps: number;
   wifiTxMbps: number;
+  /** 0-4, -1 if unavailable (e.g. location permission not granted). */
+  wifiSignalBars: number;
+}
+
+export interface StorageBreakdown {
+  photosBytes: number;
+  photosCount: number;
+  videosBytes: number;
+  videosCount: number;
+  audioBytes: number;
+  audioCount: number;
 }
 
 export interface DeviceInfo {
@@ -35,6 +46,13 @@ export interface DeviceInfo {
 export interface DeviceStatsPluginInterface {
   getStats(): Promise<DeviceStats>;
   getDeviceInfo(): Promise<DeviceInfo>;
+  checkMediaPermission(): Promise<{ granted: boolean }>;
+  requestMediaPermission(): Promise<{ granted: boolean }>;
+  getStorageBreakdown(): Promise<StorageBreakdown>;
+  openStorageSettings(): Promise<void>;
+  openWifiPanel(): Promise<void>;
+  openSoundPanel(): Promise<void>;
+  openAppSettings(): Promise<void>;
 }
 
 // Best-effort browser equivalents, only for the web preview — real numbers come from the native
@@ -83,6 +101,7 @@ class DeviceStatsPluginWeb extends WebPlugin implements DeviceStatsPluginInterfa
       ipAddress: '',
       wifiRxMbps: 0,
       wifiTxMbps: 0,
+      wifiSignalBars: -1,
     };
   }
 
@@ -112,6 +131,35 @@ class DeviceStatsPluginWeb extends WebPlugin implements DeviceStatsPluginInterfa
       storageTotalBytes,
       uptimeMillis: performance.now(),
     };
+  }
+
+  async checkMediaPermission(): Promise<{ granted: boolean }> {
+    return { granted: true };
+  }
+
+  async requestMediaPermission(): Promise<{ granted: boolean }> {
+    return { granted: true };
+  }
+
+  async getStorageBreakdown(): Promise<StorageBreakdown> {
+    // No real media index in a browser — zeros rather than a fabricated breakdown.
+    return { photosBytes: 0, photosCount: 0, videosBytes: 0, videosCount: 0, audioBytes: 0, audioCount: 0 };
+  }
+
+  async openStorageSettings(): Promise<void> {
+    // no-op in browser
+  }
+
+  async openWifiPanel(): Promise<void> {
+    // no-op in browser
+  }
+
+  async openSoundPanel(): Promise<void> {
+    // no-op in browser
+  }
+
+  async openAppSettings(): Promise<void> {
+    // no-op in browser
   }
 }
 

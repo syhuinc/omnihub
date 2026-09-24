@@ -1,9 +1,18 @@
 import { useEffect, useState } from 'react';
 import { ScreenHeader } from '../../components/ScreenHeader';
-import { Icon } from '../../components/Icon';
+import { Icon, type IconName } from '../../components/Icon';
 import { useRouter } from '../../app/Router';
 import { DeviceStatsPlugin, type DeviceStats } from '../../device-stats/plugin';
+import { hapticTap } from '../../haptics';
 import './PhoneCenter.css';
+
+const QUICK_ACTIONS: { id: string; label: string; icon: IconName; color: string }[] = [
+  { id: 'flashlight', label: 'Flashlight', icon: 'flashlight', color: 'var(--orange)' },
+  { id: 'wifi', label: 'Wi-Fi', icon: 'wifi', color: 'var(--blue)' },
+  { id: 'sound', label: 'Sound', icon: 'volume', color: 'var(--green)' },
+  { id: 'vibrate', label: 'Vibrate', icon: 'zap', color: 'var(--red)' },
+  { id: 'more', label: 'More', icon: 'more-dots', color: 'var(--text-secondary)' },
+];
 
 function formatGb(bytes: number): string {
   if (!bytes) return '—';
@@ -32,6 +41,15 @@ export function PhoneCenter() {
         // native plugin unavailable — screen just stays in its loading/placeholder state
       });
   }, []);
+
+  function runQuickAction(id: string) {
+    hapticTap();
+    if (id === 'flashlight') navigate('/tools/flashlight');
+    else if (id === 'wifi') DeviceStatsPlugin.openWifiPanel().catch(() => {});
+    else if (id === 'sound') DeviceStatsPlugin.openSoundPanel().catch(() => {});
+    else if (id === 'vibrate') hapticTap();
+    else if (id === 'more') DeviceStatsPlugin.openAppSettings().catch(() => {});
+  }
 
   const status = statusFor(stats);
   const storageUsedPct = stats && stats.storageTotalBytes > 0
@@ -80,19 +98,20 @@ export function PhoneCenter() {
             )}
           </div>
 
-          <div className="pc2__card">
+          <button type="button" className="pc2__card pc2__card--tappable" onClick={() => navigate('/storage-details')}>
             <div className="pc2__card-head">
               <span className="pc2__card-icon pc2__card-icon--purple">
                 <Icon name="database" size={16} />
               </span>
               <span>Storage</span>
+              <Icon name="chevron-right" size={14} className="pc2__card-chevron" />
             </div>
             <strong className="pc2__card-value">{stats ? formatGb(stats.storageFreeBytes) : '—'}</strong>
             <span className="pc2__card-sub">Free / {stats ? formatGb(stats.storageTotalBytes) : '—'}</span>
             <div className="pc2__bar">
               <div className="pc2__bar-fill pc2__bar-fill--purple" style={{ width: `${storageUsedPct}%` }} />
             </div>
-          </div>
+          </button>
 
           <div className="pc2__card">
             <div className="pc2__card-head">
@@ -118,7 +137,16 @@ export function PhoneCenter() {
               </span>
               <span>Connection</span>
             </div>
-            <strong className="pc2__card-value">{stats?.wifiConnected ? 'Wi-Fi' : 'Off'}</strong>
+            <div className="pc2__conn-row">
+              <strong className="pc2__card-value">{stats?.wifiConnected ? 'Wi-Fi' : 'Off'}</strong>
+              {stats?.wifiConnected && (stats?.wifiSignalBars ?? -1) >= 0 && (
+                <span className="pc2__signal" aria-label={`Signal strength ${stats.wifiSignalBars} of 4`}>
+                  {[0, 1, 2, 3].map((i) => (
+                    <span key={i} className={`pc2__signal-bar${i < (stats.wifiSignalBars + 1) ? ' pc2__signal-bar--on' : ''}`} />
+                  ))}
+                </span>
+              )}
+            </div>
             <span className="pc2__card-sub">{stats?.wifiConnected ? 'Connected' : 'Not connected'}</span>
             {!!stats?.ipAddress && <span className="pc2__card-foot">{stats.ipAddress}</span>}
             {!!(stats?.wifiRxMbps || stats?.wifiTxMbps) && (
@@ -139,6 +167,25 @@ export function PhoneCenter() {
           </span>
           <Icon name="chevron-right" size={18} className="pc2__row-chevron" />
         </button>
+
+        <div className="pc2__quick">
+          <span className="pc2__quick-title">Quick Actions</span>
+          <div className="pc2__quick-grid">
+            {QUICK_ACTIONS.map((action) => (
+              <button
+                key={action.id}
+                type="button"
+                className="pc2__quick-item"
+                onClick={() => runQuickAction(action.id)}
+              >
+                <span className="pc2__quick-icon" style={{ '--quick-color': action.color } as React.CSSProperties}>
+                  <Icon name={action.icon} size={18} />
+                </span>
+                <span>{action.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
