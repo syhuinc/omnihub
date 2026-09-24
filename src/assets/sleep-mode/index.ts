@@ -10,11 +10,11 @@ import soundOcean from './sound-ocean.webp';
 import soundNightAmbience from './sound-night-ambience.webp';
 import soundCampfire from './sound-campfire.webp';
 import soundCafe from './sound-cafe.webp';
-import sampleGentle from './sample-audio/sample-gentle.wav';
-import sampleFriendly from './sample-audio/sample-friendly.wav';
-import sampleTeasing from './sample-audio/sample-teasing.wav';
-import sampleStrict from './sample-audio/sample-strict.wav';
-import sampleSavage from './sample-audio/sample-savage.wav';
+import sampleGentle from './sample-audio/sample-gentle.m4a';
+import sampleFriendly from './sample-audio/sample-friendly.m4a';
+import sampleTeasing from './sample-audio/sample-teasing.m4a';
+import sampleStrict from './sample-audio/sample-strict.m4a';
+import sampleSavage from './sample-audio/sample-savage.m4a';
 
 export { heroBanner };
 
