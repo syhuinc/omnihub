@@ -44,15 +44,6 @@ public class SleepNagActivity extends Activity {
         showOverLockScreen();
         setContentView(R.layout.activity_sleep_nag);
 
-        String text = getIntent().getStringExtra(EXTRA_TEXT);
-        String personality = getIntent().getStringExtra(EXTRA_PERSONALITY);
-
-        TextView bodyText = findViewById(R.id.nag_body);
-        if (text != null && !text.isEmpty()) bodyText.setText(text);
-
-        ImageView illustration = findViewById(R.id.nag_illustration);
-        illustration.setImageResource(bannerResFor(personality));
-
         TextView closeButton = findViewById(R.id.nag_close);
         TextView primaryButton = findViewById(R.id.nag_btn_primary);
         TextView secondaryButton = findViewById(R.id.nag_btn_secondary);
@@ -67,6 +58,34 @@ public class SleepNagActivity extends Activity {
             finish();
         });
 
+        bindContent(getIntent());
+    }
+
+    /**
+     * launchMode="singleInstance" means a reminder firing while a previous one's card is still up
+     * (unlikely given the ~8s window vs. the usual 15-30 min gap between nags, but easy to hit
+     * while testing) reuses this same instance instead of creating a new one - onNewIntent(), not
+     * onCreate(), is where that second reminder's text/illustration and fresh auto-dismiss timer
+     * need to land, or the card would keep showing the first, now-stale, reminder.
+     */
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        bindContent(intent);
+    }
+
+    private void bindContent(Intent intent) {
+        String text = intent.getStringExtra(EXTRA_TEXT);
+        String personality = intent.getStringExtra(EXTRA_PERSONALITY);
+
+        TextView bodyText = findViewById(R.id.nag_body);
+        if (text != null && !text.isEmpty()) bodyText.setText(text);
+
+        ImageView illustration = findViewById(R.id.nag_illustration);
+        illustration.setImageResource(bannerResFor(personality));
+
+        autoDismissHandler.removeCallbacks(autoDismiss);
         autoDismissHandler.postDelayed(autoDismiss, AUTO_DISMISS_MS);
     }
 

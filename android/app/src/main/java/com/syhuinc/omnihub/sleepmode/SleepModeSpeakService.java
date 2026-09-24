@@ -244,6 +244,7 @@ public class SleepModeSpeakService extends Service {
         String emoji = PERSONALITY_EMOJI.getOrDefault(personality, DEFAULT_EMOJI);
         String title = emoji + " Sleep Mode";
 
+        PendingIntent nagActivityPi = nagActivityPendingIntent(text, personality);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
                 .setContentTitle(title)
@@ -253,8 +254,8 @@ public class SleepModeSpeakService extends Service {
                 .setCategory(NotificationCompat.CATEGORY_REMINDER)
                 .setOngoing(false)
                 .setAutoCancel(false)
-                .setFullScreenIntent(nagActivityPendingIntent(text, personality), true)
-                .setContentIntent(nagActivityPendingIntent(text, personality))
+                .setFullScreenIntent(nagActivityPi, true)
+                .setContentIntent(nagActivityPi)
                 .addAction(android.R.drawable.ic_popup_reminder, "5 more minutes", actionPendingIntent(SleepModeReceiver.ACTION_SNOOZE))
                 .addAction(android.R.drawable.ic_menu_close_clear_cancel, "I'm going to sleep", actionPendingIntent(SleepModeReceiver.ACTION_STOP_TONIGHT));
 
