@@ -126,7 +126,7 @@ export function Profile() {
               </>
             ) : (
               <button type="button" className="pf__row" onClick={signInWithGoogle} disabled={signingIn}>
-                <span className="pf__row-icon">
+                <span className="pf__row-icon pf__row-icon--blue">
                   <Icon name="user" size={18} />
                 </span>
                 <span className="pf__row-text">
@@ -166,7 +166,7 @@ export function Profile() {
           <h2 className="pf__section-title">Backup</h2>
           <div className="pf__card">
             <button type="button" className="pf__row" onClick={handleExport}>
-              <span className="pf__row-icon">
+              <span className="pf__row-icon pf__row-icon--blue">
                 <Icon name="download" size={18} />
               </span>
               <span className="pf__row-text">
@@ -177,7 +177,7 @@ export function Profile() {
             </button>
             <div className="pf__divider" />
             <button type="button" className="pf__row" onClick={handleImportClick}>
-              <span className="pf__row-icon">
+              <span className="pf__row-icon pf__row-icon--purple">
                 <Icon name="upload" size={18} />
               </span>
               <span className="pf__row-text">
@@ -231,7 +231,9 @@ export function Profile() {
         <section className="pf__section">
           <h2 className="pf__section-title">Privacy</h2>
           <div className="pf__card pf__privacy">
-            <Icon name="shield" size={20} className="pf__privacy-icon" />
+            <span className="pf__row-icon pf__row-icon--green pf__privacy-icon">
+              <Icon name="shield" size={18} />
+            </span>
             <p>
               Omni Hub works fully offline by default — no account needed, nothing leaves this device.
               Signing in above is entirely optional and only used to sync your data across your own devices;
