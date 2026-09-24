@@ -27,9 +27,9 @@ export function AiPersonalityScreen({ config, onBack, onPersist }: AiPersonality
     setComingSoonId(null);
   }
 
-  function selectPersonality(id: SleepPersonality | 'custom', tier: Tier) {
+  function selectPersonality(id: SleepPersonality | 'custom', locked: boolean) {
     hapticSelect();
-    if (tier === 'ai') {
+    if (locked) {
       setComingSoonId(id);
       return;
     }
@@ -55,7 +55,9 @@ export function AiPersonalityScreen({ config, onBack, onPersist }: AiPersonality
     }
   }
 
-  const visible = PERSONALITY_META.filter((p) => p.tier === tab);
+  // The AI tab previews the AI-generated take on every personality, including the two free ones —
+  // Normal-tier personalities still get their own, functional row in the Normal tab.
+  const visible = tab === 'normal' ? PERSONALITY_META.filter((p) => p.tier === 'normal') : PERSONALITY_META;
 
   return (
     <div className="screen">
@@ -88,13 +90,14 @@ export function AiPersonalityScreen({ config, onBack, onPersist }: AiPersonality
 
         <div className="sm__personality-list">
           {visible.map((p) => {
-            const locked = p.tier === 'ai';
+            const locked = tab === 'ai';
+            const active = !locked && config.personality === p.id;
             return (
               <button
                 key={p.id}
                 type="button"
-                className={`sm__personality${config.personality === p.id ? ' sm__personality--active' : ''}${locked ? ' sm__personality--locked' : ''}`}
-                onClick={() => selectPersonality(p.id, p.tier)}
+                className={`sm__personality${active ? ' sm__personality--active' : ''}${locked ? ' sm__personality--locked' : ''}`}
+                onClick={() => selectPersonality(p.id, locked)}
               >
                 <span className="sm__personality-emoji" style={{ '--emoji-color': p.color } as CSSProperties}>
                   {p.image ? <img src={p.image} alt="" /> : <Icon name={(p.icon ?? 'user') as never} size={18} />}
