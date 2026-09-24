@@ -183,13 +183,25 @@ export function AudioTest({ onComplete, onCancel }: TestProps) {
 export function CameraTest({ onComplete, onCancel }: TestProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
-  const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
+  const [status, setStatus] = useState<'loading' | 'ready' | 'error' | 'timeout'>('loading');
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
+    setStatus('loading');
+
+    const timeoutId = window.setTimeout(() => {
+      if (!cancelled) setStatus((s) => (s === 'loading' ? 'timeout' : s));
+    }, 8000);
+
+    // No facingMode constraint here — some devices/WebViews never resolve or reject
+    // getUserMedia when a constraint (like a rear camera) can't be satisfied cleanly,
+    // which is exactly the "stuck on Starting camera forever" failure mode. Plain
+    // {video: true} lets the system pick whatever camera is available.
     navigator.mediaDevices
-      ?.getUserMedia({ video: { facingMode: 'environment' } })
+      ?.getUserMedia({ video: true })
       .then((stream) => {
+        window.clearTimeout(timeoutId);
         if (cancelled) {
           stream.getTracks().forEach((t) => t.stop());
           return;
@@ -200,12 +212,22 @@ export function CameraTest({ onComplete, onCancel }: TestProps) {
         }
         setStatus('ready');
       })
-      .catch(() => setStatus('error'));
+      .catch(() => {
+        window.clearTimeout(timeoutId);
+        if (!cancelled) setStatus('error');
+      });
+
     return () => {
       cancelled = true;
+      window.clearTimeout(timeoutId);
       streamRef.current?.getTracks().forEach((t) => t.stop());
     };
-  }, []);
+  }, [attempt]);
+
+  function retry() {
+    hapticTap();
+    setAttempt((a) => a + 1);
+  }
 
   return (
     <div className="hct__overlay hct__overlay--dark">
@@ -217,9 +239,29 @@ export function CameraTest({ onComplete, onCancel }: TestProps) {
         {status === 'error' && (
           <>
             <p className="hct__hint">Couldn't start the camera — permission denied or no camera available.</p>
-            <button type="button" className="hct__btn hct__btn--fail" onClick={() => onComplete(false)}>
-              Mark as Failed
-            </button>
+            <div className="hct__yn">
+              <button type="button" className="hct__btn" onClick={retry}>
+                Try Again
+              </button>
+              <button type="button" className="hct__btn hct__btn--fail" onClick={() => onComplete(false)}>
+                Mark as Failed
+              </button>
+            </div>
+          </>
+        )}
+        {status === 'timeout' && (
+          <>
+            <p className="hct__hint">
+              This is taking too long. Check that no other app is using the camera, then try again.
+            </p>
+            <div className="hct__yn">
+              <button type="button" className="hct__btn" onClick={retry}>
+                Try Again
+              </button>
+              <button type="button" className="hct__btn hct__btn--fail" onClick={() => onComplete(false)}>
+                Mark as Failed
+              </button>
+            </div>
           </>
         )}
         {status === 'ready' && (
