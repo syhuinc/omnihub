@@ -25,7 +25,8 @@ public class SleepModeReceiver extends BroadcastReceiver {
 
     public static final String ACTION_SNOOZE = "com.syhuinc.omnihub.sleepmode.SNOOZE";
     public static final String ACTION_STOP_TONIGHT = "com.syhuinc.omnihub.sleepmode.STOP_TONIGHT";
-    private static final long SNOOZE_MS = 60 * 60_000L;
+    /** Matches the notification's "5 more minutes" button label. */
+    private static final long SNOOZE_MS = 5 * 60_000L;
 
     @Override
     public void onReceive(Context context, Intent intent) {

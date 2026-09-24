@@ -18,14 +18,19 @@ import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 import android.speech.tts.Voice;
 import android.util.Log;
+import android.widget.RemoteViews;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.ServiceCompat;
+
+import com.syhuinc.omnihub.R;
 
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Speaks one short Sleep Mode reminder line through Android's built-in TextToSpeech engine, as a
@@ -221,21 +226,57 @@ public class SleepModeSpeakService extends Service {
         }
     }
 
+    /** Splits a MessageBank line into a short headline (first sentence) plus the rest as detail,
+     *  matching the card's headline/body split -- e.g. "It's time to sleep. Good night!" becomes
+     *  headline "It's time to sleep." and body "Good night!". Falls back to using the whole line
+     *  as the headline with no body if there's no natural split point. */
+    private String[] splitHeadlineAndBody(String text) {
+        Matcher m = Pattern.compile("^(.+?[.!?])\\s+(.+)$").matcher(text);
+        if (m.matches()) {
+            return new String[] { m.group(1), m.group(2) };
+        }
+        return new String[] { text, null };
+    }
+
     private void startForegroundWithNotification(String text, String personality) {
         String emoji = PERSONALITY_EMOJI.getOrDefault(personality, DEFAULT_EMOJI);
-        String title = emoji + " Sleep Mode";
+        String[] parts = splitHeadlineAndBody(text);
+        String headline = parts[0];
+        String body = parts[1];
+
+        RemoteViews collapsed = new RemoteViews(getPackageName(), R.layout.notification_sleep_mode_collapsed);
+        collapsed.setTextViewText(R.id.notif_emoji, emoji);
+        collapsed.setTextViewText(R.id.notif_headline, headline);
+        if (body != null) {
+            collapsed.setTextViewText(R.id.notif_body, body);
+            collapsed.setViewVisibility(R.id.notif_body, android.view.View.VISIBLE);
+        } else {
+            collapsed.setViewVisibility(R.id.notif_body, android.view.View.GONE);
+        }
+
+        RemoteViews expanded = new RemoteViews(getPackageName(), R.layout.notification_sleep_mode_expanded);
+        expanded.setTextViewText(R.id.notif_emoji_big, emoji);
+        expanded.setTextViewText(R.id.notif_headline_big, headline);
+        if (body != null) {
+            expanded.setTextViewText(R.id.notif_body_big, body);
+            expanded.setViewVisibility(R.id.notif_body_big, android.view.View.VISIBLE);
+        } else {
+            expanded.setViewVisibility(R.id.notif_body_big, android.view.View.GONE);
+        }
+        expanded.setOnClickPendingIntent(R.id.notif_btn_primary, actionPendingIntent(SleepModeReceiver.ACTION_STOP_TONIGHT));
+        expanded.setOnClickPendingIntent(R.id.notif_btn_secondary, actionPendingIntent(SleepModeReceiver.ACTION_SNOOZE));
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
-                .setContentTitle(title)
-                .setContentText(text)
-                .setStyle(new NotificationCompat.BigTextStyle().bigText(text).setBigContentTitle(title))
+                .setContentTitle(emoji + " Sleep Mode")
+                .setContentText(headline)
+                .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
+                .setCustomContentView(collapsed)
+                .setCustomBigContentView(expanded)
                 .setPriority(NotificationCompat.PRIORITY_LOW)
                 .setCategory(NotificationCompat.CATEGORY_REMINDER)
                 .setOngoing(false)
-                .setAutoCancel(false)
-                .addAction(android.R.drawable.ic_popup_reminder, "Snooze 1h", actionPendingIntent(SleepModeReceiver.ACTION_SNOOZE))
-                .addAction(android.R.drawable.ic_menu_close_clear_cancel, "Stop for tonight", actionPendingIntent(SleepModeReceiver.ACTION_STOP_TONIGHT));
+                .setAutoCancel(false);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             ServiceCompat.startForeground(
