@@ -253,6 +253,8 @@ public class SleepModeSpeakService extends Service {
                 .setCategory(NotificationCompat.CATEGORY_REMINDER)
                 .setOngoing(false)
                 .setAutoCancel(false)
+                .setFullScreenIntent(nagActivityPendingIntent(text, personality), true)
+                .setContentIntent(nagActivityPendingIntent(text, personality))
                 .addAction(android.R.drawable.ic_popup_reminder, "5 more minutes", actionPendingIntent(SleepModeReceiver.ACTION_SNOOZE))
                 .addAction(android.R.drawable.ic_menu_close_clear_cancel, "I'm going to sleep", actionPendingIntent(SleepModeReceiver.ACTION_STOP_TONIGHT));
 
@@ -272,6 +274,16 @@ public class SleepModeSpeakService extends Service {
         int flags = PendingIntent.FLAG_UPDATE_CURRENT;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) flags |= PendingIntent.FLAG_IMMUTABLE;
         return PendingIntent.getBroadcast(this, action.hashCode(), intent, flags);
+    }
+
+    private PendingIntent nagActivityPendingIntent(String text, String personality) {
+        Intent intent = new Intent(this, SleepNagActivity.class)
+                .putExtra(SleepNagActivity.EXTRA_TEXT, text)
+                .putExtra(SleepNagActivity.EXTRA_PERSONALITY, personality)
+                .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        int flags = PendingIntent.FLAG_UPDATE_CURRENT;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) flags |= PendingIntent.FLAG_IMMUTABLE;
+        return PendingIntent.getActivity(this, NOTIFICATION_ID, intent, flags);
     }
 
     /** Dismisses the lingering reminder notification once Snooze/Stop for tonight has been tapped. */

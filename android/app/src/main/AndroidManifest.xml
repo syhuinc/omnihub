@@ -81,6 +81,14 @@
             android:exported="false"
             android:foregroundServiceType="mediaPlayback" />
 
+        <activity
+            android:name=".sleepmode.SleepNagActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:launchMode="singleInstance"
+            android:screenOrientation="portrait"
+            android:theme="@style/SleepNagTheme" />
+
         <receiver
             android:name=".sleepmode.SleepModeReceiver"
             android:exported="false" />
