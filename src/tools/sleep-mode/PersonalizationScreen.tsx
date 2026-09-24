@@ -1,6 +1,7 @@
 import { useState, type CSSProperties } from 'react';
 import { ScreenHeader } from '../../components/ScreenHeader';
 import { Icon } from '../../components/Icon';
+import { useBackHandler } from '../../app/useBackHandler';
 import { hapticSelect } from '../../haptics';
 import type { SleepModeConfig, RelationshipStatus } from '../../sleep-mode/plugin';
 import { RELATIONSHIP_OPTIONS } from './types';
@@ -21,6 +22,8 @@ const RELATIONSHIP_LABEL: Record<string, string> = Object.fromEntries(
 export function PersonalizationScreen({ config, onBack, onPersist }: PersonalizationScreenProps) {
   const [editingField, setEditingField] = useState<FieldKey | null>(null);
   const [draft, setDraft] = useState('');
+
+  useBackHandler(() => setEditingField(null), editingField !== null);
 
   function selectMode(mode: 'normal' | 'personal') {
     hapticSelect();

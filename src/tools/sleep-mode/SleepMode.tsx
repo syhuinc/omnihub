@@ -2,6 +2,7 @@ import { useEffect, useState, type CSSProperties, type ReactNode } from 'react';
 import { ScreenHeader } from '../../components/ScreenHeader';
 import { Icon } from '../../components/Icon';
 import { useRouter } from '../../app/Router';
+import { useBackHandler } from '../../app/useBackHandler';
 import { hapticSelect, hapticTap, hapticWarning } from '../../haptics';
 import { WheelTimePicker } from '../alarm/WheelTimePicker';
 import { SleepModePlugin, DEFAULT_SLEEP_MODE_CONFIG, type SleepModeConfig, type SleepModeStatus } from '../../sleep-mode/plugin';
@@ -33,6 +34,7 @@ type TimeField = 'bedtime' | 'wake';
 type SubScreen = SleepTab | 'wind-down' | SettingsDestination;
 
 const TAB_SCREENS = new Set<SubScreen>(['main', 'sleep-insights', 'sleep-sounds', 'settings']);
+const SETTINGS_SUB_SCREENS = new Set<SubScreen>(['ai-personality', 'personalization', 'reminder-example', 'sleep-mode-ai']);
 
 export function SleepMode() {
   const { back } = useRouter();
@@ -42,6 +44,12 @@ export function SleepMode() {
   const [screen, setScreen] = useState<SubScreen>('main');
   const [windDownAutoStart, setWindDownAutoStart] = useState(false);
   const [windDownInitialAction, setWindDownInitialAction] = useState<string | undefined>(undefined);
+
+  useBackHandler(() => setTimeSheet(null), timeSheet !== null);
+  useBackHandler(
+    () => setScreen(SETTINGS_SUB_SCREENS.has(screen) ? 'settings' : 'main'),
+    screen !== 'main' && timeSheet === null,
+  );
 
   useEffect(() => {
     SleepModePlugin.status()

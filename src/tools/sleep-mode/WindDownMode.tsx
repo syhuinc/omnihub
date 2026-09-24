@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { ScreenHeader } from '../../components/ScreenHeader';
 import { Icon } from '../../components/Icon';
+import { useBackHandler } from '../../app/useBackHandler';
 import { hapticSelect, hapticTap, hapticSuccess } from '../../haptics';
 import { WIND_DOWN_ACTIONS, SLEEP_SOUNDS, SOUND_FILTERS } from './types';
 import * as audioEngine from './audioEngine';
@@ -33,6 +34,9 @@ export function WindDownMode({ onBack, autoStart, initialAction }: WindDownModeP
   const [filter, setFilter] = useState<(typeof SOUND_FILTERS)[number]['id']>('all');
   const [playingId, setPlayingId] = useState<string | null>(null);
   const [volume, setVolume] = useState(0.5);
+
+  useBackHandler(() => setBreathingOpen(false), breathingOpen);
+  useBackHandler(() => setDimOn(false), dimOn);
   const endAtRef = useRef(0);
 
   useEffect(() => {
