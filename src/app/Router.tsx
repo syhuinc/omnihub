@@ -22,6 +22,8 @@ function currentPath(): string {
 function parentPath(path: string): string {
   if (path.startsWith('/tools/')) return '/tools';
   if (path === '/vault') return '/pro';
+  if (path === '/device-info') return '/phone-center';
+  if (path === '/phone-center') return '/';
   return '/';
 }
 

@@ -7,6 +7,7 @@ interface PhoneStatusCardProps {
   atTop: boolean;
   onHide: () => void;
   onTogglePosition: () => void;
+  onOpen: () => void;
 }
 
 function formatGb(bytes: number): string {
@@ -25,7 +26,7 @@ function statusFor(stats: DeviceStats | null): { tone: 'good' | 'warn'; text: st
   return { tone: 'good', text: 'Everything looks good' };
 }
 
-export function PhoneStatusCard({ atTop, onHide, onTogglePosition }: PhoneStatusCardProps) {
+export function PhoneStatusCard({ atTop, onHide, onTogglePosition, onOpen }: PhoneStatusCardProps) {
   const [stats, setStats] = useState<DeviceStats | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -52,17 +53,19 @@ export function PhoneStatusCard({ atTop, onHide, onTogglePosition }: PhoneStatus
   return (
     <div className="phc">
       <div className="phc__head">
-        <span className="phc__icon">
-          <Icon name="smartphone" size={20} />
-        </span>
-        <div className="phc__head-text">
-          <span className="phc__eyebrow">My Phone</span>
-          <strong>{stats?.deviceModel ?? 'Your device'}</strong>
-          <span className={`phc__status phc__status--${status.tone}`}>
-            <span className="phc__status-dot" />
-            {status.text}
+        <button type="button" className="phc__head-tap" onClick={onOpen}>
+          <span className="phc__icon">
+            <Icon name="smartphone" size={20} />
           </span>
-        </div>
+          <div className="phc__head-text">
+            <span className="phc__eyebrow">My Phone</span>
+            <strong>{stats?.deviceModel ?? 'Your device'}</strong>
+            <span className={`phc__status phc__status--${status.tone}`}>
+              <span className="phc__status-dot" />
+              {status.text}
+            </span>
+          </div>
+        </button>
         <div className="phc__menu-wrap" ref={menuRef}>
           <button
             type="button"

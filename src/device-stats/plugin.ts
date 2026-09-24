@@ -5,15 +5,36 @@ export interface DeviceStats {
   manufacturer: string;
   batteryPercent: number;
   isCharging: boolean;
+  batteryTempC: number;
   storageTotalBytes: number;
   storageFreeBytes: number;
   ramTotalBytes: number;
   ramAvailBytes: number;
   wifiConnected: boolean;
+  ipAddress: string;
+  wifiRxMbps: number;
+  wifiTxMbps: number;
+}
+
+export interface DeviceInfo {
+  deviceModel: string;
+  manufacturer: string;
+  androidVersion: string;
+  buildNumber: string;
+  socManufacturer: string;
+  socModel: string;
+  screenWidthPx: number;
+  screenHeightPx: number;
+  refreshRateHz: number;
+  screenSizeInches: number;
+  ramTotalBytes: number;
+  storageTotalBytes: number;
+  uptimeMillis: number;
 }
 
 export interface DeviceStatsPluginInterface {
   getStats(): Promise<DeviceStats>;
+  getDeviceInfo(): Promise<DeviceInfo>;
 }
 
 // Best-effort browser equivalents, only for the web preview — real numbers come from the native
@@ -53,11 +74,43 @@ class DeviceStatsPluginWeb extends WebPlugin implements DeviceStatsPluginInterfa
       manufacturer: 'Browser',
       batteryPercent,
       isCharging,
+      batteryTempC: 0,
       storageTotalBytes,
       storageFreeBytes,
       ramTotalBytes: ramGb * 1024 * 1024 * 1024,
       ramAvailBytes: 0,
       wifiConnected: navigator.onLine,
+      ipAddress: '',
+      wifiRxMbps: 0,
+      wifiTxMbps: 0,
+    };
+  }
+
+  async getDeviceInfo(): Promise<DeviceInfo> {
+    const ramGb = (navigator as Navigator & { deviceMemory?: number }).deviceMemory ?? 4;
+    let storageTotalBytes = 0;
+    try {
+      if (navigator.storage?.estimate) {
+        storageTotalBytes = (await navigator.storage.estimate()).quota ?? 0;
+      }
+    } catch {
+      // Storage Manager API unsupported — keep zero
+    }
+
+    return {
+      deviceModel: 'Web Preview',
+      manufacturer: 'Browser',
+      androidVersion: '—',
+      buildNumber: navigator.userAgent.slice(0, 40),
+      socManufacturer: '',
+      socModel: '',
+      screenWidthPx: window.screen.width,
+      screenHeightPx: window.screen.height,
+      refreshRateHz: 60,
+      screenSizeInches: 0,
+      ramTotalBytes: ramGb * 1024 * 1024 * 1024,
+      storageTotalBytes,
+      uptimeMillis: performance.now(),
     };
   }
 }

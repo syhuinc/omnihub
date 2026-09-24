@@ -123,7 +123,12 @@ export function Home() {
       />
 
       {!query && sections.myPhone && myPhonePosition === 'top' && (
-        <PhoneStatusCard atTop onHide={hideMyPhone} onTogglePosition={toggleMyPhonePosition} />
+        <PhoneStatusCard
+          atTop
+          onHide={hideMyPhone}
+          onTogglePosition={toggleMyPhonePosition}
+          onOpen={() => navigate('/phone-center')}
+        />
       )}
 
       <div className="home__search">
@@ -203,7 +208,12 @@ export function Home() {
           </div>
 
           {sections.myPhone && myPhonePosition === 'afterPinned' && (
-            <PhoneStatusCard atTop={false} onHide={hideMyPhone} onTogglePosition={toggleMyPhonePosition} />
+            <PhoneStatusCard
+              atTop={false}
+              onHide={hideMyPhone}
+              onTogglePosition={toggleMyPhonePosition}
+              onOpen={() => navigate('/phone-center')}
+            />
           )}
 
           <button type="button" className="home__banner" onClick={() => navigate('/tools')}>

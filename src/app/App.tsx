@@ -9,6 +9,8 @@ import { Pro } from '../screens/Pro/Pro';
 import { Profile } from '../screens/Profile/Profile';
 import { ToolRoute } from '../tools/ToolRoute';
 import { Vault } from '../vault/Vault';
+import { PhoneCenter } from '../screens/PhoneCenter/PhoneCenter';
+import { DeviceInfo } from '../screens/PhoneCenter/DeviceInfo';
 import { storageGet, StorageKeys } from '../storage/db';
 import { hapticTap } from '../haptics';
 import { AuthProvider } from '../cloud/AuthContext';
@@ -24,6 +26,8 @@ function Screen() {
   if (path === '/pro') return <Pro />;
   if (path === '/profile') return <Profile />;
   if (path === '/vault') return <Vault />;
+  if (path === '/phone-center') return <PhoneCenter />;
+  if (path === '/device-info') return <DeviceInfo />;
   if (path.startsWith('/tools/')) {
     return <ToolRoute toolId={path.slice('/tools/'.length)} />;
   }
