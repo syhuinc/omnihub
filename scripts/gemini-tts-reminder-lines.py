@@ -204,6 +204,11 @@ def generate(name: str, personality: str, text: str, out_dir: str) -> None:
     print(f"  saved {out_path} (voice: {voice})")
 
 
+# For now, only generate the Gentle (female) set -- Friendly (male) is on hold until
+# that's separately confirmed. Set to True once ready to also generate Friendly.
+GENERATE_FRIENDLY = False
+
+
 def main() -> None:
     if not API_KEY:
         raise SystemExit("Set OMNI_HUB_GEMINI_API_KEY first (get one at https://aistudio.google.com/apikey)")
@@ -216,12 +221,15 @@ def main() -> None:
         name = f"gentle_t{line['tier']}_{line['idx']:02d}"
         generate(name, "gentle", line["text"], out_dir)
 
-    print(f"\nGenerating {len(FRIENDLY_LINES)} Friendly lines (voice: {VOICE_MAP['friendly']})...")
-    for line in FRIENDLY_LINES:
-        name = f"friendly_t{line['tier']}_{line['idx']:02d}"
-        generate(name, "friendly", line["text"], out_dir)
+    if GENERATE_FRIENDLY:
+        print(f"\nGenerating {len(FRIENDLY_LINES)} Friendly lines (voice: {VOICE_MAP['friendly']})...")
+        for line in FRIENDLY_LINES:
+            name = f"friendly_t{line['tier']}_{line['idx']:02d}"
+            generate(name, "friendly", line["text"], out_dir)
+    else:
+        print("\nSkipping Friendly (male) set for now -- set GENERATE_FRIENDLY = True to include it.")
 
-    print("\nDone. 100 files in ./output-reminders/. Zip it up and send it back.")
+    print("\nDone. Files in ./output-reminders/. Zip it up and send it back.")
 
 
 if __name__ == "__main__":
