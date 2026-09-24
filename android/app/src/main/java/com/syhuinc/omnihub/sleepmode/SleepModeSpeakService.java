@@ -108,10 +108,26 @@ public class SleepModeSpeakService extends Service {
             return START_NOT_STICKY;
         }
 
-        startForegroundWithNotification(text, personality);
-        acquireWakeLock();
-        if (audioResId == 0 || !playClip(audioResId, forceAudible)) {
-            speak(text, forceAudible);
+        try {
+            startForegroundWithNotification(text, personality);
+            acquireWakeLock();
+        } catch (Throwable t) {
+            // A foreground service MUST call startForeground() promptly or the OS kills the app
+            // outright, so this can't be allowed to throw uncaught. If even this fails, there's
+            // nothing more to safely do -- stop cleanly instead of crashing.
+            Log.e(TAG, "Failed to start foreground notification, stopping", t);
+            stopSelf();
+            return START_NOT_STICKY;
+        }
+
+        try {
+            if (audioResId == 0 || !playClip(audioResId, forceAudible)) {
+                speak(text, forceAudible);
+            }
+        } catch (Throwable t) {
+            // Whatever this is, the notification is already up -- never let a problem in audio
+            // playback take the whole service (and app) down with it. Worst case: a silent nag.
+            Log.e(TAG, "Speaking/playback failed", t);
         }
 
         safetyHandler.removeCallbacks(safetyStop);
@@ -257,14 +273,9 @@ public class SleepModeSpeakService extends Service {
         // back to the plain notification that's always worked.
         try {
             postForeground(richNotificationBuilder(text, personality, emoji));
-        } catch (Exception e) {
-            Log.e(TAG, "Rich notification failed, falling back to plain text", e);
-            try {
-                postForeground(plainNotificationBuilder(text, emoji));
-            } catch (Exception e2) {
-                Log.e(TAG, "Plain notification also failed, stopping", e2);
-                stopSelf();
-            }
+        } catch (Throwable t) {
+            Log.e(TAG, "Rich notification failed, falling back to plain text", t);
+            postForeground(plainNotificationBuilder(text, emoji));
         }
     }
 
