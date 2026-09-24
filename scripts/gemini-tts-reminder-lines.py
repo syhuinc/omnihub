@@ -1,10 +1,10 @@
 """
 Generates the 100 real, pre-recorded Sleep Mode reminder lines (50 Gentle + 50 Friendly)
-using the Gemini API's native TTS. Each personality is locked to ONE consistent voice
-across all 50 of its lines (Gentle = one female-toned voice, Friendly = one male-toned
-voice) so it sounds like the same person speaking throughout, not a different voice per
-line. These replace on-device TTS for the two "Normal"-tier personalities with real
-recorded audio; Teasing/Strict/Savage stay on-device since they're dynamic (AI tier).
+using the Gemini API's native TTS. Both personalities currently share ONE consistent
+female-toned voice across all 100 lines (Friendly's own distinct male voice is on hold
+until confirmed separately -- see VOICE_MAP). These replace on-device TTS for the two
+"Normal"-tier personalities with real recorded audio; Teasing/Strict/Savage stay
+on-device since they're dynamic (AI tier).
 
 Lines are pulled directly from MessageBank.java's GENERIC pools, tier-organized (0-3,
 mild to most insistent), so the audio matches the live nightly nag text exactly.
@@ -42,14 +42,16 @@ SAMPLE_WIDTH = 2
 CHANNELS = 1
 
 # One voice per personality, used for every one of that personality's 50 lines.
+# Both currently share the same female-toned voice -- Friendly's own male voice is on
+# hold until confirmed separately.
 VOICE_MAP = {
     "gentle": "Vindemiatrix",   # same voice used for the "Hear a sample" gentle clip
-    "friendly": "Iapetus",      # a different, clearly male-toned voice from the samples
+    "friendly": "Vindemiatrix",
 }
 
 STYLE_MAP = {
     "gentle": "A calm, warm female speaker says this gently and soothingly, at a slow, soft pace:",
-    "friendly": "An upbeat, casual male speaker says this in a warm, cheerful, friendly tone, at a natural pace:",
+    "friendly": "An upbeat, warm female speaker says this in a cheerful, friendly tone, at a natural pace:",
 }
 
 GENTLE_LINES = [
@@ -204,9 +206,8 @@ def generate(name: str, personality: str, text: str, out_dir: str) -> None:
     print(f"  saved {out_path} (voice: {voice})")
 
 
-# For now, only generate the Gentle (female) set -- Friendly (male) is on hold until
-# that's separately confirmed. Set to True once ready to also generate Friendly.
-GENERATE_FRIENDLY = False
+# Both Gentle and Friendly currently generate with the same female voice.
+GENERATE_FRIENDLY = True
 
 
 def main() -> None:
