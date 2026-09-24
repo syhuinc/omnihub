@@ -177,4 +177,36 @@ public class SleepModePlugin extends Plugin {
         }
         call.resolve();
     }
+
+    /**
+     * The illustrated full-screen nag card (SleepNagActivity) only auto-launches over whatever's
+     * on screen via the notification's full-screen intent -- Android 14+ treats that as a
+     * separate, not-auto-granted permission for apps targeting API 34+ (unlike pre-14, where
+     * declaring USE_FULL_SCREEN_INTENT in the manifest was enough on its own). Without it, the
+     * card still opens on tap (SleepModeSpeakService's contentIntent), just not automatically.
+     */
+    @PluginMethod
+    public void checkFullScreenIntentPermission(PluginCall call) {
+        JSObject ret = new JSObject();
+        ret.put("granted", canUseFullScreenIntent());
+        call.resolve(ret);
+    }
+
+    @PluginMethod
+    public void requestFullScreenIntentPermission(PluginCall call) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            Intent intent = new Intent(android.provider.Settings.ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT);
+            intent.setData(Uri.parse("package:" + getContext().getPackageName()));
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            getContext().startActivity(intent);
+        }
+        call.resolve();
+    }
+
+    private boolean canUseFullScreenIntent() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE) return true;
+        android.app.NotificationManager nm = (android.app.NotificationManager)
+                getContext().getSystemService(android.content.Context.NOTIFICATION_SERVICE);
+        return nm != null && nm.canUseFullScreenIntent();
+    }
 }

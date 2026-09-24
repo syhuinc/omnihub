@@ -55,6 +55,8 @@ export interface SleepModePluginInterface {
   requestNotificationPermission(): Promise<{ granted: boolean }>;
   checkExactAlarmPermission(): Promise<{ granted: boolean }>;
   requestExactAlarmPermission(): Promise<void>;
+  checkFullScreenIntentPermission(): Promise<{ granted: boolean }>;
+  requestFullScreenIntentPermission(): Promise<void>;
 }
 
 export const DEFAULT_SLEEP_MODE_CONFIG: SleepModeConfig = {
@@ -152,6 +154,14 @@ class SleepModePluginWeb extends WebPlugin implements SleepModePluginInterface {
   }
 
   async requestExactAlarmPermission(): Promise<void> {
+    // no-op in browser
+  }
+
+  async checkFullScreenIntentPermission(): Promise<{ granted: boolean }> {
+    return { granted: true };
+  }
+
+  async requestFullScreenIntentPermission(): Promise<void> {
     // no-op in browser
   }
 }

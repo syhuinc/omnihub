@@ -37,6 +37,7 @@ export function SleepMode() {
   const [config, setConfig] = useState<SleepModeStatus>({ ...DEFAULT_SLEEP_MODE_CONFIG, sessionStartMillis: 0, nagCount: 0, mutedUntilMillis: 0 });
   const [timeSheet, setTimeSheet] = useState<TimeField | null>(null);
   const [needsExactAlarmPermission, setNeedsExactAlarmPermission] = useState(false);
+  const [needsFullScreenPermission, setNeedsFullScreenPermission] = useState(false);
   const [screen, setScreen] = useState<SubScreen>('main');
   const [windDownAutoStart, setWindDownAutoStart] = useState(false);
   const [windDownInitialAction, setWindDownInitialAction] = useState<string | undefined>(undefined);
@@ -46,7 +47,17 @@ export function SleepMode() {
 
   useEffect(() => {
     SleepModePlugin.status()
-      .then(setConfig)
+      .then((status) => {
+        setConfig(status);
+        // Sleep Mode may already have been enabled before this permission existed (or before
+        // this device ever prompted for it) — check on every visit, not just the on-toggle, so
+        // the illustrated card's auto-pop-up gets fixed without needing an off/on cycle.
+        if (status.enabled) {
+          SleepModePlugin.checkFullScreenIntentPermission()
+            .then((r) => setNeedsFullScreenPermission(!r.granted))
+            .catch(() => {});
+        }
+      })
       .catch(() => {
         // web fallback / unsupported platform — keep the default config
       });
@@ -90,6 +101,22 @@ export function SleepMode() {
     }
 
     setNeedsExactAlarmPermission(false);
+
+    try {
+      const fullScreen = await SleepModePlugin.checkFullScreenIntentPermission();
+      if (!fullScreen.granted) {
+        setNeedsFullScreenPermission(true);
+        await SleepModePlugin.requestFullScreenIntentPermission();
+        // Unlike the exact-alarm permission, this one isn't required for reminders to work at
+        // all (the notification still shows and can be tapped) — just for the illustrated card
+        // to pop up on its own, so Sleep Mode still turns on below rather than blocking on it.
+      } else {
+        setNeedsFullScreenPermission(false);
+      }
+    } catch {
+      // web fallback / unsupported platform — proceed anyway
+    }
+
     await persist({ ...config, enabled: true });
   }
 
@@ -176,6 +203,23 @@ export function SleepMode() {
             <div className="sm__warning">
               <Icon name="info" size={16} />
               <span>Sleep Mode needs the "Alarms &amp; reminders" permission. Grant it in Settings, then turn Sleep Mode on again.</span>
+            </div>
+          )}
+
+          {needsFullScreenPermission && (
+            <div className="sm__warning">
+              <Icon name="info" size={16} />
+              <span>
+                For the reminder card to pop up on its own, grant "Full screen notifications" for Omni Hub in Settings. Without
+                it, tapping the notification still opens it.
+              </span>
+              <button
+                type="button"
+                className="sm__warning-action"
+                onClick={() => SleepModePlugin.requestFullScreenIntentPermission()}
+              >
+                Open Settings
+              </button>
             </div>
           )}
 
