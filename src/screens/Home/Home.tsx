@@ -56,6 +56,15 @@ export function Home() {
     storageSet(StorageKeys.homeSections, next);
   }
 
+  // Hiding always resets the card back to its default top position, so whenever it comes back
+  // (via "Show hidden sections") it reappears where the reference design has it, rather than
+  // wherever it happened to be positioned before it was hidden.
+  function hideMyPhone() {
+    hideSection('myPhone');
+    setMyPhonePosition('top');
+    storageSet(StorageKeys.homeMyPhonePosition, 'top');
+  }
+
   function restoreSections() {
     setSections(DEFAULT_SECTIONS);
     storageSet(StorageKeys.homeSections, DEFAULT_SECTIONS);
@@ -96,7 +105,7 @@ export function Home() {
       <ScreenHeader title={`${greeting()} \u{1F44B}`} subtitle="What do you need today?" />
 
       {!query && sections.myPhone && myPhonePosition === 'top' && (
-        <PhoneStatusCard atTop onHide={() => hideSection('myPhone')} onTogglePosition={toggleMyPhonePosition} />
+        <PhoneStatusCard atTop onHide={hideMyPhone} onTogglePosition={toggleMyPhonePosition} />
       )}
 
       <div className="home__search">
@@ -176,7 +185,7 @@ export function Home() {
           </div>
 
           {sections.myPhone && myPhonePosition === 'afterPinned' && (
-            <PhoneStatusCard atTop={false} onHide={() => hideSection('myPhone')} onTogglePosition={toggleMyPhonePosition} />
+            <PhoneStatusCard atTop={false} onHide={hideMyPhone} onTogglePosition={toggleMyPhonePosition} />
           )}
 
           <button type="button" className="home__banner" onClick={() => navigate('/tools')}>
