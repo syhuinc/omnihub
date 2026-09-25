@@ -61,7 +61,15 @@ export function HomeScreen({ api }: { api: VcApi }) {
 
   return (
     <div className="screen">
-      <ScreenHeader title="Voice Changer" subtitle="Transform your voice instantly" onBack={api.popBack} />
+      <ScreenHeader
+        title={
+          <>
+            Voice <span className="vch__title-accent">Changer</span>
+          </>
+        }
+        subtitle="Transform your voice instantly"
+        onBack={api.popBack}
+      />
 
       <div className="vch__body vch__body--with-tabbar">
         {importError && (

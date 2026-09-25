@@ -3,7 +3,7 @@ import { Icon } from './Icon';
 import './ScreenHeader.css';
 
 interface ScreenHeaderProps {
-  title: string;
+  title: ReactNode;
   subtitle?: string;
   onBack?: () => void;
   action?: ReactNode;

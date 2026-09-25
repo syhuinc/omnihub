@@ -128,9 +128,9 @@ export function VoiceChanger() {
   }
 
   return (
-    <>
+    <div className="vch-app">
       {body}
       {TAB_SCREENS.has(screen) && <VoiceChangerTabBar active={screen as VcTab} onSelect={selectTab} />}
-    </>
+    </div>
   );
 }
