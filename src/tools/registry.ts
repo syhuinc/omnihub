@@ -273,6 +273,16 @@ export const TOOLS: ToolMeta[] = [
     keywords: ['barcode', 'scan', 'scanner', 'product', 'upc', 'ean'],
     presentation: 'page',
   },
+  {
+    id: 'voice-changer',
+    name: 'Voice Changer',
+    shortDescription: 'Record your voice, transform it, share it',
+    category: 'more',
+    color: 'var(--pink)',
+    icon: 'mic',
+    keywords: ['voice', 'changer', 'record', 'pitch', 'chipmunk', 'robot', 'echo', 'funny', 'audio'],
+    presentation: 'page',
+  },
 ];
 
 export function getToolById(id: string): ToolMeta | undefined {

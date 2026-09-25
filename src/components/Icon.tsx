@@ -92,7 +92,9 @@ export type IconName =
   | 'smartphone'
   | 'wifi'
   | 'cpu'
-  | 'database';
+  | 'database'
+  | 'mic'
+  | 'share';
 
 interface IconProps {
   name: IconName;
@@ -332,6 +334,15 @@ const paths: Record<IconName, React.ReactNode> = {
   wifi: <path d="M1.4 9a16 16 0 0 1 21.2 0 M5 12.55a11 11 0 0 1 14.08 0 M8.53 16.11a6 6 0 0 1 6.95 0 M12 20h.01" />,
   cpu: <path d="M6 4h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z M9 9h6v6H9Z M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 14h3M1 9h3M1 14h3" />,
   database: <path d="M3 5a9 3 0 1 0 18 0a9 3 0 1 0-18 0 M3 5v14a9 3 0 0 0 18 0V5 M3 12a9 3 0 0 0 18 0" />,
+  mic: <path d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3Z M19 11a7 7 0 0 1-14 0 M12 18v3 M9 21h6" />,
+  share: (
+    <>
+      <circle cx="18" cy="5" r="2.5" />
+      <circle cx="6" cy="12" r="2.5" />
+      <circle cx="18" cy="19" r="2.5" />
+      <path d="M8.3 10.7 15.7 6.6 M8.3 13.3l7.4 4.1" />
+    </>
+  ),
 };
 
 export function Icon({ name, size = 20, strokeWidth = 2, className, style }: IconProps) {

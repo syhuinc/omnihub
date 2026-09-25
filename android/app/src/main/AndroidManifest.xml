@@ -139,6 +139,10 @@
       - ACCESS_FINE_LOCATION / ACCESS_COARSE_LOCATION: only for the Compass tool's optional
         location/altitude/accuracy display. Used entirely on-device to show where you are on that
         one screen - never stored, logged, or transmitted anywhere.
+      - RECORD_AUDIO: only for the Voice Changer tool's microphone recording, requested via the
+        WebView's standard getUserMedia permission prompt when you tap record. Recordings stay
+        entirely on-device (processed with the Web Audio API) and are only ever sent anywhere if
+        you explicitly tap Share.
     -->
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
@@ -155,6 +159,7 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />

@@ -26,6 +26,7 @@ import { Compass } from './compass/Compass';
 import { Flashlight } from './flashlight/Flashlight';
 import { QrScanner } from './qr-scanner/QrScanner';
 import { BarcodeScannerTool } from './barcode-scanner/BarcodeScannerTool';
+import { VoiceChanger } from './voice-changer/VoiceChanger';
 
 const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
   calculator: Calculator,
@@ -53,6 +54,7 @@ const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
   flashlight: Flashlight,
   'qr-scanner': QrScanner,
   'barcode-scanner': BarcodeScannerTool,
+  'voice-changer': VoiceChanger,
 };
 
 export function ToolRoute({ toolId }: { toolId: string }) {

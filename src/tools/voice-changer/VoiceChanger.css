@@ -1,0 +1,188 @@
+.vch__body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 8px 20px 20px;
+  gap: 16px;
+  min-height: 0;
+}
+
+.vch__error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--red) 14%, var(--bg-elevated));
+  border: 1px solid color-mix(in srgb, var(--red) 30%, transparent);
+  color: var(--text-primary);
+  font-size: 13px;
+}
+
+.vch__error svg {
+  flex-shrink: 0;
+  color: var(--red);
+}
+
+.vch__stage {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  min-height: 0;
+}
+
+.vch__stage--ready {
+  justify-content: flex-start;
+  padding-top: 24px;
+}
+
+.vch__record-btn {
+  width: 128px;
+  height: 128px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--purple) 88%, white 8%), var(--purple));
+  color: #fff;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--purple) 30%, transparent), 0 10px 28px -8px color-mix(in srgb, var(--purple) 65%, transparent);
+}
+
+.vch__record-btn--active {
+  background: linear-gradient(135deg, color-mix(in srgb, var(--red) 88%, white 8%), var(--red));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--red) 30%, transparent), 0 10px 28px -8px color-mix(in srgb, var(--red) 65%, transparent);
+}
+
+.vch__pulse-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vch__pulse-ring {
+  position: absolute;
+  width: 128px;
+  height: 128px;
+  border-radius: 50%;
+  border: 2px solid var(--red);
+  animation: vch-pulse 1.6s ease-out infinite;
+}
+
+@keyframes vch-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+.vch__timer {
+  font-size: 28px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+}
+
+.vch__hint {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.vch__play-btn {
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
+  background: var(--accent-gradient);
+  color: #fff;
+  box-shadow: var(--shadow-glow);
+  margin-bottom: 4px;
+}
+
+.vch__effects {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  width: 100%;
+}
+
+.vch__effect {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 14px 8px;
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.vch__effect-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--bg-elevated-2);
+  color: var(--text-secondary);
+}
+
+.vch__effect--active {
+  background: color-mix(in srgb, var(--purple) 16%, var(--bg-elevated));
+  border-color: color-mix(in srgb, var(--purple) 40%, transparent);
+  color: var(--text-primary);
+}
+
+.vch__effect--active .vch__effect-icon {
+  background: linear-gradient(135deg, color-mix(in srgb, var(--purple) 88%, white 8%), var(--purple));
+  color: #fff;
+}
+
+.vch__actions {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  margin-top: auto;
+}
+
+.vch__action {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 50px;
+  border-radius: var(--radius-pill);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.vch__action--secondary {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+}
+
+.vch__action--primary {
+  background: var(--accent-gradient);
+  color: #fff;
+  box-shadow: var(--shadow-glow);
+}
+
+.vch__action:disabled {
+  opacity: 0.6;
+}
