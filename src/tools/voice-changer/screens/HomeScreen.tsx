@@ -73,17 +73,17 @@ export function HomeScreen({ api }: { api: VcApi }) {
         <div className="vch__hero">
           <div className="vch__hero-glow" />
           <div className="vch__hero-visual">
-            <span className="vch__hero-bars" aria-hidden="true">
-              {[0.15, 0.3, 0, 0.45].map((d, i) => (
-                <span key={i} style={{ '--d': `${d}s`, '--bar-color': i % 2 ? 'var(--blue)' : 'var(--purple)' } as React.CSSProperties} />
+            <span className="vch__hero-bars vch__hero-bars--left" aria-hidden="true">
+              {[0.5, 0.15, 0.35, 0, 0.55, 0.2].map((d, i) => (
+                <span key={i} style={{ '--d': `${d}s`, '--bar-color': ['var(--blue)', 'var(--purple)'][i % 2] } as React.CSSProperties} />
               ))}
             </span>
             <span className="vch__hero-icon">
-              <Icon name="mic" size={34} />
+              <Icon name="mic" size={46} />
             </span>
-            <span className="vch__hero-bars" aria-hidden="true">
-              {[0.4, 0.1, 0.25, 0].map((d, i) => (
-                <span key={i} style={{ '--d': `${d}s`, '--bar-color': i % 2 ? 'var(--purple)' : 'var(--pink)' } as React.CSSProperties} />
+            <span className="vch__hero-bars vch__hero-bars--right" aria-hidden="true">
+              {[0.1, 0.4, 0.05, 0.5, 0.25, 0.45].map((d, i) => (
+                <span key={i} style={{ '--d': `${d}s`, '--bar-color': ['var(--purple)', 'var(--pink)'][i % 2] } as React.CSSProperties} />
               ))}
             </span>
           </div>

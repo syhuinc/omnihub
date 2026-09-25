@@ -1,5 +1,4 @@
 import lamejs from './vendor/lamejs-bundle.js';
-import type { IconName } from '../../components/Icon';
 
 const { Mp3Encoder } = lamejs;
 
@@ -8,7 +7,11 @@ export type EffectCategory = 'fun' | 'character' | 'special';
 export interface EffectDef {
   id: string;
   label: string;
-  icon: IconName;
+  /** A real emoji character rather than a line-icon glyph — with no illustration tool available,
+   *  emoji are the closest honest match to the reference design's colorful character-face icons
+   *  (a bearded face for Deep Voice, a baby face, a robot head, and so on) that this codebase can
+   *  actually render. */
+  emoji: string;
   category: EffectCategory;
   /** Each effect's own accent color, so the grid reads as a set of distinct characters rather
    *  than one flat purple wash — mirrors the colorful per-effect icons in the reference design. */
@@ -18,20 +21,20 @@ export interface EffectDef {
 /** id 'normal' is the only one every screen treats as "no effect" — kept out of the rate/processing
  *  tables below since it's a pure passthrough. */
 export const EFFECTS: EffectDef[] = [
-  { id: 'normal', label: 'Normal', icon: 'mic', category: 'fun', color: '#8b5cf6' },
-  { id: 'chipmunk', label: 'Chipmunk', icon: 'zap', category: 'fun', color: '#f97316' },
-  { id: 'fast', label: 'Fast', icon: 'fast-forward', category: 'fun', color: '#06b6d4' },
-  { id: 'slow', label: 'Slow', icon: 'clock', category: 'fun', color: '#14b8a6' },
-  { id: 'deep', label: 'Deep Voice', icon: 'moon', category: 'character', color: '#4f46e5' },
-  { id: 'baby', label: 'Baby Voice', icon: 'baby', category: 'character', color: '#ec4899' },
-  { id: 'robot', label: 'Robot', icon: 'cpu', category: 'character', color: '#64748b' },
-  { id: 'alien', label: 'Alien', icon: 'star', category: 'character', color: '#22c55e' },
-  { id: 'monster', label: 'Monster', icon: 'paw', category: 'character', color: '#ef4444' },
-  { id: 'echo', label: 'Echo', icon: 'repeat', category: 'special', color: '#3b82f6' },
-  { id: 'radio', label: 'Radio', icon: 'wifi', category: 'special', color: '#f59e0b' },
-  { id: 'megaphone', label: 'Megaphone', icon: 'volume', category: 'special', color: '#f43f5e' },
-  { id: 'distorted', label: 'Distorted', icon: 'activity', category: 'special', color: '#a855f7' },
-  { id: 'karaoke', label: 'Karaoke', icon: 'music', category: 'special', color: '#eab308' },
+  { id: 'normal', label: 'Normal', emoji: '🎤', category: 'fun', color: '#8b5cf6' },
+  { id: 'chipmunk', label: 'Chipmunk', emoji: '🐿️', category: 'fun', color: '#f97316' },
+  { id: 'fast', label: 'Fast', emoji: '🐇', category: 'fun', color: '#06b6d4' },
+  { id: 'slow', label: 'Slow', emoji: '🐢', category: 'fun', color: '#14b8a6' },
+  { id: 'deep', label: 'Deep Voice', emoji: '🧔', category: 'character', color: '#4f46e5' },
+  { id: 'baby', label: 'Baby Voice', emoji: '👶', category: 'character', color: '#ec4899' },
+  { id: 'robot', label: 'Robot', emoji: '🤖', category: 'character', color: '#64748b' },
+  { id: 'alien', label: 'Alien', emoji: '👽', category: 'character', color: '#22c55e' },
+  { id: 'monster', label: 'Monster', emoji: '👹', category: 'character', color: '#ef4444' },
+  { id: 'echo', label: 'Echo', emoji: '⛰️', category: 'special', color: '#3b82f6' },
+  { id: 'radio', label: 'Radio', emoji: '📻', category: 'special', color: '#f59e0b' },
+  { id: 'megaphone', label: 'Megaphone', emoji: '📢', category: 'special', color: '#f43f5e' },
+  { id: 'distorted', label: 'Distorted', emoji: '🌀', category: 'special', color: '#a855f7' },
+  { id: 'karaoke', label: 'Karaoke', emoji: '🎶', category: 'special', color: '#eab308' },
 ];
 
 export function getEffect(id: string): EffectDef {

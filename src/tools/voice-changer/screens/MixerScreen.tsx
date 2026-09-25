@@ -73,8 +73,8 @@ export function MixerScreen({ api }: { api: VcApi }) {
               disabled={!api.original}
               style={{ '--effect-color': effect.color } as React.CSSProperties}
             >
-              <span className="vch__effect-icon">
-                <Icon name={effect.icon} size={20} />
+              <span className="vch__effect-icon" aria-hidden="true">
+                {effect.emoji}
               </span>
               <span>{effect.label}</span>
             </button>
