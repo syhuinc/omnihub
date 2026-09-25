@@ -3,7 +3,20 @@ import { ScreenHeader } from '../../../components/ScreenHeader';
 import { Icon, type IconName } from '../../../components/Icon';
 import { hapticTap, hapticWarning } from '../../../haptics';
 import { decodeBlob } from '../playback';
+import { HeroMic } from '../HeroMic';
 import type { VcApi, VcScreenName } from '../types';
+
+/** Blue -> purple -> pink across the bar count, so the continuous waveform reads as one smooth
+ *  gradient sweep rather than repeating three flat colors. */
+function waveBarColor(i: number, count: number): string {
+  const t = i / (count - 1);
+  return t < 0.5
+    ? `color-mix(in srgb, var(--purple) ${Math.round(t * 200)}%, var(--blue))`
+    : `color-mix(in srgb, var(--pink) ${Math.round((t - 0.5) * 200)}%, var(--purple))`;
+}
+
+const WAVE_BAR_COUNT = 22;
+const WAVE_HEIGHTS = [0.3, 0.55, 0.8, 0.5, 0.9, 0.35, 0.7, 1, 0.45, 0.85, 0.6, 0.6, 0.85, 0.45, 1, 0.7, 0.35, 0.9, 0.5, 0.8, 0.55, 0.3];
 
 const TILES: { id: VcScreenName; label: string; desc: string; icon: IconName; color: string }[] = [
   { id: 'effects', label: 'Voice Effects', desc: 'Fun & creative voices', icon: 'zap', color: '#3b82f6' },
@@ -73,19 +86,25 @@ export function HomeScreen({ api }: { api: VcApi }) {
         <div className="vch__hero">
           <div className="vch__hero-glow" />
           <div className="vch__hero-visual">
-            <span className="vch__hero-bars vch__hero-bars--left" aria-hidden="true">
-              {[0.5, 0.15, 0.35, 0, 0.55, 0.2].map((d, i) => (
-                <span key={i} style={{ '--d': `${d}s`, '--bar-color': ['var(--blue)', 'var(--purple)'][i % 2] } as React.CSSProperties} />
+            <div className="vch__hero-wave" aria-hidden="true">
+              {WAVE_HEIGHTS.map((peak, i) => (
+                <span
+                  key={i}
+                  style={
+                    {
+                      '--d': `${(i * 0.9) % 1.6}s`,
+                      '--peak': `${Math.round(peak * 100)}%`,
+                      '--bar-color': waveBarColor(i, WAVE_BAR_COUNT),
+                    } as React.CSSProperties
+                  }
+                />
               ))}
-            </span>
-            <span className="vch__hero-icon">
-              <Icon name="mic" size={46} />
-            </span>
-            <span className="vch__hero-bars vch__hero-bars--right" aria-hidden="true">
-              {[0.1, 0.4, 0.05, 0.5, 0.25, 0.45].map((d, i) => (
-                <span key={i} style={{ '--d': `${d}s`, '--bar-color': ['var(--purple)', 'var(--pink)'][i % 2] } as React.CSSProperties} />
-              ))}
-            </span>
+            </div>
+            <div className="vch__hero-mic-wrap">
+              <div className="vch__hero-mic-circle">
+                <HeroMic size={52} />
+              </div>
+            </div>
           </div>
           <p className="vch__hero-text">Record, transform, and share your voice</p>
         </div>
