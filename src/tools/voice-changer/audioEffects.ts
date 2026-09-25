@@ -39,15 +39,13 @@ export function getEffect(id: string): EffectDef {
 
 /** The playback-rate contribution of a single effect at a given intensity (0-1, default 0.5).
  *  1 = no change. Multiple effects (Voice Mixer) multiply their rates together onto the one
- *  BufferSourceNode a render pass has. */
+ *  BufferSourceNode a render pass has. 'fast'/'slow' are deliberately absent here — they're pure
+ *  tempo changes handled by timeStretch() below instead, so they read as the same voice sped up
+ *  or slowed down rather than turning into a different pitched character like chipmunk/deep. */
 function rateFor(effectId: string, intensity: number): number {
   switch (effectId) {
     case 'chipmunk':
       return 1 + intensity * 0.9;
-    case 'fast':
-      return 1 + intensity * 0.6;
-    case 'slow':
-      return 1 - intensity * 0.5;
     case 'deep':
       return 1 - intensity * 0.55;
     case 'baby':
@@ -59,6 +57,84 @@ function rateFor(effectId: string, intensity: number): number {
     default:
       return 1;
   }
+}
+
+/** Tempo-only speed factor for 'fast'/'slow' (>1 = shorter/faster, <1 = longer/slower), consumed
+ *  by timeStretch() rather than rateFor() so they don't also shift pitch. */
+function tempoFor(effectId: string, intensity: number): number {
+  switch (effectId) {
+    case 'fast':
+      return 1 + intensity * 0.6;
+    case 'slow':
+      return 1 - intensity * 0.5;
+    default:
+      return 1;
+  }
+}
+
+function hann(i: number, n: number): number {
+  return 0.5 - 0.5 * Math.cos((2 * Math.PI * i) / (n - 1));
+}
+
+/** Pitch-preserving tempo change for the 'fast'/'slow' effects: output grains are written at a
+ *  fixed hop while the matching input grain is read from a position that advances by
+ *  hop * speedFactor — i.e. we change *where* we read from, not *how fast* we read it, so no
+ *  per-sample resampling (and therefore no pitch shift) happens, only how much source content is
+ *  skipped or repeated between grains. A lightweight fixed-hop OLA (not full WSOLA with
+ *  cross-correlation grain alignment), so sustained vowels can flutter slightly at extreme
+ *  settings — the same honest trade-off the auto-tune resynthesis above documents. */
+function timeStretch(buffer: AudioBuffer, speedFactor: number): AudioBuffer {
+  const numChannels = buffer.numberOfChannels;
+  const inputData: Float32Array[] = [];
+  for (let c = 0; c < numChannels; c++) inputData.push(buffer.getChannelData(c));
+
+  const hop = 1024;
+  const grainWindow = hop * 2;
+  const outLength = Math.max(1, Math.round(buffer.length / speedFactor));
+
+  const outChannels: Float32Array<ArrayBuffer>[] = [];
+  for (let c = 0; c < numChannels; c++) outChannels.push(new Float32Array(new ArrayBuffer(outLength * 4)));
+  const weightSum = new Float32Array(outLength);
+
+  const numGrains = Math.ceil(outLength / hop) + 1;
+  for (let g = 0; g < numGrains; g++) {
+    const outCenter = g * hop;
+    if (outCenter >= outLength) break;
+    const inCenter = outCenter * speedFactor;
+    const inStart = inCenter - grainWindow / 2;
+    const outStart = outCenter - grainWindow / 2;
+    for (let c = 0; c < numChannels; c++) {
+      const src = inputData[c];
+      const out = outChannels[c];
+      for (let i = 0; i < grainWindow; i++) {
+        const srcPos = inStart + i;
+        const idx = Math.floor(srcPos);
+        const frac = srcPos - idx;
+        const s0 = idx >= 0 && idx < src.length ? src[idx] : 0;
+        const s1 = idx + 1 >= 0 && idx + 1 < src.length ? src[idx + 1] : 0;
+        const sample = s0 + (s1 - s0) * frac;
+        const outPos = Math.round(outStart) + i;
+        if (outPos >= 0 && outPos < outLength) {
+          const w = hann(i, grainWindow);
+          out[outPos] += sample * w;
+          if (c === 0) weightSum[outPos] += w;
+        }
+      }
+    }
+  }
+
+  for (let c = 0; c < numChannels; c++) {
+    const out = outChannels[c];
+    for (let i = 0; i < outLength; i++) {
+      const w = weightSum[i];
+      if (w > 0.0001) out[i] = out[i] / w;
+    }
+  }
+
+  const scratchCtx = new OfflineAudioContext(numChannels, outLength, buffer.sampleRate);
+  const result = scratchCtx.createBuffer(numChannels, outLength, buffer.sampleRate);
+  for (let c = 0; c < numChannels; c++) result.copyToChannel(outChannels[c], c);
+  return result;
 }
 
 /** Classic WebAudio soft-clip distortion curve (the standard formula cited in MDN's WaveShaperNode
@@ -80,8 +156,9 @@ function makeDistortionCurve(amount: number): Float32Array<ArrayBuffer> {
 
 /** Inserts one effect's non-rate processing (filters, ring modulation, distortion, delay) into the
  *  chain and returns the new output node. Rate is handled separately (see rateFor) since it lives
- *  on the shared BufferSourceNode, not per-effect. Pure rate effects (chipmunk/fast/slow/deep) add
- *  no nodes here and just pass the input straight through. */
+ *  on the shared BufferSourceNode, not per-effect. Pure rate effects (chipmunk/deep) add no nodes
+ *  here and just pass the input straight through; fast/slow never reach this function at all (see
+ *  timeStretch/tempoFor). */
 function applyProcessing(ctx: BaseAudioContext, input: AudioNode, effectId: string, intensity: number): AudioNode {
   switch (effectId) {
     case 'baby': {
@@ -195,18 +272,32 @@ export async function renderEffects(buffer: AudioBuffer, effectIds: string[], in
   const active = effectIds.filter((id) => id !== 'normal');
   if (active.length === 0) return buffer;
 
-  const rate = active.reduce((r, id) => r * rateFor(id, intensity), 1);
-  const clampedRate = Math.max(0.3, Math.min(3, rate));
-  const tailSamples = Math.ceil(extraTailSeconds(active, intensity) * buffer.sampleRate);
-  const outLength = Math.ceil(buffer.length / clampedRate) + tailSamples;
+  // Fast/Slow are pure tempo changes, rendered as a distinct time-stretch pre-pass (see
+  // timeStretch) so they never share the pitch-shifting playbackRate below — otherwise they'd
+  // sound like weaker versions of Chipmunk/Deep Voice instead of the same voice at a different
+  // speed.
+  const tempoIds = active.filter((id) => id === 'fast' || id === 'slow');
+  const pitchIds = active.filter((id) => id !== 'fast' && id !== 'slow');
 
-  const ctx = new OfflineAudioContext(buffer.numberOfChannels, outLength, buffer.sampleRate);
+  let working = buffer;
+  if (tempoIds.length > 0) {
+    const speedFactor = tempoIds.reduce((s, id) => s * tempoFor(id, intensity), 1);
+    working = timeStretch(working, Math.max(0.4, Math.min(2.5, speedFactor)));
+  }
+  if (pitchIds.length === 0) return working;
+
+  const rate = pitchIds.reduce((r, id) => r * rateFor(id, intensity), 1);
+  const clampedRate = Math.max(0.3, Math.min(3, rate));
+  const tailSamples = Math.ceil(extraTailSeconds(pitchIds, intensity) * working.sampleRate);
+  const outLength = Math.ceil(working.length / clampedRate) + tailSamples;
+
+  const ctx = new OfflineAudioContext(working.numberOfChannels, outLength, working.sampleRate);
   const source = ctx.createBufferSource();
-  source.buffer = buffer;
+  source.buffer = working;
   source.playbackRate.value = clampedRate;
 
   let node: AudioNode = source;
-  for (const id of active) node = applyProcessing(ctx, node, id, intensity);
+  for (const id of pitchIds) node = applyProcessing(ctx, node, id, intensity);
 
   node.connect(ctx.destination);
   source.start(0);
