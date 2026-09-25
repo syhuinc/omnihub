@@ -30,16 +30,17 @@ export const SCALE_INTERVALS: Record<ScaleName, number[]> = {
 export interface AutoTunePreset {
   id: string;
   label: string;
+  desc: string;
   strength: number;
   responseSpeed: number;
   formant: number;
 }
 
 export const AUTOTUNE_PRESETS: AutoTunePreset[] = [
-  { id: 'natural', label: 'Natural', strength: 0.35, responseSpeed: 0.3, formant: 0 },
-  { id: 'pop', label: 'Pop', strength: 0.65, responseSpeed: 0.55, formant: 0.1 },
-  { id: 'hardtune', label: 'Hard Tune', strength: 1, responseSpeed: 0.9, formant: 0 },
-  { id: 'robot', label: 'Robot', strength: 1, responseSpeed: 1, formant: -0.2 },
+  { id: 'natural', label: 'Natural', desc: 'Subtle correction', strength: 0.35, responseSpeed: 0.3, formant: 0 },
+  { id: 'pop', label: 'Pop', desc: 'Modern vocal', strength: 0.65, responseSpeed: 0.55, formant: 0.1 },
+  { id: 'hardtune', label: 'Hard Tune', desc: 'Strong effect', strength: 1, responseSpeed: 0.9, formant: 0 },
+  { id: 'robot', label: 'Robot', desc: 'Extreme', strength: 1, responseSpeed: 1, formant: -0.2 },
 ];
 
 export interface AutoTuneOptions {

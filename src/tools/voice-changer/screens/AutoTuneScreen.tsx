@@ -103,6 +103,7 @@ export function AutoTuneScreen({ api }: { api: VcApi }) {
             >
               <Icon name="music" size={18} />
               <span>{p.label}</span>
+              <small>{p.desc}</small>
             </button>
           ))}
         </div>

@@ -5,13 +5,13 @@ import { hapticTap, hapticWarning } from '../../../haptics';
 import { decodeBlob } from '../playback';
 import type { VcApi, VcScreenName } from '../types';
 
-const TILES: { id: VcScreenName; label: string; desc: string; icon: IconName }[] = [
-  { id: 'effects', label: 'Voice Effects', desc: 'Fun & creative voices', icon: 'zap' },
-  { id: 'autotune', label: 'Auto-Tune', desc: 'Pitch correction & singing', icon: 'music' },
-  { id: 'pitch-speed', label: 'Pitch & Speed', desc: 'Change pitch and speed', icon: 'sliders' },
-  { id: 'echo-reverb', label: 'Echo & Reverb', desc: 'Studio effects', icon: 'repeat' },
-  { id: 'mixer', label: 'Voice Mixer', desc: 'Combine effects', icon: 'sliders' },
-  { id: 'tools', label: 'More Tools', desc: 'Browse everything', icon: 'more-dots' },
+const TILES: { id: VcScreenName; label: string; desc: string; icon: IconName; color: string }[] = [
+  { id: 'effects', label: 'Voice Effects', desc: 'Fun & creative voices', icon: 'zap', color: '#3b82f6' },
+  { id: 'autotune', label: 'Auto-Tune', desc: 'Pitch correction & singing', icon: 'music', color: '#ec4899' },
+  { id: 'pitch-speed', label: 'Pitch & Speed', desc: 'Change pitch and speed', icon: 'sliders', color: '#14b8a6' },
+  { id: 'echo-reverb', label: 'Echo & Reverb', desc: 'Studio effects', icon: 'repeat', color: '#8b5cf6' },
+  { id: 'mixer', label: 'Voice Mixer', desc: 'Combine effects', icon: 'sliders', color: '#f97316' },
+  { id: 'tools', label: 'More Tools', desc: 'Browse everything', icon: 'more-dots', color: '#64748b' },
 ];
 
 export function HomeScreen({ api }: { api: VcApi }) {
@@ -109,7 +109,7 @@ export function HomeScreen({ api }: { api: VcApi }) {
 
         <div className="vch__tile-grid">
           {TILES.map((t) => (
-            <button key={t.id} type="button" className="vch__tile" onClick={() => openTile(t.id)}>
+            <button key={t.id} type="button" className="vch__tile" onClick={() => openTile(t.id)} style={{ '--tile-color': t.color } as React.CSSProperties}>
               <span className="vch__tile-icon">
                 <Icon name={t.icon} size={20} />
               </span>

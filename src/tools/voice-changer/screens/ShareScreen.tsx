@@ -229,7 +229,7 @@ export function ShareScreen({ api }: { api: VcApi }) {
           </>
         )}
 
-        {renaming ? (
+        {renaming && (
           <div className="vch__field">
             <input
               type="text"
@@ -248,11 +248,6 @@ export function ShareScreen({ api }: { api: VcApi }) {
               </button>
             </div>
           </div>
-        ) : (
-          <button type="button" className="vch__action vch__action--primary vch__action--full" onClick={() => void handleShare()}>
-            <Icon name="share" size={18} />
-            Share
-          </button>
         )}
 
         {!renaming && (

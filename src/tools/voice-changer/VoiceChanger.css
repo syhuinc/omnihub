@@ -254,8 +254,8 @@
   width: 34px;
   height: 34px;
   border-radius: 10px;
-  background: color-mix(in srgb, var(--purple) 20%, var(--bg-elevated-2));
-  color: var(--purple);
+  background: color-mix(in srgb, var(--tile-color, var(--purple)) 20%, var(--bg-elevated-2));
+  color: var(--tile-color, var(--purple));
 }
 
 /* Record -------------------------------------------------------------------------------------- */
@@ -482,6 +482,13 @@
   background: color-mix(in srgb, var(--purple) 16%, var(--bg-elevated));
   border-color: var(--purple);
   color: var(--text-primary);
+}
+
+.vch__preset small {
+  font-size: 9px;
+  font-weight: 400;
+  color: var(--text-tertiary);
+  text-align: center;
 }
 
 /* Sliders / fields ------------------------------------------------------------------------------- */
