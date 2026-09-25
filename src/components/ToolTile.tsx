@@ -2,6 +2,8 @@ import { useRef, type CSSProperties, type MouseEvent, type PointerEvent } from '
 import { Icon } from './Icon';
 import type { ToolMeta } from '../types';
 import { TOOL_ICON_IMAGES } from '../assets/tool-icons';
+import { TOOL_ICON_IMAGES_LIGHT } from '../assets/tool-icons/lightIndex';
+import { useIsLightTheme } from '../theme/useTheme';
 import './ToolTile.css';
 
 const LONG_PRESS_MS = 450;
@@ -19,7 +21,8 @@ interface ToolTileProps {
 }
 
 export function ToolTile({ tool, onClick, onRemove, onLongPress, showPinBadge, pinned, onTogglePin }: ToolTileProps) {
-  const image = TOOL_ICON_IMAGES[tool.id];
+  const isLight = useIsLightTheme();
+  const image = (isLight ? TOOL_ICON_IMAGES_LIGHT : TOOL_ICON_IMAGES)[tool.id];
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const startRef = useRef({ x: 0, y: 0 });
   const suppressClickRef = useRef(false);

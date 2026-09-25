@@ -9,6 +9,8 @@ import { searchTools } from '../../search/searchIndex';
 import { storageGet, storageSet, StorageKeys } from '../../storage/db';
 import { hapticSelect, hapticSuccess } from '../../haptics';
 import { TOOL_ICON_IMAGES } from '../../assets/tool-icons';
+import { TOOL_ICON_IMAGES_LIGHT } from '../../assets/tool-icons/lightIndex';
+import { useIsLightTheme } from '../../theme/useTheme';
 import { loadPinnedToolIds, savePinnedToolIds } from '../../tools/pinnedTools';
 import type { ToolCategory, ToolMeta } from '../../types';
 import './Tools.css';
@@ -25,6 +27,8 @@ const FEATURED_TOOL_IDS = ['calculator', 'timer', 'checklist'];
 
 export function Tools() {
   const { navigate } = useRouter();
+  const isLight = useIsLightTheme();
+  const toolIconImages = isLight ? TOOL_ICON_IMAGES_LIGHT : TOOL_ICON_IMAGES;
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState<CategoryFilter>('all');
   const [sortMode, setSortMode] = useState<SortMode>('default');
@@ -130,7 +134,7 @@ export function Tools() {
             {FEATURED_TOOL_IDS.map((id, i) => (
               <img
                 key={id}
-                src={TOOL_ICON_IMAGES[id]}
+                src={toolIconImages[id]}
                 alt=""
                 className="tools__featured-chip"
                 style={{ '--i': i } as CSSProperties}
