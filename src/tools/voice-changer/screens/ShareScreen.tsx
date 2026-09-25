@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { ScreenHeader } from '../../../components/ScreenHeader';
-import { Icon, type IconName } from '../../../components/Icon';
+import { Icon } from '../../../components/Icon';
 import { hapticTap, hapticSuccess, hapticWarning } from '../../../haptics';
 import { playBuffer, stopPlayback, decodeBlob } from '../playback';
 import { deleteClip, renameClip, setFavorite } from '../clipStorage';
 import { extensionForBlob } from '../audioEffects';
 import { RingtonePlugin } from '../ringtonePlugin';
+import { SHARE_TARGET_IMAGES } from '../../../assets/voice-changer';
 import type { VcApi } from '../types';
 
 function blobToBase64(blob: Blob): Promise<string> {
@@ -26,15 +27,15 @@ function blobToBase64(blob: Blob): Promise<string> {
  *  no reliable cross-platform way to deep-link a file share straight into one specific app, so
  *  these are a recognizable visual shortcut into that sheet rather than a guaranteed direct route
  *  — the sheet that opens will show WhatsApp/Telegram/Gmail/etc. if the device has them installed. */
-const SHARE_TARGETS: { id: string; label: string; icon: IconName; background: string }[] = [
-  { id: 'whatsapp', label: 'WhatsApp', icon: 'chat', background: '#25D366' },
-  { id: 'telegram', label: 'Telegram', icon: 'send', background: '#229ED9' },
-  { id: 'instagram', label: 'Instagram', icon: 'camera', background: 'linear-gradient(135deg,#f58529,#dd2a7b 60%,#8134af)' },
-  { id: 'tiktok', label: 'TikTok', icon: 'music', background: '#111318' },
-  { id: 'youtube', label: 'YouTube', icon: 'play', background: '#FF0000' },
-  { id: 'gmail', label: 'Gmail', icon: 'mail', background: '#EA4335' },
-  { id: 'bluetooth', label: 'Bluetooth', icon: 'bluetooth', background: '#0A84FF' },
-  { id: 'more', label: 'More', icon: 'more-dots', background: '' },
+const SHARE_TARGETS: { id: string; label: string }[] = [
+  { id: 'whatsapp', label: 'WhatsApp' },
+  { id: 'telegram', label: 'Telegram' },
+  { id: 'instagram', label: 'Instagram' },
+  { id: 'tiktok', label: 'TikTok' },
+  { id: 'youtube', label: 'YouTube' },
+  { id: 'gmail', label: 'Gmail' },
+  { id: 'bluetooth', label: 'Bluetooth' },
+  { id: 'more', label: 'More' },
 ];
 
 function formatBytes(bytes: number): string {
@@ -213,14 +214,9 @@ export function ShareScreen({ api }: { api: VcApi }) {
           <span className="vch__section-title">Share to</span>
           <div className="vch__share-grid">
             {SHARE_TARGETS.map((t) => (
-              <button
-                key={t.id}
-                type="button"
-                className={`vch__share-target${t.id === 'more' ? ' vch__share-target--more' : ''}`}
-                onClick={() => void handleShare()}
-              >
-                <span className="vch__share-target-icon" style={t.background ? { background: t.background } : undefined}>
-                  <Icon name={t.icon} size={20} />
+              <button key={t.id} type="button" className="vch__share-target" onClick={() => void handleShare()}>
+                <span className="vch__share-target-icon">
+                  <img src={SHARE_TARGET_IMAGES[t.id]} alt="" />
                 </span>
                 <span>{t.label}</span>
               </button>

@@ -4,7 +4,7 @@ import { Icon } from '../../../components/Icon';
 import { hapticTap, hapticSelect } from '../../../haptics';
 import { AUTOTUNE_PRESETS, KEY_NAMES, SCALE_INTERVALS, renderAutoTune, type ScaleName } from '../autotune';
 import { playBuffer, stopPlayback } from '../playback';
-import { HeroMic } from '../HeroMic';
+import { heroMicrophone, autoTuneNotes } from '../../../assets/voice-changer';
 import type { VcApi } from '../types';
 
 const SCALE_NAMES = Object.keys(SCALE_INTERVALS) as ScaleName[];
@@ -81,13 +81,13 @@ export function AutoTuneScreen({ api }: { api: VcApi }) {
       <div className="vch__body">
         <div className="vch__at-hero" aria-hidden="true">
           <span className="vch__at-hero-icon">
-            <Icon name="music" size={18} />
+            <img src={autoTuneNotes} alt="" />
           </span>
           <span className="vch__at-hero-icon vch__at-hero-icon--main">
-            <HeroMic size={38} />
+            <img src={heroMicrophone} alt="" />
           </span>
           <span className="vch__at-hero-icon">
-            <Icon name="music" size={18} />
+            <img src={autoTuneNotes} alt="" />
           </span>
         </div>
 

@@ -129,76 +129,27 @@
   }
 }
 
-.vch__hero-visual {
+.vch__hero-image {
   position: relative;
   z-index: 1;
-  height: 168px;
   width: 100%;
+  max-width: 340px;
+  height: auto;
+  display: block;
+  -webkit-mask-image: radial-gradient(ellipse 62% 75% at center, black 55%, transparent 92%);
+  mask-image: radial-gradient(ellipse 62% 75% at center, black 55%, transparent 92%);
+  animation: vch-hero-breathe 4s ease-in-out infinite;
 }
 
-.vch__hero-wave {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 3.5px;
-  padding: 0 10px;
-}
-
-.vch__hero-wave span {
-  flex: 1;
-  max-width: 6px;
-  border-radius: 3px;
-  background: linear-gradient(180deg, var(--bar-color), color-mix(in srgb, var(--bar-color) 40%, transparent) 70%, transparent);
-  box-shadow: 0 0 10px 0 var(--bar-color);
-  animation: vch-hero-bar 1.6s ease-in-out infinite;
-  animation-delay: var(--d, 0s);
-}
-
-@keyframes vch-hero-bar {
-  0%,
-  100% {
-    height: 14%;
-  }
-  50% {
-    height: var(--peak, 100%);
-  }
-}
-
-.vch__hero-mic-wrap {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 2;
-}
-
-.vch__hero-mic-circle {
-  width: 122px;
-  height: 122px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: radial-gradient(circle at 34% 28%, rgba(255, 255, 255, 0.4), transparent 46%),
-    linear-gradient(135deg, var(--blue), var(--purple) 55%, var(--pink));
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.15) inset, 0 -10px 22px rgba(255, 255, 255, 0.3) inset,
-    0 10px 22px rgba(0, 0, 0, 0.4) inset, 0 18px 50px -10px color-mix(in srgb, var(--purple) 70%, transparent),
-    0 0 60px -6px color-mix(in srgb, var(--pink) 65%, transparent);
-  animation: vch-mic-pulse 3.2s ease-in-out infinite;
-}
-
-@keyframes vch-mic-pulse {
+@keyframes vch-hero-breathe {
   0%,
   100% {
     transform: scale(1);
     filter: brightness(1);
   }
   50% {
-    transform: scale(1.04);
-    filter: brightness(1.1);
+    transform: scale(1.02);
+    filter: brightness(1.06);
   }
 }
 
@@ -290,6 +241,12 @@
   color: var(--tile-color, var(--purple));
 }
 
+.vch__tile-icon img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
 /* Record -------------------------------------------------------------------------------------- */
 
 .vch__record-btn {
@@ -299,14 +256,18 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, color-mix(in srgb, var(--purple) 88%, white 8%), var(--purple));
+  background: radial-gradient(circle at 32% 24%, rgba(255, 255, 255, 0.5), transparent 50%),
+    linear-gradient(135deg, color-mix(in srgb, var(--purple) 88%, white 8%), var(--purple));
   color: #fff;
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--purple) 30%, transparent), 0 10px 28px -8px color-mix(in srgb, var(--purple) 65%, transparent);
+  box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.3) inset, 0 0 0 1px color-mix(in srgb, var(--purple) 30%, transparent),
+    0 10px 28px -8px color-mix(in srgb, var(--purple) 65%, transparent);
 }
 
 .vch__record-btn--active {
-  background: linear-gradient(135deg, color-mix(in srgb, var(--red) 88%, white 8%), var(--red));
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--red) 30%, transparent), 0 10px 28px -8px color-mix(in srgb, var(--red) 65%, transparent);
+  background: radial-gradient(circle at 32% 24%, rgba(255, 255, 255, 0.5), transparent 50%),
+    linear-gradient(135deg, color-mix(in srgb, var(--red) 88%, white 8%), var(--red));
+  box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.3) inset, 0 0 0 1px color-mix(in srgb, var(--red) 30%, transparent),
+    0 10px 28px -8px color-mix(in srgb, var(--red) 65%, transparent);
 }
 
 .vch__pulse-wrap {
@@ -382,9 +343,9 @@
   align-items: center;
   justify-content: center;
   align-self: center;
-  background: var(--accent-gradient);
+  background: radial-gradient(circle at 32% 26%, rgba(255, 255, 255, 0.45), transparent 55%), var(--accent-gradient);
   color: #fff;
-  box-shadow: var(--shadow-glow);
+  box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.3) inset, var(--shadow-glow), 0 10px 24px -8px color-mix(in srgb, var(--purple) 60%, transparent);
 }
 
 .vch__effects {
@@ -421,6 +382,12 @@
   color: var(--effect-color, var(--text-secondary));
   font-size: 22px;
   line-height: 1;
+}
+
+.vch__effect-icon img {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
 }
 
 .vch__effect--active {
@@ -480,14 +447,21 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 34% 28%, rgba(255, 255, 255, 0.3), transparent 55%),
-    color-mix(in srgb, var(--blue) 30%, var(--bg-elevated-2));
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1) inset, 0 -4px 8px rgba(255, 255, 255, 0.12) inset;
-  color: var(--blue);
   animation: vch-note-float 3.4s ease-in-out infinite;
+}
+
+.vch__at-hero-icon img {
+  width: 46px;
+  height: 46px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 14px rgba(236, 72, 153, 0.6)) drop-shadow(0 4px 10px rgba(0, 0, 0, 0.35));
+}
+
+.vch__at-hero-icon--main img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: none;
 }
 
 .vch__at-hero-icon:last-child {
@@ -507,6 +481,8 @@
 .vch__at-hero-icon--main {
   width: 74px;
   height: 74px;
+  border-radius: 50%;
+  overflow: hidden;
   background: radial-gradient(circle at 34% 28%, rgba(255, 255, 255, 0.4), transparent 46%),
     linear-gradient(135deg, var(--blue), var(--purple) 55%, var(--pink));
   color: #fff;
@@ -597,6 +573,29 @@
   width: 100%;
   accent-color: var(--purple);
   height: 4px;
+}
+
+.vch__slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 28%, rgba(255, 255, 255, 0.95), var(--purple) 65%);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.18), 0 2px 6px rgba(0, 0, 0, 0.45),
+    0 0 14px -2px color-mix(in srgb, var(--purple) 75%, transparent);
+  cursor: pointer;
+}
+
+.vch__slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border: none;
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 28%, rgba(255, 255, 255, 0.95), var(--purple) 65%);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.18), 0 2px 6px rgba(0, 0, 0, 0.45),
+    0 0 14px -2px color-mix(in srgb, var(--purple) 75%, transparent);
+  cursor: pointer;
 }
 
 .vch__slider-labels {
@@ -739,7 +738,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--accent-gradient);
+  background: radial-gradient(circle at 32% 26%, rgba(255, 255, 255, 0.45), transparent 55%), var(--accent-gradient);
+  box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.28) inset, 0 4px 10px -4px color-mix(in srgb, var(--purple) 60%, transparent);
   color: #fff;
 }
 
@@ -832,9 +832,9 @@
 }
 
 .vch__action--primary {
-  background: var(--accent-gradient);
+  background: radial-gradient(circle at 30% -30%, rgba(255, 255, 255, 0.45), transparent 55%), var(--accent-gradient);
   color: #fff;
-  box-shadow: var(--shadow-glow);
+  box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.3) inset, var(--shadow-glow), 0 10px 24px -10px color-mix(in srgb, var(--purple) 65%, transparent);
 }
 
 .vch__action--danger {
@@ -898,19 +898,16 @@
 .vch__share-target-icon {
   width: 48px;
   height: 48px;
-  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
-  box-shadow: 0 6px 14px -6px rgba(0, 0, 0, 0.4);
 }
 
-.vch__share-target--more .vch__share-target-icon {
-  background: var(--bg-elevated-2) !important;
-  color: var(--text-secondary);
-  box-shadow: none;
-  border: 1px solid var(--border);
+.vch__share-target-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.4));
 }
 
 .vch__share-target span {

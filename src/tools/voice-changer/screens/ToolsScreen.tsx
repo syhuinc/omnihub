@@ -1,14 +1,14 @@
 import { ScreenHeader } from '../../../components/ScreenHeader';
-import { Icon, type IconName } from '../../../components/Icon';
 import { hapticTap } from '../../../haptics';
+import { TILE_IMAGES } from '../../../assets/voice-changer';
 import type { VcApi, VcScreenName } from '../types';
 
-const TILES: { id: VcScreenName; label: string; desc: string; icon: IconName; color: string }[] = [
-  { id: 'effects', label: 'Voice Effects', desc: 'Fun & creative voices', icon: 'zap', color: '#3b82f6' },
-  { id: 'autotune', label: 'Auto-Tune', desc: 'Pitch correction & singing', icon: 'music', color: '#ec4899' },
-  { id: 'pitch-speed', label: 'Pitch & Speed', desc: 'Change pitch and speed', icon: 'sliders', color: '#14b8a6' },
-  { id: 'echo-reverb', label: 'Echo & Reverb', desc: 'Studio effects', icon: 'repeat', color: '#8b5cf6' },
-  { id: 'mixer', label: 'Voice Mixer', desc: 'Combine effects', icon: 'sliders', color: '#f97316' },
+const TILES: { id: VcScreenName; label: string; desc: string; color: string }[] = [
+  { id: 'effects', label: 'Voice Effects', desc: 'Fun & creative voices', color: '#3b82f6' },
+  { id: 'autotune', label: 'Auto-Tune', desc: 'Pitch correction & singing', color: '#ec4899' },
+  { id: 'pitch-speed', label: 'Pitch & Speed', desc: 'Change pitch and speed', color: '#14b8a6' },
+  { id: 'echo-reverb', label: 'Echo & Reverb', desc: 'Studio effects', color: '#8b5cf6' },
+  { id: 'mixer', label: 'Voice Mixer', desc: 'Combine effects', color: '#f97316' },
 ];
 
 export function ToolsScreen({ api }: { api: VcApi }) {
@@ -30,7 +30,7 @@ export function ToolsScreen({ api }: { api: VcApi }) {
           {TILES.map((t) => (
             <button key={t.id} type="button" className="vch__tile" onClick={() => openTile(t.id)} style={{ '--tile-color': t.color } as React.CSSProperties}>
               <span className="vch__tile-icon">
-                <Icon name={t.icon} size={20} />
+                <img src={TILE_IMAGES[t.id]} alt="" />
               </span>
               <strong>{t.label}</strong>
               <small>{t.desc}</small>

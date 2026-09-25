@@ -1,30 +1,18 @@
 import { useRef, useState } from 'react';
 import { ScreenHeader } from '../../../components/ScreenHeader';
-import { Icon, type IconName } from '../../../components/Icon';
+import { Icon } from '../../../components/Icon';
 import { hapticTap, hapticWarning } from '../../../haptics';
 import { decodeBlob } from '../playback';
-import { HeroMic } from '../HeroMic';
+import { heroMicrophone, TILE_IMAGES } from '../../../assets/voice-changer';
 import type { VcApi, VcScreenName } from '../types';
 
-/** Blue -> purple -> pink across the bar count, so the continuous waveform reads as one smooth
- *  gradient sweep rather than repeating three flat colors. */
-function waveBarColor(i: number, count: number): string {
-  const t = i / (count - 1);
-  return t < 0.5
-    ? `color-mix(in srgb, var(--purple) ${Math.round(t * 200)}%, var(--blue))`
-    : `color-mix(in srgb, var(--pink) ${Math.round((t - 0.5) * 200)}%, var(--purple))`;
-}
-
-const WAVE_BAR_COUNT = 22;
-const WAVE_HEIGHTS = [0.3, 0.55, 0.8, 0.5, 0.9, 0.35, 0.7, 1, 0.45, 0.85, 0.6, 0.6, 0.85, 0.45, 1, 0.7, 0.35, 0.9, 0.5, 0.8, 0.55, 0.3];
-
-const TILES: { id: VcScreenName; label: string; desc: string; icon: IconName; color: string }[] = [
-  { id: 'effects', label: 'Voice Effects', desc: 'Fun & creative voices', icon: 'zap', color: '#3b82f6' },
-  { id: 'autotune', label: 'Auto-Tune', desc: 'Pitch correction & singing', icon: 'music', color: '#ec4899' },
-  { id: 'pitch-speed', label: 'Pitch & Speed', desc: 'Change pitch and speed', icon: 'sliders', color: '#14b8a6' },
-  { id: 'echo-reverb', label: 'Echo & Reverb', desc: 'Studio effects', icon: 'repeat', color: '#8b5cf6' },
-  { id: 'mixer', label: 'Voice Mixer', desc: 'Combine effects', icon: 'sliders', color: '#f97316' },
-  { id: 'tools', label: 'More Tools', desc: 'Browse everything', icon: 'more-dots', color: '#64748b' },
+const TILES: { id: VcScreenName; label: string; desc: string; color: string }[] = [
+  { id: 'effects', label: 'Voice Effects', desc: 'Fun & creative voices', color: '#3b82f6' },
+  { id: 'autotune', label: 'Auto-Tune', desc: 'Pitch correction & singing', color: '#ec4899' },
+  { id: 'pitch-speed', label: 'Pitch & Speed', desc: 'Change pitch and speed', color: '#14b8a6' },
+  { id: 'echo-reverb', label: 'Echo & Reverb', desc: 'Studio effects', color: '#8b5cf6' },
+  { id: 'mixer', label: 'Voice Mixer', desc: 'Combine effects', color: '#f97316' },
+  { id: 'tools', label: 'More Tools', desc: 'Browse everything', color: '#64748b' },
 ];
 
 export function HomeScreen({ api }: { api: VcApi }) {
@@ -85,27 +73,7 @@ export function HomeScreen({ api }: { api: VcApi }) {
 
         <div className="vch__hero">
           <div className="vch__hero-glow" />
-          <div className="vch__hero-visual">
-            <div className="vch__hero-wave" aria-hidden="true">
-              {WAVE_HEIGHTS.map((peak, i) => (
-                <span
-                  key={i}
-                  style={
-                    {
-                      '--d': `${(i * 0.9) % 1.6}s`,
-                      '--peak': `${Math.round(peak * 100)}%`,
-                      '--bar-color': waveBarColor(i, WAVE_BAR_COUNT),
-                    } as React.CSSProperties
-                  }
-                />
-              ))}
-            </div>
-            <div className="vch__hero-mic-wrap">
-              <div className="vch__hero-mic-circle">
-                <HeroMic size={52} />
-              </div>
-            </div>
-          </div>
+          <img className="vch__hero-image" src={heroMicrophone} alt="" />
           <p className="vch__hero-text">Record, transform, and share your voice</p>
         </div>
 
@@ -130,7 +98,7 @@ export function HomeScreen({ api }: { api: VcApi }) {
           {TILES.map((t) => (
             <button key={t.id} type="button" className="vch__tile" onClick={() => openTile(t.id)} style={{ '--tile-color': t.color } as React.CSSProperties}>
               <span className="vch__tile-icon">
-                <Icon name={t.icon} size={20} />
+                <img src={TILE_IMAGES[t.id]} alt="" />
               </span>
               <strong>{t.label}</strong>
               <small>{t.desc}</small>

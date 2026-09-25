@@ -5,6 +5,7 @@ import { hapticTap, hapticSelect } from '../../../haptics';
 import { EFFECTS, type EffectCategory, renderEffect } from '../audioEffects';
 import { playBuffer, stopPlayback } from '../playback';
 import { ClipCard } from '../ClipCard';
+import { EFFECT_IMAGES } from '../../../assets/voice-changer';
 import type { VcApi } from '../types';
 
 const CATEGORY_TABS: { id: EffectCategory | 'all'; label: string }[] = [
@@ -104,7 +105,7 @@ export function EffectsScreen({ api }: { api: VcApi }) {
               style={{ '--effect-color': effect.color } as React.CSSProperties}
             >
               <span className="vch__effect-icon" aria-hidden="true">
-                {effect.emoji}
+                <img src={EFFECT_IMAGES[effect.id]} alt="" />
               </span>
               <span>{effect.label}</span>
             </button>

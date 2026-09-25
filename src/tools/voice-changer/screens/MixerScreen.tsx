@@ -4,6 +4,7 @@ import { Icon } from '../../../components/Icon';
 import { hapticTap, hapticSelect } from '../../../haptics';
 import { EFFECTS, renderEffects } from '../audioEffects';
 import { playBuffer, stopPlayback } from '../playback';
+import { EFFECT_IMAGES } from '../../../assets/voice-changer';
 import type { VcApi } from '../types';
 
 const MIXABLE = EFFECTS.filter((e) => e.id !== 'normal');
@@ -74,7 +75,7 @@ export function MixerScreen({ api }: { api: VcApi }) {
               style={{ '--effect-color': effect.color } as React.CSSProperties}
             >
               <span className="vch__effect-icon" aria-hidden="true">
-                {effect.emoji}
+                <img src={EFFECT_IMAGES[effect.id]} alt="" />
               </span>
               <span>{effect.label}</span>
             </button>
