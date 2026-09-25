@@ -232,19 +232,17 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
-  background: radial-gradient(circle at 32% 26%, rgba(255, 255, 255, 0.3), transparent 55%),
-    color-mix(in srgb, var(--tile-color, var(--purple)) 22%, var(--bg-elevated-2));
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08) inset, 0 -3px 6px rgba(255, 255, 255, 0.1) inset;
-  color: var(--tile-color, var(--purple));
+  width: 56px;
+  height: 56px;
+  margin-bottom: 2px;
 }
 
 .vch__tile-icon img {
-  width: 24px;
-  height: 24px;
+  width: 56px;
+  height: 56px;
   object-fit: contain;
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.5))
+    drop-shadow(0 0 16px color-mix(in srgb, var(--tile-color, var(--purple)) 60%, transparent));
 }
 
 /* Record -------------------------------------------------------------------------------------- */
@@ -373,21 +371,15 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 32% 26%, rgba(255, 255, 255, 0.28), transparent 55%),
-    color-mix(in srgb, var(--effect-color, var(--text-secondary)) 22%, var(--bg-elevated-2));
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08) inset, 0 -3px 6px rgba(255, 255, 255, 0.1) inset;
-  color: var(--effect-color, var(--text-secondary));
-  font-size: 22px;
-  line-height: 1;
+  width: 100%;
+  height: 64px;
 }
 
 .vch__effect-icon img {
-  width: 30px;
-  height: 30px;
+  width: 64px;
+  height: 64px;
   object-fit: contain;
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.5));
 }
 
 .vch__effect--active {
@@ -396,12 +388,9 @@
   color: var(--text-primary);
 }
 
-.vch__effect--active .vch__effect-icon {
-  background: radial-gradient(circle at 32% 26%, rgba(255, 255, 255, 0.4), transparent 55%),
-    linear-gradient(135deg, color-mix(in srgb, var(--effect-color, var(--purple)) 88%, white 8%), var(--effect-color, var(--purple)));
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.15) inset, 0 -4px 8px rgba(255, 255, 255, 0.25) inset,
-    0 10px 20px -6px color-mix(in srgb, var(--effect-color, var(--purple)) 60%, transparent);
-  color: #fff;
+.vch__effect--active .vch__effect-icon img {
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.5))
+    drop-shadow(0 0 18px color-mix(in srgb, var(--effect-color, var(--purple)) 75%, transparent));
 }
 
 /* Category / preset chips ----------------------------------------------------------------------- */
