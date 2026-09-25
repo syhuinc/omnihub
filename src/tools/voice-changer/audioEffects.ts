@@ -1,82 +1,278 @@
 import type { IconName } from '../../components/Icon';
 
-export type VoiceEffectId = 'original' | 'chipmunk' | 'deep' | 'robot' | 'echo' | 'alien';
+export type EffectCategory = 'fun' | 'character' | 'special';
 
-export const VOICE_EFFECTS: { id: VoiceEffectId; label: string; icon: IconName }[] = [
-  { id: 'original', label: 'Original', icon: 'mic' },
-  { id: 'chipmunk', label: 'Chipmunk', icon: 'zap' },
-  { id: 'deep', label: 'Deep Voice', icon: 'moon' },
-  { id: 'robot', label: 'Robot', icon: 'cpu' },
-  { id: 'echo', label: 'Echo', icon: 'repeat' },
-  { id: 'alien', label: 'Alien', icon: 'star' },
+export interface EffectDef {
+  id: string;
+  label: string;
+  icon: IconName;
+  category: EffectCategory;
+}
+
+/** id 'normal' is the only one every screen treats as "no effect" — kept out of the rate/processing
+ *  tables below since it's a pure passthrough. */
+export const EFFECTS: EffectDef[] = [
+  { id: 'normal', label: 'Normal', icon: 'mic', category: 'fun' },
+  { id: 'chipmunk', label: 'Chipmunk', icon: 'zap', category: 'fun' },
+  { id: 'fast', label: 'Fast', icon: 'fast-forward', category: 'fun' },
+  { id: 'slow', label: 'Slow', icon: 'clock', category: 'fun' },
+  { id: 'deep', label: 'Deep Voice', icon: 'moon', category: 'character' },
+  { id: 'baby', label: 'Baby Voice', icon: 'baby', category: 'character' },
+  { id: 'robot', label: 'Robot', icon: 'cpu', category: 'character' },
+  { id: 'alien', label: 'Alien', icon: 'star', category: 'character' },
+  { id: 'monster', label: 'Monster', icon: 'paw', category: 'character' },
+  { id: 'echo', label: 'Echo', icon: 'repeat', category: 'special' },
+  { id: 'radio', label: 'Radio', icon: 'wifi', category: 'special' },
+  { id: 'megaphone', label: 'Megaphone', icon: 'volume', category: 'special' },
+  { id: 'distorted', label: 'Distorted', icon: 'activity', category: 'special' },
 ];
 
-/** Playback-rate change for the pitch-shifting effects — also shortens/lengthens duration, which
- *  is the classic, expected trade-off for this style of effect (real formant-preserving pitch
- *  shift needs much heavier DSP than a fun utility tool like this calls for). */
-const PLAYBACK_RATE: Partial<Record<VoiceEffectId, number>> = {
-  chipmunk: 1.55,
-  deep: 0.72,
-  alien: 1.28,
-};
+export function getEffect(id: string): EffectDef {
+  return EFFECTS.find((e) => e.id === id) ?? EFFECTS[0];
+}
 
-/** Ring-modulation carrier frequency — connecting a sine oscillator straight into a GainNode's
- *  own gain AudioParam, with the gain's base value left at 0, makes the gain equal the carrier
- *  wave itself, so the dry signal passing through gets multiplied by it. That's textbook ring
- *  modulation without needing a ScriptProcessor/AudioWorklet. */
-const RING_MOD_HZ: Partial<Record<VoiceEffectId, number>> = {
-  robot: 35,
-  alien: 60,
-};
+/** The playback-rate contribution of a single effect at a given intensity (0-1, default 0.5).
+ *  1 = no change. Multiple effects (Voice Mixer) multiply their rates together onto the one
+ *  BufferSourceNode a render pass has. */
+function rateFor(effectId: string, intensity: number): number {
+  switch (effectId) {
+    case 'chipmunk':
+      return 1 + intensity * 0.9;
+    case 'fast':
+      return 1 + intensity * 0.6;
+    case 'slow':
+      return 1 - intensity * 0.5;
+    case 'deep':
+      return 1 - intensity * 0.55;
+    case 'baby':
+      return 1 + intensity * 0.7;
+    case 'alien':
+      return 1 + intensity * 0.4;
+    case 'monster':
+      return 1 - intensity * 0.6;
+    default:
+      return 1;
+  }
+}
 
-const ECHO_TAIL_SECONDS = 1.2;
+/** Classic WebAudio soft-clip distortion curve (the standard formula cited in MDN's WaveShaperNode
+ *  example) — a cheap, well-known way to get analog-style grit without modeling real circuitry. */
+function makeDistortionCurve(amount: number): Float32Array<ArrayBuffer> {
+  const k = Math.max(0, amount) * 100;
+  const n = 44100;
+  // WaveShaperNode.curve requires an ArrayBuffer-backed (not SharedArrayBuffer-compatible)
+  // Float32Array under recent TS DOM lib typings — constructing from an explicit ArrayBuffer
+  // pins the generic, unlike the plain `new Float32Array(n)` form.
+  const curve = new Float32Array(new ArrayBuffer(n * 4));
+  const deg = Math.PI / 180;
+  for (let i = 0; i < n; i++) {
+    const x = (i * 2) / n - 1;
+    curve[i] = ((3 + k) * x * 20 * deg) / (Math.PI + k * Math.abs(x));
+  }
+  return curve;
+}
 
-/** Renders an effect into a brand new AudioBuffer via OfflineAudioContext, so the result is a
- *  plain, deterministic buffer usable for both preview playback and exporting to a shareable
- *  WAV file — the same rendered buffer serves both purposes. */
-export async function renderEffect(buffer: AudioBuffer, effect: VoiceEffectId): Promise<AudioBuffer> {
-  if (effect === 'original') return buffer;
+/** Inserts one effect's non-rate processing (filters, ring modulation, distortion, delay) into the
+ *  chain and returns the new output node. Rate is handled separately (see rateFor) since it lives
+ *  on the shared BufferSourceNode, not per-effect. Pure rate effects (chipmunk/fast/slow/deep) add
+ *  no nodes here and just pass the input straight through. */
+function applyProcessing(ctx: BaseAudioContext, input: AudioNode, effectId: string, intensity: number): AudioNode {
+  switch (effectId) {
+    case 'baby': {
+      const hp = ctx.createBiquadFilter();
+      hp.type = 'highpass';
+      hp.frequency.value = 300 + intensity * 500;
+      input.connect(hp);
+      return hp;
+    }
+    case 'robot':
+    case 'alien': {
+      const modGain = ctx.createGain();
+      modGain.gain.value = 0;
+      const carrier = ctx.createOscillator();
+      carrier.type = 'sine';
+      carrier.frequency.value = effectId === 'robot' ? 20 + intensity * 60 : 30 + intensity * 90;
+      carrier.connect(modGain.gain);
+      carrier.start(0);
+      input.connect(modGain);
+      return modGain;
+    }
+    case 'monster': {
+      const lp = ctx.createBiquadFilter();
+      lp.type = 'lowpass';
+      lp.frequency.value = 900 - intensity * 500;
+      const shaper = ctx.createWaveShaper();
+      shaper.curve = makeDistortionCurve(intensity * 0.25);
+      input.connect(lp);
+      lp.connect(shaper);
+      return shaper;
+    }
+    case 'echo': {
+      const delay = ctx.createDelay(1.0);
+      delay.delayTime.value = 0.15 + intensity * 0.25;
+      const feedback = ctx.createGain();
+      feedback.gain.value = Math.min(0.75, 0.2 + intensity * 0.5);
+      const merged = ctx.createGain();
+      input.connect(merged);
+      input.connect(delay);
+      delay.connect(feedback);
+      feedback.connect(delay);
+      delay.connect(merged);
+      return merged;
+    }
+    case 'radio': {
+      const bp = ctx.createBiquadFilter();
+      bp.type = 'bandpass';
+      bp.frequency.value = 1200;
+      bp.Q.value = 1 + intensity * 4;
+      const shaper = ctx.createWaveShaper();
+      shaper.curve = makeDistortionCurve(intensity * 0.15);
+      input.connect(bp);
+      bp.connect(shaper);
+      return shaper;
+    }
+    case 'megaphone': {
+      const bp = ctx.createBiquadFilter();
+      bp.type = 'bandpass';
+      bp.frequency.value = 1500;
+      bp.Q.value = 1.5;
+      const shaper = ctx.createWaveShaper();
+      shaper.curve = makeDistortionCurve(0.25 + intensity * 0.5);
+      input.connect(bp);
+      bp.connect(shaper);
+      return shaper;
+    }
+    case 'distorted': {
+      const shaper = ctx.createWaveShaper();
+      shaper.curve = makeDistortionCurve(0.15 + intensity * 0.75);
+      input.connect(shaper);
+      return shaper;
+    }
+    default:
+      return input;
+  }
+}
 
-  const rate = PLAYBACK_RATE[effect] ?? 1;
-  const tailSamples = effect === 'echo' ? Math.ceil(ECHO_TAIL_SECONDS * buffer.sampleRate) : 0;
-  const outLength = Math.ceil(buffer.length / rate) + tailSamples;
+function extraTailSeconds(effectIds: string[], intensity: number): number {
+  if (!effectIds.includes('echo')) return 0;
+  return 0.15 + intensity * 0.25 + 1.0;
+}
+
+/** Renders one or more effects (Voice Mixer combines several; every other screen passes a single
+ *  id) into a brand new AudioBuffer via OfflineAudioContext, so the result is a plain,
+ *  deterministic buffer usable for preview playback and for the shared/saved file alike. */
+export async function renderEffects(buffer: AudioBuffer, effectIds: string[], intensity = 0.5): Promise<AudioBuffer> {
+  const active = effectIds.filter((id) => id !== 'normal');
+  if (active.length === 0) return buffer;
+
+  const rate = active.reduce((r, id) => r * rateFor(id, intensity), 1);
+  const clampedRate = Math.max(0.3, Math.min(3, rate));
+  const tailSamples = Math.ceil(extraTailSeconds(active, intensity) * buffer.sampleRate);
+  const outLength = Math.ceil(buffer.length / clampedRate) + tailSamples;
+
+  const ctx = new OfflineAudioContext(buffer.numberOfChannels, outLength, buffer.sampleRate);
+  const source = ctx.createBufferSource();
+  source.buffer = buffer;
+  source.playbackRate.value = clampedRate;
+
+  let node: AudioNode = source;
+  for (const id of active) node = applyProcessing(ctx, node, id, intensity);
+
+  node.connect(ctx.destination);
+  source.start(0);
+  return ctx.startRendering();
+}
+
+export async function renderEffect(buffer: AudioBuffer, effectId: string, intensity = 0.5): Promise<AudioBuffer> {
+  return renderEffects(buffer, [effectId], intensity);
+}
+
+export interface PitchSpeedOptions {
+  /** Semitones, roughly -12..+12. */
+  semitones: number;
+  /** 1 = normal speed. */
+  speed: number;
+}
+
+/** A dedicated continuous pitch/speed tool. Both controls live on the same BufferSourceNode
+ *  playback rate (there's no independent time-stretch without much heavier DSP — see autotune.ts
+ *  for where that complexity actually gets spent), so moving one slider does audibly affect the
+ *  other; that's an honest, standard trade-off for this style of simple tool, not a bug. */
+export async function renderPitchSpeed(buffer: AudioBuffer, opts: PitchSpeedOptions): Promise<AudioBuffer> {
+  const pitchRate = Math.pow(2, opts.semitones / 12);
+  const rate = Math.max(0.3, Math.min(3, pitchRate * opts.speed));
+  const outLength = Math.ceil(buffer.length / rate);
 
   const ctx = new OfflineAudioContext(buffer.numberOfChannels, outLength, buffer.sampleRate);
   const source = ctx.createBufferSource();
   source.buffer = buffer;
   source.playbackRate.value = rate;
+  source.connect(ctx.destination);
+  source.start(0);
+  return ctx.startRendering();
+}
 
-  let node: AudioNode = source;
-
-  const ringHz = RING_MOD_HZ[effect];
-  if (ringHz) {
-    const modGain = ctx.createGain();
-    modGain.gain.value = 0;
-    const carrier = ctx.createOscillator();
-    carrier.type = 'sine';
-    carrier.frequency.value = ringHz;
-    carrier.connect(modGain.gain);
-    carrier.start(0);
-    node.connect(modGain);
-    node = modGain;
+/** A synthetic room impulse response — exponentially-decaying filtered noise — rather than a
+ *  licensed/recorded IR file (we don't have one), convolved in to approximate reverb. */
+function generateImpulseResponse(ctx: BaseAudioContext, seconds: number, decay: number): AudioBuffer {
+  const rate = ctx.sampleRate;
+  const length = Math.max(1, Math.floor(rate * seconds));
+  const impulse = ctx.createBuffer(2, length, rate);
+  for (let c = 0; c < 2; c++) {
+    const data = impulse.getChannelData(c);
+    for (let i = 0; i < length; i++) {
+      data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / length, decay);
+    }
   }
+  return impulse;
+}
 
-  if (effect === 'echo') {
-    const delay = ctx.createDelay(1.0);
-    delay.delayTime.value = 0.22;
+export interface EchoReverbOptions {
+  delayTime: number; // seconds
+  feedback: number; // 0-0.85
+  echoMix: number; // 0-1
+  reverbDecaySeconds: number; // 0.2-3
+  reverbMix: number; // 0-1
+}
+
+export async function renderEchoReverb(buffer: AudioBuffer, opts: EchoReverbOptions): Promise<AudioBuffer> {
+  const tailSeconds = opts.delayTime * 4 + opts.reverbDecaySeconds + 0.5;
+  const outLength = buffer.length + Math.ceil(tailSeconds * buffer.sampleRate);
+
+  const ctx = new OfflineAudioContext(buffer.numberOfChannels, outLength, buffer.sampleRate);
+  const source = ctx.createBufferSource();
+  source.buffer = buffer;
+
+  const dry = ctx.createGain();
+  dry.gain.value = 1;
+  source.connect(dry);
+  dry.connect(ctx.destination);
+
+  if (opts.echoMix > 0.001) {
+    const delay = ctx.createDelay(2.0);
+    delay.delayTime.value = Math.max(0.01, opts.delayTime);
     const feedback = ctx.createGain();
-    feedback.gain.value = 0.35;
-    const merged = ctx.createGain();
+    feedback.gain.value = Math.min(0.85, Math.max(0, opts.feedback));
+    const wet = ctx.createGain();
+    wet.gain.value = opts.echoMix;
 
-    node.connect(merged);
-    node.connect(delay);
+    source.connect(delay);
     delay.connect(feedback);
     feedback.connect(delay);
-    delay.connect(merged);
-    node = merged;
+    delay.connect(wet);
+    wet.connect(ctx.destination);
   }
 
-  node.connect(ctx.destination);
+  if (opts.reverbMix > 0.001) {
+    const convolver = ctx.createConvolver();
+    convolver.buffer = generateImpulseResponse(ctx, Math.max(0.2, opts.reverbDecaySeconds), 2.2);
+    const wet = ctx.createGain();
+    wet.gain.value = opts.reverbMix;
+    source.connect(convolver);
+    convolver.connect(wet);
+    wet.connect(ctx.destination);
+  }
+
   source.start(0);
   return ctx.startRendering();
 }
@@ -84,7 +280,8 @@ export async function renderEffect(buffer: AudioBuffer, effect: VoiceEffectId): 
 /** Standard 16-bit PCM WAV encoder — MediaRecorder can't re-encode an already-processed
  *  AudioBuffer directly (it needs a live MediaStream), and a hand-rolled WAV writer is simpler
  *  and more deterministic than routing the rendered buffer back through a MediaStreamDestination
- *  and a second real-time recording pass. */
+ *  and a second real-time recording pass. Browsers don't offer a native MP3 encoder, so WAV is
+ *  the honest format to ship here rather than mislabeling the output. */
 export function audioBufferToWav(buffer: AudioBuffer): Blob {
   const numChannels = buffer.numberOfChannels;
   const sampleRate = buffer.sampleRate;

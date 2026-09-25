@@ -94,7 +94,10 @@ export type IconName =
   | 'cpu'
   | 'database'
   | 'mic'
-  | 'share';
+  | 'share'
+  | 'baby'
+  | 'sliders'
+  | 'fast-forward';
 
 interface IconProps {
   name: IconName;
@@ -343,6 +346,21 @@ const paths: Record<IconName, React.ReactNode> = {
       <path d="M8.3 10.7 15.7 6.6 M8.3 13.3l7.4 4.1" />
     </>
   ),
+  baby: (
+    <>
+      <circle cx="12" cy="12" r="7" />
+      <path d="M9.5 11h.01M14.5 11h.01M9.5 15a3 3 0 0 0 5 0" />
+    </>
+  ),
+  sliders: (
+    <>
+      <path d="M4 6h16M4 12h16M4 18h16" />
+      <circle cx="9" cy="6" r="2" />
+      <circle cx="15" cy="12" r="2" />
+      <circle cx="7" cy="18" r="2" />
+    </>
+  ),
+  'fast-forward': <path d="M5 5v14l9-7Z M14 5v14l9-7Z" />,
 };
 
 export function Icon({ name, size = 20, strokeWidth = 2, className, style }: IconProps) {
