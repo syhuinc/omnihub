@@ -71,9 +71,22 @@ export function HomeScreen({ api }: { api: VcApi }) {
         )}
 
         <div className="vch__hero">
-          <span className="vch__hero-icon">
-            <Icon name="mic" size={34} />
-          </span>
+          <div className="vch__hero-glow" />
+          <div className="vch__hero-visual">
+            <span className="vch__hero-bars" aria-hidden="true">
+              {[0.15, 0.3, 0, 0.45].map((d, i) => (
+                <span key={i} style={{ '--d': `${d}s`, '--bar-color': i % 2 ? 'var(--blue)' : 'var(--purple)' } as React.CSSProperties} />
+              ))}
+            </span>
+            <span className="vch__hero-icon">
+              <Icon name="mic" size={34} />
+            </span>
+            <span className="vch__hero-bars" aria-hidden="true">
+              {[0.4, 0.1, 0.25, 0].map((d, i) => (
+                <span key={i} style={{ '--d': `${d}s`, '--bar-color': i % 2 ? 'var(--purple)' : 'var(--pink)' } as React.CSSProperties} />
+              ))}
+            </span>
+          </div>
           <p className="vch__hero-text">Record, transform, and share your voice</p>
         </div>
 

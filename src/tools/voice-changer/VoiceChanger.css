@@ -41,6 +41,59 @@
   padding: 20px 0 4px;
 }
 
+.vch__hero {
+  position: relative;
+}
+
+.vch__hero-glow {
+  position: absolute;
+  inset: -10px 15% auto;
+  height: 150px;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--purple) 45%, transparent),
+    color-mix(in srgb, var(--pink) 25%, transparent) 55%,
+    transparent 75%
+  );
+  filter: blur(22px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.vch__hero-visual {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.vch__hero-bars {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  height: 40px;
+}
+
+.vch__hero-bars span {
+  width: 3px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, var(--bar-color, var(--purple)), transparent);
+  animation: vch-hero-bar 1.8s ease-in-out infinite;
+  animation-delay: var(--d, 0s);
+}
+
+@keyframes vch-hero-bar {
+  0%,
+  100% {
+    height: 30%;
+  }
+  50% {
+    height: 100%;
+  }
+}
+
 .vch__hero-icon {
   width: 68px;
   height: 68px;
@@ -51,6 +104,7 @@
   background: linear-gradient(135deg, color-mix(in srgb, var(--purple) 85%, var(--pink) 25%), var(--pink));
   color: #fff;
   box-shadow: 0 10px 28px -8px color-mix(in srgb, var(--purple) 65%, transparent);
+  flex-shrink: 0;
 }
 
 .vch__hero-text {
@@ -260,18 +314,18 @@
   width: 38px;
   height: 38px;
   border-radius: 50%;
-  background: var(--bg-elevated-2);
-  color: var(--text-secondary);
+  background: color-mix(in srgb, var(--effect-color, var(--text-secondary)) 20%, var(--bg-elevated-2));
+  color: var(--effect-color, var(--text-secondary));
 }
 
 .vch__effect--active {
-  background: color-mix(in srgb, var(--purple) 16%, var(--bg-elevated));
-  border-color: color-mix(in srgb, var(--purple) 40%, transparent);
+  background: color-mix(in srgb, var(--effect-color, var(--purple)) 16%, var(--bg-elevated));
+  border-color: color-mix(in srgb, var(--effect-color, var(--purple)) 45%, transparent);
   color: var(--text-primary);
 }
 
 .vch__effect--active .vch__effect-icon {
-  background: linear-gradient(135deg, color-mix(in srgb, var(--purple) 88%, white 8%), var(--purple));
+  background: linear-gradient(135deg, color-mix(in srgb, var(--effect-color, var(--purple)) 88%, white 8%), var(--effect-color, var(--purple)));
   color: #fff;
 }
 
@@ -304,6 +358,33 @@
   background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 85%, white 10%), var(--accent));
   border-color: transparent;
   color: #fff;
+}
+
+.vch__at-hero {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 12px 0 4px;
+}
+
+.vch__at-hero-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--blue) 22%, var(--bg-elevated-2));
+  color: var(--blue);
+}
+
+.vch__at-hero-icon--main {
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--blue) 85%, var(--purple) 25%), var(--purple));
+  color: #fff;
+  box-shadow: 0 10px 26px -8px color-mix(in srgb, var(--blue) 60%, transparent);
 }
 
 .vch__preset-row {
@@ -560,6 +641,21 @@
   background: color-mix(in srgb, var(--purple) 55%, var(--bg-elevated-2));
 }
 
+/* .vch__body--center centers its children on the cross axis, which shrink-wraps a flex item with
+   no explicit width to fit-content instead of stretching it — align-self here overrides that so
+   the live recording waveform actually spans the row instead of collapsing to a few px wide. */
+.vch__waveform--live {
+  align-self: stretch;
+  height: 40px;
+  gap: 3px;
+  padding: 0 12px;
+}
+
+.vch__waveform--live span {
+  background: linear-gradient(180deg, var(--red), color-mix(in srgb, var(--pink) 60%, var(--red)));
+  transition: height 0.09s ease-out;
+}
+
 /* Actions / buttons ----------------------------------------------------------------------------- */
 
 .vch__actions {
@@ -648,6 +744,43 @@
   display: block;
   font-size: 12px;
   color: var(--text-secondary);
+}
+
+.vch__share-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px 6px;
+}
+
+.vch__share-target {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.vch__share-target-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  box-shadow: 0 6px 14px -6px rgba(0, 0, 0, 0.4);
+}
+
+.vch__share-target--more .vch__share-target-icon {
+  background: var(--bg-elevated-2) !important;
+  color: var(--text-secondary);
+  box-shadow: none;
+  border: 1px solid var(--border);
+}
+
+.vch__share-target span {
+  font-size: 11px;
+  color: var(--text-secondary);
+  text-align: center;
 }
 
 .vch__menu-list {

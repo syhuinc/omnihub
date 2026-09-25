@@ -78,6 +78,18 @@ export function AutoTuneScreen({ api }: { api: VcApi }) {
     <div className="screen">
       <ScreenHeader title="Auto-Tune" subtitle="Fix your pitch, sound like a pro" onBack={api.popBack} />
       <div className="vch__body">
+        <div className="vch__at-hero" aria-hidden="true">
+          <span className="vch__at-hero-icon">
+            <Icon name="music" size={18} />
+          </span>
+          <span className="vch__at-hero-icon vch__at-hero-icon--main">
+            <Icon name="mic" size={28} />
+          </span>
+          <span className="vch__at-hero-icon">
+            <Icon name="music" size={18} />
+          </span>
+        </div>
+
         <div className="vch__section-title-row">
           <span className="vch__section-title">Presets</span>
         </div>

@@ -23,17 +23,24 @@ export function RecordScreen({ api }: { api: VcApi }) {
   const [isBusy, setIsBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [levels, setLevels] = useState<number[]>(() => Array(28).fill(8));
+
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const streamRef = useRef<MediaStream | null>(null);
   const timerRef = useRef<number | null>(null);
   const startedAtRef = useRef(0);
   const autoStopRef = useRef<number | null>(null);
+  const analyserCtxRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const rafRef = useRef<number | null>(null);
+  const tickRef = useRef<(() => void) | null>(null);
 
   useEffect(
     () => () => {
       stopStream();
       clearTimer();
+      stopVisualizer();
       if (autoStopRef.current) window.clearTimeout(autoStopRef.current);
     },
     [],
@@ -42,6 +49,50 @@ export function RecordScreen({ api }: { api: VcApi }) {
   function stopStream() {
     streamRef.current?.getTracks().forEach((t) => t.stop());
     streamRef.current = null;
+  }
+
+  function startVisualizer(stream: MediaStream) {
+    const ctx = new AudioContext();
+    analyserCtxRef.current = ctx;
+    const source = ctx.createMediaStreamSource(stream);
+    const analyser = ctx.createAnalyser();
+    analyser.fftSize = 128;
+    analyser.smoothingTimeConstant = 0.6;
+    source.connect(analyser);
+    analyserRef.current = analyser;
+
+    const data = new Uint8Array(analyser.frequencyBinCount);
+    const BARS = 28;
+    const step = Math.max(1, Math.floor(data.length / BARS));
+
+    function tick() {
+      analyser.getByteFrequencyData(data);
+      const next: number[] = [];
+      for (let i = 0; i < BARS; i++) next.push(Math.max(8, (data[i * step] / 255) * 100));
+      setLevels(next);
+      rafRef.current = requestAnimationFrame(tick);
+    }
+    tickRef.current = tick;
+    tick();
+  }
+
+  function pauseVisualizerLoop() {
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    rafRef.current = null;
+  }
+
+  function resumeVisualizerLoop() {
+    if (tickRef.current && analyserRef.current) tickRef.current();
+  }
+
+  function stopVisualizer() {
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    rafRef.current = null;
+    tickRef.current = null;
+    analyserRef.current = null;
+    void analyserCtxRef.current?.close().catch(() => {});
+    analyserCtxRef.current = null;
+    setLevels(Array(28).fill(8));
   }
 
   function clearTimer() {
@@ -64,6 +115,7 @@ export function RecordScreen({ api }: { api: VcApi }) {
       recorder.onstop = () => void handleStopped();
 
       recorder.start();
+      startVisualizer(stream);
       hapticTap();
       setIsRecording(true);
       setIsPaused(false);
@@ -82,6 +134,7 @@ export function RecordScreen({ api }: { api: VcApi }) {
     hapticTap();
     if (isPaused) {
       recorder.resume();
+      resumeVisualizerLoop();
       // Resuming shifts the "start" reference forward so elapsedMs keeps counting from where it
       // was frozen, rather than jumping to include the paused interval.
       startedAtRef.current = Date.now() - elapsedMs;
@@ -92,6 +145,7 @@ export function RecordScreen({ api }: { api: VcApi }) {
       autoStopRef.current = window.setTimeout(() => stopRecording(), MAX_RECORD_MS - elapsedMs);
     } else {
       recorder.pause();
+      pauseVisualizerLoop();
       clearTimer();
       if (autoStopRef.current) {
         window.clearTimeout(autoStopRef.current);
@@ -103,6 +157,7 @@ export function RecordScreen({ api }: { api: VcApi }) {
 
   function stopRecording() {
     clearTimer();
+    stopVisualizer();
     if (autoStopRef.current) {
       window.clearTimeout(autoStopRef.current);
       autoStopRef.current = null;
@@ -158,6 +213,11 @@ export function RecordScreen({ api }: { api: VcApi }) {
               <button type="button" className="vch__record-btn vch__record-btn--active" onClick={stopRecording} aria-label="Stop recording">
                 <Icon name="mic" size={36} />
               </button>
+            </div>
+            <div className="vch__waveform vch__waveform--live" aria-hidden="true">
+              {levels.map((h, i) => (
+                <span key={i} style={{ '--h': `${h}%` } as React.CSSProperties} />
+              ))}
             </div>
             <p className="vch__hint">{isPaused ? 'Paused.' : 'Recording…'} Tap Stop when done</p>
 

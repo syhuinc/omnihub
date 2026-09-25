@@ -4,6 +4,7 @@ import { Icon } from '../../../components/Icon';
 import { hapticTap, hapticSelect } from '../../../haptics';
 import { EFFECTS, type EffectCategory, renderEffect } from '../audioEffects';
 import { playBuffer, stopPlayback } from '../playback';
+import { ClipCard } from '../ClipCard';
 import type { VcApi } from '../types';
 
 const CATEGORY_TABS: { id: EffectCategory | 'all'; label: string }[] = [
@@ -19,12 +20,26 @@ export function EffectsScreen({ api }: { api: VcApi }) {
   const [intensity, setIntensity] = useState(0.5);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isBusy, setIsBusy] = useState(false);
+  const [isPlayingOriginal, setIsPlayingOriginal] = useState(false);
 
   const visible = category === 'all' ? EFFECTS : EFFECTS.filter((e) => e.category === category);
+
+  async function playOriginal() {
+    if (!api.original) return;
+    if (isPlayingOriginal) {
+      stopPlayback();
+      setIsPlayingOriginal(false);
+      return;
+    }
+    setIsPlaying(false);
+    await playBuffer(api.original, () => setIsPlayingOriginal(false));
+    setIsPlayingOriginal(true);
+  }
 
   async function preview(effectId = selected, effectIntensity = intensity) {
     if (!api.original) return;
     stopPlayback();
+    setIsPlayingOriginal(false);
     setIsBusy(true);
     try {
       const rendered = await renderEffect(api.original, effectId, effectIntensity);
@@ -61,6 +76,10 @@ export function EffectsScreen({ api }: { api: VcApi }) {
     <div className="screen">
       <ScreenHeader title="Voice Effects" subtitle={api.original ? undefined : 'Record or import audio first'} onBack={api.popBack} />
       <div className="vch__body">
+        {api.original && (
+          <ClipCard label="Original Voice" durationSeconds={api.original.duration} seed="original" isPlaying={isPlayingOriginal} onPlay={() => void playOriginal()} />
+        )}
+
         <div className="vch__chip-row">
           {CATEGORY_TABS.map((t) => (
             <button
@@ -82,6 +101,7 @@ export function EffectsScreen({ api }: { api: VcApi }) {
               className={`vch__effect${selected === effect.id ? ' vch__effect--active' : ''}`}
               onClick={() => selectEffect(effect.id)}
               disabled={!api.original}
+              style={{ '--effect-color': effect.color } as React.CSSProperties}
             >
               <span className="vch__effect-icon">
                 <Icon name={effect.icon} size={20} />

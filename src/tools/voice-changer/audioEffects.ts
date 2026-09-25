@@ -7,24 +7,27 @@ export interface EffectDef {
   label: string;
   icon: IconName;
   category: EffectCategory;
+  /** Each effect's own accent color, so the grid reads as a set of distinct characters rather
+   *  than one flat purple wash — mirrors the colorful per-effect icons in the reference design. */
+  color: string;
 }
 
 /** id 'normal' is the only one every screen treats as "no effect" — kept out of the rate/processing
  *  tables below since it's a pure passthrough. */
 export const EFFECTS: EffectDef[] = [
-  { id: 'normal', label: 'Normal', icon: 'mic', category: 'fun' },
-  { id: 'chipmunk', label: 'Chipmunk', icon: 'zap', category: 'fun' },
-  { id: 'fast', label: 'Fast', icon: 'fast-forward', category: 'fun' },
-  { id: 'slow', label: 'Slow', icon: 'clock', category: 'fun' },
-  { id: 'deep', label: 'Deep Voice', icon: 'moon', category: 'character' },
-  { id: 'baby', label: 'Baby Voice', icon: 'baby', category: 'character' },
-  { id: 'robot', label: 'Robot', icon: 'cpu', category: 'character' },
-  { id: 'alien', label: 'Alien', icon: 'star', category: 'character' },
-  { id: 'monster', label: 'Monster', icon: 'paw', category: 'character' },
-  { id: 'echo', label: 'Echo', icon: 'repeat', category: 'special' },
-  { id: 'radio', label: 'Radio', icon: 'wifi', category: 'special' },
-  { id: 'megaphone', label: 'Megaphone', icon: 'volume', category: 'special' },
-  { id: 'distorted', label: 'Distorted', icon: 'activity', category: 'special' },
+  { id: 'normal', label: 'Normal', icon: 'mic', category: 'fun', color: '#8b5cf6' },
+  { id: 'chipmunk', label: 'Chipmunk', icon: 'zap', category: 'fun', color: '#f97316' },
+  { id: 'fast', label: 'Fast', icon: 'fast-forward', category: 'fun', color: '#06b6d4' },
+  { id: 'slow', label: 'Slow', icon: 'clock', category: 'fun', color: '#14b8a6' },
+  { id: 'deep', label: 'Deep Voice', icon: 'moon', category: 'character', color: '#4f46e5' },
+  { id: 'baby', label: 'Baby Voice', icon: 'baby', category: 'character', color: '#ec4899' },
+  { id: 'robot', label: 'Robot', icon: 'cpu', category: 'character', color: '#64748b' },
+  { id: 'alien', label: 'Alien', icon: 'star', category: 'character', color: '#22c55e' },
+  { id: 'monster', label: 'Monster', icon: 'paw', category: 'character', color: '#ef4444' },
+  { id: 'echo', label: 'Echo', icon: 'repeat', category: 'special', color: '#3b82f6' },
+  { id: 'radio', label: 'Radio', icon: 'wifi', category: 'special', color: '#f59e0b' },
+  { id: 'megaphone', label: 'Megaphone', icon: 'volume', category: 'special', color: '#f43f5e' },
+  { id: 'distorted', label: 'Distorted', icon: 'activity', category: 'special', color: '#a855f7' },
 ];
 
 export function getEffect(id: string): EffectDef {

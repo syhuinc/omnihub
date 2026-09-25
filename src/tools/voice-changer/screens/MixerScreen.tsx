@@ -71,6 +71,7 @@ export function MixerScreen({ api }: { api: VcApi }) {
               className={`vch__effect${selected.includes(effect.id) ? ' vch__effect--active' : ''}`}
               onClick={() => toggleEffect(effect.id)}
               disabled={!api.original}
+              style={{ '--effect-color': effect.color } as React.CSSProperties}
             >
               <span className="vch__effect-icon">
                 <Icon name={effect.icon} size={20} />

@@ -1,10 +1,26 @@
 import { useState } from 'react';
 import { ScreenHeader } from '../../../components/ScreenHeader';
-import { Icon } from '../../../components/Icon';
+import { Icon, type IconName } from '../../../components/Icon';
 import { hapticTap, hapticSuccess, hapticWarning } from '../../../haptics';
 import { playBuffer, stopPlayback, decodeBlob } from '../playback';
 import { deleteClip, renameClip } from '../clipStorage';
 import type { VcApi } from '../types';
+
+/** Quick-access tiles into the same share flow below — tapping any of them opens the one real
+ *  share mechanism (the OS share sheet via handleShare), same as tapping "Share" itself. There's
+ *  no reliable cross-platform way to deep-link a file share straight into one specific app, so
+ *  these are a recognizable visual shortcut into that sheet rather than a guaranteed direct route
+ *  — the sheet that opens will show WhatsApp/Telegram/Gmail/etc. if the device has them installed. */
+const SHARE_TARGETS: { id: string; label: string; icon: IconName; background: string }[] = [
+  { id: 'whatsapp', label: 'WhatsApp', icon: 'chat', background: '#25D366' },
+  { id: 'telegram', label: 'Telegram', icon: 'send', background: '#229ED9' },
+  { id: 'instagram', label: 'Instagram', icon: 'camera', background: 'linear-gradient(135deg,#f58529,#dd2a7b 60%,#8134af)' },
+  { id: 'tiktok', label: 'TikTok', icon: 'music', background: '#111318' },
+  { id: 'youtube', label: 'YouTube', icon: 'play', background: '#FF0000' },
+  { id: 'gmail', label: 'Gmail', icon: 'mail', background: '#EA4335' },
+  { id: 'bluetooth', label: 'Bluetooth', icon: 'bluetooth', background: '#0A84FF' },
+  { id: 'more', label: 'More', icon: 'more-dots', background: '' },
+];
 
 function formatBytes(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
@@ -128,6 +144,27 @@ export function ShareScreen({ api }: { api: VcApi }) {
             <Icon name="info" size={16} />
             <span>{error}</span>
           </div>
+        )}
+
+        {!renaming && (
+          <>
+          <span className="vch__section-title">Share to</span>
+          <div className="vch__share-grid">
+            {SHARE_TARGETS.map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                className={`vch__share-target${t.id === 'more' ? ' vch__share-target--more' : ''}`}
+                onClick={() => void handleShare()}
+              >
+                <span className="vch__share-target-icon" style={t.background ? { background: t.background } : undefined}>
+                  <Icon name={t.icon} size={20} />
+                </span>
+                <span>{t.label}</span>
+              </button>
+            ))}
+          </div>
+          </>
         )}
 
         {renaming ? (
