@@ -11,7 +11,7 @@ const TILES: { id: VcScreenName; label: string; desc: string; icon: IconName }[]
   { id: 'pitch-speed', label: 'Pitch & Speed', desc: 'Change pitch and speed', icon: 'sliders' },
   { id: 'echo-reverb', label: 'Echo & Reverb', desc: 'Studio effects', icon: 'repeat' },
   { id: 'mixer', label: 'Voice Mixer', desc: 'Combine effects', icon: 'sliders' },
-  { id: 'history', label: 'History', desc: 'Your saved clips', icon: 'clock' },
+  { id: 'tools', label: 'More Tools', desc: 'Browse everything', icon: 'more-dots' },
 ];
 
 export function HomeScreen({ api }: { api: VcApi }) {
@@ -20,8 +20,8 @@ export function HomeScreen({ api }: { api: VcApi }) {
 
   function openTile(id: VcScreenName) {
     hapticTap();
-    if (id === 'history') {
-      api.goto('history');
+    if (id === 'tools') {
+      api.goto('tools');
       return;
     }
     if (!api.original) {
@@ -62,7 +62,7 @@ export function HomeScreen({ api }: { api: VcApi }) {
     <div className="screen">
       <ScreenHeader title="Voice Changer" subtitle="Transform your voice instantly" onBack={api.popBack} />
 
-      <div className="vch__body">
+      <div className="vch__body vch__body--with-tabbar">
         {importError && (
           <div className="vch__error">
             <Icon name="info" size={16} />

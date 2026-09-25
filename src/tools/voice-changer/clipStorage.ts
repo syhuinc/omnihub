@@ -13,6 +13,9 @@ export interface SavedClip {
   durationSeconds: number;
   effectLabel: string;
   blob: Blob;
+  /** Backs the "Saved" tab, distinct from "History" (all clips) — an explicit bookmark, not a
+   *  duplicate of the same list. Optional since clips saved before this field existed have none. */
+  favorite?: boolean;
 }
 
 const DB_NAME = 'omnihub-voice-changer';
@@ -76,6 +79,22 @@ export async function renameClip(id: string, name: string): Promise<void> {
     req.onsuccess = () => {
       const clip = req.result as SavedClip | undefined;
       if (clip) store.put({ ...clip, name });
+    };
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+  db.close();
+}
+
+export async function setFavorite(id: string, favorite: boolean): Promise<void> {
+  const db = await openDb();
+  await new Promise<void>((resolve, reject) => {
+    const tx = db.transaction(STORE, 'readwrite');
+    const store = tx.objectStore(STORE);
+    const req = store.get(id);
+    req.onsuccess = () => {
+      const clip = req.result as SavedClip | undefined;
+      if (clip) store.put({ ...clip, favorite });
     };
     tx.oncomplete = () => resolve();
     tx.onerror = () => reject(tx.error);

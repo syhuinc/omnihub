@@ -2,6 +2,7 @@ import type { SavedClip } from './clipStorage';
 
 export type VcScreenName =
   | 'home'
+  | 'tools'
   | 'record'
   | 'effects'
   | 'autotune'
@@ -10,7 +11,8 @@ export type VcScreenName =
   | 'mixer'
   | 'preview'
   | 'share'
-  | 'history';
+  | 'history'
+  | 'saved';
 
 /** Shared state + navigation every screen needs, threaded down from the root VoiceChanger
  *  component as one props object rather than context — small, fixed set of screens, so the extra

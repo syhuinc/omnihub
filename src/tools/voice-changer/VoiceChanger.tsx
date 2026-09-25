@@ -3,7 +3,9 @@ import { useRouter } from '../../app/Router';
 import { useBackHandler } from '../../app/useBackHandler';
 import type { VcApi, VcScreenName } from './types';
 import type { SavedClip } from './clipStorage';
+import { VoiceChangerTabBar, type VcTab } from './VoiceChangerTabBar';
 import { HomeScreen } from './screens/HomeScreen';
+import { ToolsScreen } from './screens/ToolsScreen';
 import { RecordScreen } from './screens/RecordScreen';
 import { EffectsScreen } from './screens/EffectsScreen';
 import { AutoTuneScreen } from './screens/AutoTuneScreen';
@@ -14,6 +16,8 @@ import { PreviewScreen } from './screens/PreviewScreen';
 import { ShareScreen } from './screens/ShareScreen';
 import { HistoryScreen } from './screens/HistoryScreen';
 import './VoiceChanger.css';
+
+const TAB_SCREENS = new Set<VcScreenName>(['home', 'tools', 'history', 'saved']);
 
 export function VoiceChanger() {
   const { back: exitTool } = useRouter();
@@ -36,8 +40,21 @@ export function VoiceChanger() {
   }
 
   function popBack() {
-    setStack((s) => (s.length > 1 ? s.slice(0, -1) : s));
-    if (stack.length <= 1) exitTool();
+    if (stack.length > 1) {
+      setStack((s) => s.slice(0, -1));
+      return;
+    }
+    // At the root of a non-Home tab, back returns to Home rather than exiting the tool — only
+    // Home's own root exits, matching how a tab bar's back behavior normally works.
+    if (screen !== 'home') {
+      setStack(['home']);
+      return;
+    }
+    exitTool();
+  }
+
+  function selectTab(tab: VcTab) {
+    setStack([tab]);
   }
 
   useBackHandler(popBack, screen !== 'home');
@@ -70,27 +87,50 @@ export function VoiceChanger() {
     bumpHistoryToken: () => setRefreshHistoryToken((t) => t + 1),
   };
 
+  let body: React.ReactNode;
   switch (screen) {
+    case 'tools':
+      body = <ToolsScreen api={api} />;
+      break;
     case 'record':
-      return <RecordScreen api={api} />;
+      body = <RecordScreen api={api} />;
+      break;
     case 'effects':
-      return <EffectsScreen api={api} />;
+      body = <EffectsScreen api={api} />;
+      break;
     case 'autotune':
-      return <AutoTuneScreen api={api} />;
+      body = <AutoTuneScreen api={api} />;
+      break;
     case 'pitch-speed':
-      return <PitchSpeedScreen api={api} />;
+      body = <PitchSpeedScreen api={api} />;
+      break;
     case 'echo-reverb':
-      return <EchoReverbScreen api={api} />;
+      body = <EchoReverbScreen api={api} />;
+      break;
     case 'mixer':
-      return <MixerScreen api={api} />;
+      body = <MixerScreen api={api} />;
+      break;
     case 'preview':
-      return <PreviewScreen api={api} />;
+      body = <PreviewScreen api={api} />;
+      break;
     case 'share':
-      return <ShareScreen api={api} />;
+      body = <ShareScreen api={api} />;
+      break;
     case 'history':
-      return <HistoryScreen api={api} />;
+      body = <HistoryScreen api={api} />;
+      break;
+    case 'saved':
+      body = <HistoryScreen api={api} favoritesOnly />;
+      break;
     case 'home':
     default:
-      return <HomeScreen api={api} />;
+      body = <HomeScreen api={api} />;
   }
+
+  return (
+    <>
+      {body}
+      {TAB_SCREENS.has(screen) && <VoiceChangerTabBar active={screen as VcTab} onSelect={selectTab} />}
+    </>
+  );
 }

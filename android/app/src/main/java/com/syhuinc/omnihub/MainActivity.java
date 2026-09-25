@@ -9,6 +9,7 @@ import com.getcapacitor.WebViewListener;
 import com.syhuinc.omnihub.alarm.AlarmPlugin;
 import com.syhuinc.omnihub.devicestats.DeviceStatsPlugin;
 import com.syhuinc.omnihub.flashalert.FlashAlertPlugin;
+import com.syhuinc.omnihub.ringtone.RingtonePlugin;
 import com.syhuinc.omnihub.sleepmode.SleepModePlugin;
 
 public class MainActivity extends BridgeActivity {
@@ -18,6 +19,7 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(FlashAlertPlugin.class);
         registerPlugin(SleepModePlugin.class);
         registerPlugin(DeviceStatsPlugin.class);
+        registerPlugin(RingtonePlugin.class);
         super.onCreate(savedInstanceState);
 
         // Capacitor's own BridgeWebViewClient.onRenderProcessGone() returns false (meaning "not

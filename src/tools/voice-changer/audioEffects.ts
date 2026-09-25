@@ -1,4 +1,7 @@
+import lamejs from './vendor/lamejs-bundle.js';
 import type { IconName } from '../../components/Icon';
+
+const { Mp3Encoder } = lamejs;
 
 export type EffectCategory = 'fun' | 'character' | 'special';
 
@@ -28,6 +31,7 @@ export const EFFECTS: EffectDef[] = [
   { id: 'radio', label: 'Radio', icon: 'wifi', category: 'special', color: '#f59e0b' },
   { id: 'megaphone', label: 'Megaphone', icon: 'volume', category: 'special', color: '#f43f5e' },
   { id: 'distorted', label: 'Distorted', icon: 'activity', category: 'special', color: '#a855f7' },
+  { id: 'karaoke', label: 'Karaoke', icon: 'music', category: 'special', color: '#eab308' },
 ];
 
 export function getEffect(id: string): EffectDef {
@@ -151,14 +155,38 @@ function applyProcessing(ctx: BaseAudioContext, input: AudioNode, effectId: stri
       input.connect(shaper);
       return shaper;
     }
+    case 'karaoke': {
+      // A "sing-along on stage" treatment, not literal vocal-removal — this app only ever has the
+      // one recorded voice track (no separate backing track to isolate vocals from), so a real
+      // center-channel-cancellation karaoke effect has nothing to cancel against. A gentle
+      // soft-clip for consistency plus a hall convolution reverb is the honest, audible stand-in.
+      const shaper = ctx.createWaveShaper();
+      shaper.curve = makeDistortionCurve(0.05 + intensity * 0.1);
+      const convolver = ctx.createConvolver();
+      convolver.buffer = generateImpulseResponse(ctx, 1.2 + intensity * 0.8, 2.5);
+      const dry = ctx.createGain();
+      dry.gain.value = 0.65;
+      const wet = ctx.createGain();
+      wet.gain.value = 0.3 + intensity * 0.3;
+      const merged = ctx.createGain();
+      input.connect(shaper);
+      shaper.connect(dry);
+      dry.connect(merged);
+      shaper.connect(convolver);
+      convolver.connect(wet);
+      wet.connect(merged);
+      return merged;
+    }
     default:
       return input;
   }
 }
 
 function extraTailSeconds(effectIds: string[], intensity: number): number {
-  if (!effectIds.includes('echo')) return 0;
-  return 0.15 + intensity * 0.25 + 1.0;
+  let tail = 0;
+  if (effectIds.includes('echo')) tail = Math.max(tail, 0.15 + intensity * 0.25 + 1.0);
+  if (effectIds.includes('karaoke')) tail = Math.max(tail, 1.2 + intensity * 0.8 + 0.5);
+  return tail;
 }
 
 /** Renders one or more effects (Voice Mixer combines several; every other screen passes a single
@@ -327,4 +355,51 @@ export function audioBufferToWav(buffer: AudioBuffer): Blob {
   }
 
   return new Blob([arrayBuffer], { type: 'audio/wav' });
+}
+
+/** Real MPEG-1 Layer III encoding via lamejs (a pure-JS LAME port) — not a relabeled WAV. lamejs
+ *  works in fixed blocks of 1152 samples per the MP3 frame spec, and only accepts mono or stereo,
+ *  so a >2-channel buffer is downmixed to stereo first. */
+export function audioBufferToMp3(buffer: AudioBuffer, kbps = 192): Blob {
+  const numChannels = Math.min(2, buffer.numberOfChannels);
+  const encoder = new Mp3Encoder(numChannels, buffer.sampleRate, kbps);
+
+  const toInt16 = (data: Float32Array) => {
+    const out = new Int16Array(data.length);
+    for (let i = 0; i < data.length; i++) {
+      const sample = Math.max(-1, Math.min(1, data[i]));
+      out[i] = sample < 0 ? sample * 0x8000 : sample * 0x7fff;
+    }
+    return out;
+  };
+
+  const left = toInt16(buffer.getChannelData(0));
+  const right = numChannels > 1 ? toInt16(buffer.getChannelData(1)) : undefined;
+
+  // lamejs's Int8Array chunks come back typed as Int8Array<ArrayBufferLike>, which BlobPart
+  // rejects (it wants a concrete ArrayBuffer, not the SharedArrayBuffer-inclusive union). Copying
+  // bytes into a Uint8Array explicitly backed by `new ArrayBuffer(...)` pins the generic to a real
+  // ArrayBuffer — same fix as makeDistortionCurve above, where `new Uint8Array(mp3buf)` alone still
+  // infers ArrayBufferLike from the source and doesn't satisfy BlobPart.
+  const chunks: Uint8Array<ArrayBuffer>[] = [];
+  const blockSize = 1152;
+  function toArrayBufferBacked(src: Int8Array): Uint8Array<ArrayBuffer> {
+    const out = new Uint8Array(new ArrayBuffer(src.length));
+    out.set(src);
+    return out;
+  }
+  for (let i = 0; i < left.length; i += blockSize) {
+    const leftChunk = left.subarray(i, i + blockSize);
+    const rightChunk = right?.subarray(i, i + blockSize);
+    const mp3buf = encoder.encodeBuffer(leftChunk, rightChunk);
+    if (mp3buf.length > 0) chunks.push(toArrayBufferBacked(mp3buf));
+  }
+  const tail = encoder.flush();
+  if (tail.length > 0) chunks.push(toArrayBufferBacked(tail));
+
+  return new Blob(chunks, { type: 'audio/mpeg' });
+}
+
+export function extensionForBlob(blob: Blob): string {
+  return blob.type === 'audio/mpeg' ? 'mp3' : 'wav';
 }

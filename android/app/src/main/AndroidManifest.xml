@@ -169,6 +169,11 @@
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
+    <!-- WRITE_SETTINGS: a special permission (granted from a system Settings screen, like
+         SYSTEM_ALERT_WINDOW above, not a runtime dialog) needed only for Voice Changer's
+         "Set as Ringtone" — RingtoneManager.setActualDefaultRingtoneUri throws SecurityException
+         without it. -->
+    <uses-permission android:name="android.permission.WRITE_SETTINGS" />
     <uses-feature android:name="android.hardware.camera" android:required="false" />
     <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
 </manifest>

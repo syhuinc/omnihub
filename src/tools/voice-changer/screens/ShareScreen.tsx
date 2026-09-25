@@ -1,10 +1,25 @@
 import { useState } from 'react';
+import { Capacitor } from '@capacitor/core';
 import { ScreenHeader } from '../../../components/ScreenHeader';
 import { Icon, type IconName } from '../../../components/Icon';
 import { hapticTap, hapticSuccess, hapticWarning } from '../../../haptics';
 import { playBuffer, stopPlayback, decodeBlob } from '../playback';
-import { deleteClip, renameClip } from '../clipStorage';
+import { deleteClip, renameClip, setFavorite } from '../clipStorage';
+import { extensionForBlob } from '../audioEffects';
+import { RingtonePlugin } from '../ringtonePlugin';
 import type { VcApi } from '../types';
+
+function blobToBase64(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      resolve(result.slice(result.indexOf(',') + 1));
+    };
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(blob);
+  });
+}
 
 /** Quick-access tiles into the same share flow below — tapping any of them opens the one real
  *  share mechanism (the OS share sheet via handleShare), same as tapping "Share" itself. There's
@@ -42,6 +57,7 @@ export function ShareScreen({ api }: { api: VcApi }) {
   const [nameDraft, setNameDraft] = useState(clip?.name ?? '');
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [ringtoneStatus, setRingtoneStatus] = useState<'idle' | 'busy' | 'needs-permission' | 'success'>('idle');
 
   if (!clip) {
     return (
@@ -77,7 +93,7 @@ export function ShareScreen({ api }: { api: VcApi }) {
     hapticTap();
     setError(null);
     try {
-      const file = new File([clip.blob], `${clip.name}.wav`, { type: 'audio/wav' });
+      const file = new File([clip.blob], `${clip.name}.${extensionForBlob(clip.blob)}`, { type: clip.blob.type });
       if (navigator.canShare?.({ files: [file] })) {
         await navigator.share({ files: [file], title: clip.name });
         hapticSuccess();
@@ -85,7 +101,7 @@ export function ShareScreen({ api }: { api: VcApi }) {
         const url = URL.createObjectURL(clip.blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `${clip.name}.wav`;
+        a.download = `${clip.name}.${extensionForBlob(clip.blob)}`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -120,6 +136,52 @@ export function ShareScreen({ api }: { api: VcApi }) {
     api.goto('home');
   }
 
+  async function handleToggleFavorite() {
+    if (!clip || !isSaved) return;
+    hapticTap();
+    const next = !clip.favorite;
+    await setFavorite(clip.id, next);
+    api.setShareClip({ ...clip, favorite: next });
+    api.bumpHistoryToken();
+  }
+
+  async function handleSetRingtone() {
+    if (!clip) return;
+    hapticTap();
+    setError(null);
+    setRingtoneStatus('busy');
+    try {
+      const { granted } = await RingtonePlugin.checkWriteSettingsPermission();
+      if (!granted) {
+        setRingtoneStatus('needs-permission');
+        return;
+      }
+      const base64 = await blobToBase64(clip.blob);
+      const result = await RingtonePlugin.setAsRingtone({
+        base64,
+        fileName: `${clip.name}.${extensionForBlob(clip.blob)}`,
+        mimeType: clip.blob.type,
+      });
+      if (result.needsPermission) {
+        setRingtoneStatus('needs-permission');
+      } else {
+        hapticSuccess();
+        setRingtoneStatus('success');
+      }
+    } catch (e) {
+      hapticWarning();
+      setError(e instanceof Error ? e.message : "Couldn't set that as your ringtone.");
+      setRingtoneStatus('idle');
+    }
+  }
+
+  async function handleGrantRingtonePermission() {
+    hapticTap();
+    await RingtonePlugin.requestWriteSettingsPermission();
+    // The user grants this from a system Settings screen and comes back — nothing to await here,
+    // they just tap "Set as Ringtone" again once they're back.
+  }
+
   return (
     <div className="screen">
       <ScreenHeader title="Share / Export" onBack={api.popBack} />
@@ -134,7 +196,7 @@ export function ShareScreen({ api }: { api: VcApi }) {
                 here means Preview & Save's Save button already ran and something is ready to go. */}
             <strong>{isSaved ? 'Saved Successfully!' : 'Ready to Share'}</strong>
             <span>
-              {clip.name}.wav · {formatDuration(clip.durationSeconds)} · {formatBytes(clip.blob.size)}
+              {clip.name}.{extensionForBlob(clip.blob)} · {formatDuration(clip.durationSeconds)} · {formatBytes(clip.blob.size)}
             </span>
           </div>
         </div>
@@ -203,6 +265,33 @@ export function ShareScreen({ api }: { api: VcApi }) {
               <button type="button" className="vch__menu-row" onClick={() => setRenaming(true)}>
                 <Icon name="edit" size={17} />
                 <span>Rename</span>
+              </button>
+            )}
+            {Capacitor.isNativePlatform() && (
+              <button type="button" className="vch__menu-row" onClick={() => void handleSetRingtone()} disabled={ringtoneStatus === 'busy'}>
+                <Icon name="bell" size={17} />
+                <span>
+                  {ringtoneStatus === 'success' ? 'Set as your ringtone ✓' : ringtoneStatus === 'busy' ? 'Setting ringtone…' : 'Set as Ringtone'}
+                </span>
+              </button>
+            )}
+            {ringtoneStatus === 'needs-permission' && (
+              <div className="vch__confirm">
+                <p>Setting a ringtone needs the "Modify system settings" permission. Grant it, then tap Set as Ringtone again.</p>
+                <div className="vch__actions">
+                  <button type="button" className="vch__action vch__action--secondary" onClick={() => setRingtoneStatus('idle')}>
+                    Cancel
+                  </button>
+                  <button type="button" className="vch__action vch__action--primary" onClick={() => void handleGrantRingtonePermission()}>
+                    Open Settings
+                  </button>
+                </div>
+              </div>
+            )}
+            {isSaved && (
+              <button type="button" className="vch__menu-row" onClick={() => void handleToggleFavorite()}>
+                <Icon name="bookmark" size={17} style={clip.favorite ? { fill: 'currentColor' } : undefined} />
+                <span>{clip.favorite ? 'Remove from Saved' : 'Add to Saved'}</span>
               </button>
             )}
             {isSaved && !confirmingDelete && (

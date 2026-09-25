@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { ScreenHeader } from '../../../components/ScreenHeader';
 import { Icon } from '../../../components/Icon';
 import { hapticTap, hapticSuccess } from '../../../haptics';
-import { audioBufferToWav } from '../audioEffects';
+import { audioBufferToWav, audioBufferToMp3 } from '../audioEffects';
 import { playBuffer, stopPlayback } from '../playback';
 import { saveClip, type SavedClip } from '../clipStorage';
 import type { VcApi } from '../types';
@@ -33,8 +33,11 @@ function ClipRow({ label, buffer, playingId, id, onPlay }: { label: string; buff
   );
 }
 
+type ExportFormat = 'mp3' | 'wav';
+
 export function PreviewScreen({ api }: { api: VcApi }) {
   const [fileName, setFileName] = useState('My Voice');
+  const [format, setFormat] = useState<ExportFormat>('mp3');
   const [saveToDevice, setSaveToDevice] = useState(true);
   const [addToHistory, setAddToHistory] = useState(true);
   const [playingId, setPlayingId] = useState<string | null>(null);
@@ -56,9 +59,9 @@ export function PreviewScreen({ api }: { api: VcApi }) {
     stopPlayback();
     setIsBusy(true);
     try {
-      const wav = audioBufferToWav(api.processed);
+      const encoded = format === 'mp3' ? audioBufferToMp3(api.processed) : audioBufferToWav(api.processed);
       const name = fileName.trim() || 'My Voice';
-      const safeName = `${name}.wav`;
+      const safeName = `${name}.${format}`;
 
       if (addToHistory) {
         const clip: SavedClip = {
@@ -67,7 +70,7 @@ export function PreviewScreen({ api }: { api: VcApi }) {
           createdAt: Date.now(),
           durationSeconds: api.processed.duration,
           effectLabel: api.processedLabel,
-          blob: wav,
+          blob: encoded,
         };
         await saveClip(clip);
         api.bumpHistoryToken();
@@ -79,12 +82,12 @@ export function PreviewScreen({ api }: { api: VcApi }) {
           createdAt: Date.now(),
           durationSeconds: api.processed.duration,
           effectLabel: api.processedLabel,
-          blob: wav,
+          blob: encoded,
         });
       }
 
       if (saveToDevice) {
-        const url = URL.createObjectURL(wav);
+        const url = URL.createObjectURL(encoded);
         const a = document.createElement('a');
         a.href = url;
         a.download = safeName;
@@ -127,8 +130,13 @@ export function PreviewScreen({ api }: { api: VcApi }) {
         </div>
 
         <div className="vch__field">
-          <span className="vch__label">Format</span>
-          <div className="vch__select vch__select--static">WAV (High Quality)</div>
+          <label className="vch__label" htmlFor="vch-format">
+            Format
+          </label>
+          <select id="vch-format" className="vch__select" value={format} onChange={(e) => setFormat(e.target.value as ExportFormat)}>
+            <option value="mp3">MP3 (High Quality)</option>
+            <option value="wav">WAV (Lossless)</option>
+          </select>
         </div>
 
         <label className="vch__switch-row">

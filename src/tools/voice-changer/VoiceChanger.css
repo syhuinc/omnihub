@@ -12,6 +12,61 @@
   justify-content: center;
 }
 
+/* Extra bottom clearance on the four tab-bar screens (Home/Tools/History/Saved) so content isn't
+   hidden behind the sticky bar, which overlays rather than reserving space. */
+.vch__body--with-tabbar {
+  padding-bottom: 90px;
+}
+
+/* Tab bar ------------------------------------------------------------------------------------ */
+
+.vch__tabbar {
+  display: flex;
+  flex-shrink: 0;
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  background: var(--bg-elevated);
+  border-top: 1px solid var(--border);
+  box-shadow: 0 -6px 20px rgba(0, 0, 0, 0.25);
+  padding: 8px max(8px, var(--safe-right)) calc(8px + var(--safe-bottom)) max(8px, var(--safe-left));
+}
+
+.vch__tabbar-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 4px 4px;
+  border-radius: var(--radius-sm);
+  color: var(--text-tertiary);
+  font-size: 12px;
+  font-weight: 500;
+  transition: color 0.15s ease;
+  min-height: 48px;
+}
+
+.vch__tabbar-icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 26px;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  transition: background 0.2s ease, transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.vch__tabbar-item--active {
+  color: var(--purple);
+}
+
+.vch__tabbar-item--active .vch__tabbar-icon-wrap {
+  background: color-mix(in srgb, var(--purple) 16%, transparent);
+  transform: scale(1.04);
+}
+
 /* Error banner ------------------------------------------------------------------------------ */
 
 .vch__error {
@@ -884,6 +939,21 @@
 .vch__history-info span {
   font-size: 11px;
   color: var(--text-tertiary);
+}
+
+.vch__history-fav {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  color: var(--text-tertiary);
+}
+
+.vch__history-fav--active {
+  color: var(--purple);
 }
 
 .vch__history-chevron {
