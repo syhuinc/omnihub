@@ -28,7 +28,6 @@ export function RecordScreen({ api }: { api: VcApi }) {
   const streamRef = useRef<MediaStream | null>(null);
   const timerRef = useRef<number | null>(null);
   const startedAtRef = useRef(0);
-  const pausedAccumRef = useRef(0);
   const autoStopRef = useRef<number | null>(null);
 
   useEffect(
@@ -68,10 +67,9 @@ export function RecordScreen({ api }: { api: VcApi }) {
       hapticTap();
       setIsRecording(true);
       setIsPaused(false);
-      pausedAccumRef.current = 0;
       startedAtRef.current = Date.now();
       setElapsedMs(0);
-      timerRef.current = window.setInterval(() => setElapsedMs(Date.now() - startedAtRef.current - pausedAccumRef.current), 100);
+      timerRef.current = window.setInterval(() => setElapsedMs(Date.now() - startedAtRef.current), 100);
       autoStopRef.current = window.setTimeout(() => stopRecording(), MAX_RECORD_MS);
     } catch {
       setError("Couldn't access the microphone — check that Omni Hub has microphone permission.");
@@ -84,11 +82,21 @@ export function RecordScreen({ api }: { api: VcApi }) {
     hapticTap();
     if (isPaused) {
       recorder.resume();
-      startedAtRef.current = Date.now() - elapsedMs - pausedAccumRef.current;
-      timerRef.current = window.setInterval(() => setElapsedMs(Date.now() - startedAtRef.current - pausedAccumRef.current), 100);
+      // Resuming shifts the "start" reference forward so elapsedMs keeps counting from where it
+      // was frozen, rather than jumping to include the paused interval.
+      startedAtRef.current = Date.now() - elapsedMs;
+      timerRef.current = window.setInterval(() => setElapsedMs(Date.now() - startedAtRef.current), 100);
+      // The max-duration cutoff is a cap on actual recorded content, not wall-clock session time —
+      // without this, time spent paused would silently eat into it, auto-stopping a session with
+      // less audio than MAX_RECORD_MS ever actually captured.
+      autoStopRef.current = window.setTimeout(() => stopRecording(), MAX_RECORD_MS - elapsedMs);
     } else {
       recorder.pause();
       clearTimer();
+      if (autoStopRef.current) {
+        window.clearTimeout(autoStopRef.current);
+        autoStopRef.current = null;
+      }
     }
     setIsPaused((p) => !p);
   }
@@ -151,7 +159,7 @@ export function RecordScreen({ api }: { api: VcApi }) {
                 <Icon name="mic" size={36} />
               </button>
             </div>
-            <p className="vch__hint">{isPaused ? 'Paused' : 'Recording…'} Tap Stop when done</p>
+            <p className="vch__hint">{isPaused ? 'Paused.' : 'Recording…'} Tap Stop when done</p>
 
             <div className="vch__actions">
               <button type="button" className="vch__action vch__action--secondary" onClick={togglePause}>

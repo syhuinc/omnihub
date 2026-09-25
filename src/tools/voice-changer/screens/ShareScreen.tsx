@@ -108,19 +108,20 @@ export function ShareScreen({ api }: { api: VcApi }) {
     <div className="screen">
       <ScreenHeader title="Share / Export" onBack={api.popBack} />
       <div className="vch__body">
-        {isSaved && (
-          <div className="vch__success-banner">
-            <span className="vch__success-icon">
-              <Icon name="check" size={18} />
+        <div className="vch__success-banner">
+          <span className="vch__success-icon">
+            <Icon name="check" size={18} />
+          </span>
+          <div>
+            {/* isSaved only reflects whether it landed in History — this still shows for a clip
+                that was saved to device but not history (or neither), since either way arriving
+                here means Preview & Save's Save button already ran and something is ready to go. */}
+            <strong>{isSaved ? 'Saved Successfully!' : 'Ready to Share'}</strong>
+            <span>
+              {clip.name}.wav · {formatDuration(clip.durationSeconds)} · {formatBytes(clip.blob.size)}
             </span>
-            <div>
-              <strong>Saved Successfully!</strong>
-              <span>
-                {clip.name}.wav · {formatDuration(clip.durationSeconds)} · {formatBytes(clip.blob.size)}
-              </span>
-            </div>
           </div>
-        )}
+        </div>
 
         {error && (
           <div className="vch__error">
