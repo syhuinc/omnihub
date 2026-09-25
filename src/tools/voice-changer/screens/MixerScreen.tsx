@@ -5,11 +5,15 @@ import { hapticTap, hapticSelect } from '../../../haptics';
 import { EFFECTS, renderEffects } from '../audioEffects';
 import { playBuffer, stopPlayback } from '../playback';
 import { EFFECT_IMAGES } from '../../../assets/voice-changer';
+import { EFFECT_IMAGES_LIGHT } from '../../../assets/voice-changer/lightIndex';
+import { useIsLightTheme } from '../../../theme/useTheme';
 import type { VcApi } from '../types';
 
 const MIXABLE = EFFECTS.filter((e) => e.id !== 'normal');
 
 export function MixerScreen({ api }: { api: VcApi }) {
+  const isLight = useIsLightTheme();
+  const effectImages = isLight ? EFFECT_IMAGES_LIGHT : EFFECT_IMAGES;
   const [selected, setSelected] = useState<string[]>([]);
   const [intensity, setIntensity] = useState(0.5);
   const [isBusy, setIsBusy] = useState(false);
@@ -75,7 +79,7 @@ export function MixerScreen({ api }: { api: VcApi }) {
               style={{ '--effect-color': effect.color } as React.CSSProperties}
             >
               <span className="vch__effect-icon" aria-hidden="true">
-                <img src={EFFECT_IMAGES[effect.id]} alt="" />
+                <img src={effectImages[effect.id]} alt="" />
               </span>
               <span>{effect.label}</span>
             </button>

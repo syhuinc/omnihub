@@ -8,6 +8,8 @@ import { deleteClip, renameClip, setFavorite } from '../clipStorage';
 import { extensionForBlob } from '../audioEffects';
 import { RingtonePlugin } from '../ringtonePlugin';
 import { SHARE_TARGET_IMAGES } from '../../../assets/voice-changer';
+import { SHARE_TARGET_IMAGES_LIGHT } from '../../../assets/voice-changer/lightIndex';
+import { useIsLightTheme } from '../../../theme/useTheme';
 import type { VcApi } from '../types';
 
 function blobToBase64(blob: Blob): Promise<string> {
@@ -52,6 +54,8 @@ function formatDuration(seconds: number): string {
 }
 
 export function ShareScreen({ api }: { api: VcApi }) {
+  const isLight = useIsLightTheme();
+  const shareTargetImages = isLight ? SHARE_TARGET_IMAGES_LIGHT : SHARE_TARGET_IMAGES;
   const clip = api.shareClip;
   const [isPlaying, setIsPlaying] = useState(false);
   const [renaming, setRenaming] = useState(false);
@@ -216,7 +220,7 @@ export function ShareScreen({ api }: { api: VcApi }) {
             {SHARE_TARGETS.map((t) => (
               <button key={t.id} type="button" className="vch__share-target" onClick={() => void handleShare()}>
                 <span className="vch__share-target-icon">
-                  <img src={SHARE_TARGET_IMAGES[t.id]} alt="" />
+                  <img src={shareTargetImages[t.id]} alt="" />
                 </span>
                 <span>{t.label}</span>
               </button>

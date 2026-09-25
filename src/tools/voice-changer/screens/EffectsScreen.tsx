@@ -6,6 +6,8 @@ import { EFFECTS, type EffectCategory, renderEffect } from '../audioEffects';
 import { playBuffer, stopPlayback } from '../playback';
 import { ClipCard } from '../ClipCard';
 import { EFFECT_IMAGES } from '../../../assets/voice-changer';
+import { EFFECT_IMAGES_LIGHT } from '../../../assets/voice-changer/lightIndex';
+import { useIsLightTheme } from '../../../theme/useTheme';
 import type { VcApi } from '../types';
 
 const CATEGORY_TABS: { id: EffectCategory | 'all'; label: string }[] = [
@@ -16,6 +18,8 @@ const CATEGORY_TABS: { id: EffectCategory | 'all'; label: string }[] = [
 ];
 
 export function EffectsScreen({ api }: { api: VcApi }) {
+  const isLight = useIsLightTheme();
+  const effectImages = isLight ? EFFECT_IMAGES_LIGHT : EFFECT_IMAGES;
   const [category, setCategory] = useState<(typeof CATEGORY_TABS)[number]['id']>('all');
   const [selected, setSelected] = useState('normal');
   const [intensity, setIntensity] = useState(0.5);
@@ -105,7 +109,7 @@ export function EffectsScreen({ api }: { api: VcApi }) {
               style={{ '--effect-color': effect.color } as React.CSSProperties}
             >
               <span className="vch__effect-icon" aria-hidden="true">
-                <img src={EFFECT_IMAGES[effect.id]} alt="" />
+                <img src={effectImages[effect.id]} alt="" />
               </span>
               <span>{effect.label}</span>
             </button>

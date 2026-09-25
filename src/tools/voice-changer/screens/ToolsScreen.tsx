@@ -1,6 +1,8 @@
 import { ScreenHeader } from '../../../components/ScreenHeader';
 import { hapticTap } from '../../../haptics';
 import { TILE_IMAGES } from '../../../assets/voice-changer';
+import { TILE_IMAGES_LIGHT } from '../../../assets/voice-changer/lightIndex';
+import { useIsLightTheme } from '../../../theme/useTheme';
 import type { VcApi, VcScreenName } from '../types';
 
 const TILES: { id: VcScreenName; label: string; desc: string; color: string }[] = [
@@ -12,6 +14,8 @@ const TILES: { id: VcScreenName; label: string; desc: string; color: string }[] 
 ];
 
 export function ToolsScreen({ api }: { api: VcApi }) {
+  const isLight = useIsLightTheme();
+  const tileImages = isLight ? TILE_IMAGES_LIGHT : TILE_IMAGES;
   function openTile(id: VcScreenName) {
     hapticTap();
     if (!api.original) {
@@ -30,7 +34,7 @@ export function ToolsScreen({ api }: { api: VcApi }) {
           {TILES.map((t) => (
             <button key={t.id} type="button" className="vch__tile" onClick={() => openTile(t.id)} style={{ '--tile-color': t.color } as React.CSSProperties}>
               <span className="vch__tile-icon">
-                <img src={TILE_IMAGES[t.id]} alt="" />
+                <img src={tileImages[t.id]} alt="" />
               </span>
               <strong>{t.label}</strong>
               <small>{t.desc}</small>

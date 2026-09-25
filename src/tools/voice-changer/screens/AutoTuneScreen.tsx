@@ -5,11 +5,15 @@ import { hapticTap, hapticSelect } from '../../../haptics';
 import { AUTOTUNE_PRESETS, KEY_NAMES, SCALE_INTERVALS, renderAutoTune, type ScaleName } from '../autotune';
 import { playBuffer, stopPlayback } from '../playback';
 import { heroMicrophone, autoTuneNotes } from '../../../assets/voice-changer';
+import { autoTuneNotesLight } from '../../../assets/voice-changer/lightIndex';
+import { useIsLightTheme } from '../../../theme/useTheme';
 import type { VcApi } from '../types';
 
 const SCALE_NAMES = Object.keys(SCALE_INTERVALS) as ScaleName[];
 
 export function AutoTuneScreen({ api }: { api: VcApi }) {
+  const isLight = useIsLightTheme();
+  const noteIcon = isLight ? autoTuneNotesLight : autoTuneNotes;
   const [presetId, setPresetId] = useState('pop');
   const [keyRoot, setKeyRoot] = useState(0);
   const [scale, setScale] = useState<ScaleName>('Major');
@@ -81,13 +85,13 @@ export function AutoTuneScreen({ api }: { api: VcApi }) {
       <div className="vch__body">
         <div className="vch__at-hero" aria-hidden="true">
           <span className="vch__at-hero-icon">
-            <img src={autoTuneNotes} alt="" />
+            <img src={noteIcon} alt="" />
           </span>
           <span className="vch__at-hero-icon vch__at-hero-icon--main">
             <img src={heroMicrophone} alt="" />
           </span>
           <span className="vch__at-hero-icon">
-            <img src={autoTuneNotes} alt="" />
+            <img src={noteIcon} alt="" />
           </span>
         </div>
 
