@@ -97,7 +97,11 @@ export type IconName =
   | 'share'
   | 'baby'
   | 'sliders'
-  | 'fast-forward';
+  | 'fast-forward'
+  | 'chat'
+  | 'send'
+  | 'mail'
+  | 'bluetooth';
 
 interface IconProps {
   name: IconName;
@@ -361,6 +365,10 @@ const paths: Record<IconName, React.ReactNode> = {
     </>
   ),
   'fast-forward': <path d="M5 5v14l9-7Z M14 5v14l9-7Z" />,
+  chat: <path d="M4 4h16a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H9l-5 4v-4H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Z" />,
+  send: <path d="M22 2 11 13 M22 2 15 22l-4-9-9-4Z" />,
+  mail: <path d="M4 5h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z M3 6l9 7 9-7" />,
+  bluetooth: <path d="M7 7l10 10-5 5V2l5 5L7 17" />,
 };
 
 export function Icon({ name, size = 20, strokeWidth = 2, className, style }: IconProps) {

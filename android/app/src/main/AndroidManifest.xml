@@ -143,6 +143,10 @@
         WebView's standard getUserMedia permission prompt when you tap record. Recordings stay
         entirely on-device (processed with the Web Audio API) and are only ever sent anywhere if
         you explicitly tap Share.
+      - MODIFY_AUDIO_SETTINGS: a normal (no-prompt) permission that Capacitor's WebView bridge
+        requests together with RECORD_AUDIO for every getUserMedia(audio) call. Capacitor denies
+        the whole audio request if either one is missing, so this has to be declared even though
+        Voice Changer never actually touches audio routing/volume itself.
     -->
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
@@ -160,6 +164,7 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
