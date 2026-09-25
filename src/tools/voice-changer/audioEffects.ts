@@ -49,7 +49,7 @@ function rateFor(effectId: string, intensity: number): number {
     case 'deep':
       return 1 - intensity * 0.55;
     case 'baby':
-      return 1 + intensity * 0.7;
+      return 1 + intensity * 0.75;
     case 'alien':
       return 1 + intensity * 0.4;
     case 'monster':
@@ -162,11 +162,28 @@ function makeDistortionCurve(amount: number): Float32Array<ArrayBuffer> {
 function applyProcessing(ctx: BaseAudioContext, input: AudioNode, effectId: string, intensity: number): AudioNode {
   switch (effectId) {
     case 'baby': {
+      // The old version was just a highpass at 300-800Hz, which strips out the fundamental and
+      // low harmonics of most voices entirely (rather than the pitch shift alone), leaving a
+      // thin, telephone-y sound that doesn't read as "baby" at all. A real baby's voice is
+      // higher-pitched (handled by rateFor) AND has higher, brighter formants from a much
+      // smaller vocal tract — approximated here with a gentle low-end trim plus a shelf/peak
+      // boost in the 2-4kHz "baby coo" brightness range, instead of removing the voice's body.
       const hp = ctx.createBiquadFilter();
       hp.type = 'highpass';
-      hp.frequency.value = 300 + intensity * 500;
+      hp.frequency.value = 90;
+      const shelf = ctx.createBiquadFilter();
+      shelf.type = 'highshelf';
+      shelf.frequency.value = 2200;
+      shelf.gain.value = 5 + intensity * 8;
+      const peak = ctx.createBiquadFilter();
+      peak.type = 'peaking';
+      peak.frequency.value = 3200;
+      peak.Q.value = 1.1;
+      peak.gain.value = 4 + intensity * 6;
       input.connect(hp);
-      return hp;
+      hp.connect(shelf);
+      shelf.connect(peak);
+      return peak;
     }
     case 'robot':
     case 'alien': {
