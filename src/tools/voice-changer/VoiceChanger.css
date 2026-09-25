@@ -415,6 +415,21 @@
     drop-shadow(0 0 18px color-mix(in srgb, var(--effect-color, var(--purple)) 75%, transparent));
 }
 
+/* These character icons carry a soft translucent glow baked into the source art, meant to sit on
+   a dark backdrop (it reads as a glow). On a white card the exact same translucent pixels just
+   blend into pale, hazy smudges around the icon instead. A faint neutral radial "plate" behind
+   each icon gives that translucent edge something other than pure white to blend into, so it
+   reads as a soft grounding shadow again rather than a stray color cast; the active state's
+   colored glow is dropped in favor of the plain depth shadow for the same reason. */
+:root[data-theme='light'] .vch__effect-icon {
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(15, 23, 42, 0.07) 0%, transparent 72%);
+}
+
+:root[data-theme='light'] .vch__effect--active .vch__effect-icon img {
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.22));
+}
+
 /* Category / preset chips ----------------------------------------------------------------------- */
 
 .vch__chip-row {
