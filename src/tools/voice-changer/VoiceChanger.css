@@ -1,31 +1,19 @@
-/* Voice Changer is a deliberately single-theme, dark/neon design (matching the reference
-   mockup, which has no light variant) — so it pins the app's dark-theme tokens locally rather
-   than inheriting whichever theme the rest of the app is in. Without this, toggling the app to
-   light mode flips --bg-elevated (used by every card/tabbar here) to white while this file's own
-   near-black backdrop stays hardcoded dark, producing a broken white-cards-on-black mess. */
+/* Like Sleep Mode/Sleep Sounds, Voice Changer follows the app's normal Light/Dark toggle via the
+   shared theme tokens (--bg-elevated, --text-primary, etc.) rather than a hardcoded palette — a
+   card/tabbar/title here looks exactly like it would on any other themed tool. The only
+   tool-specific override is a punchier, near-black backdrop in dark mode (the shared
+   --bg-gradient reads as flat/washed-out against this tool's neon accents and glow icons); light
+   mode gets the app's normal light background, same as every other tool. */
 .vch-app {
-  --bg: #0a0e16;
-  --bg-elevated: #131a27;
-  --bg-elevated-2: #1b2434;
-  --bg-active: #212c40;
-  --border: rgba(255, 255, 255, 0.08);
-  --border-strong: rgba(255, 255, 255, 0.14);
-  --text-primary: #f5f7fa;
-  --text-secondary: #9aa4b6;
-  --text-tertiary: #6b7484;
-  --shadow-glow: 0 4px 16px rgba(77, 124, 254, 0.35);
-  color-scheme: dark;
-
   flex: 1;
   display: flex;
   flex-direction: column;
   min-height: 0;
+  background: var(--bg-gradient);
+}
+
+:root:not([data-theme='light']) .vch-app {
   background: radial-gradient(130% 55% at 50% 0%, #14121f 0%, #030305 58%);
-  /* Plain elements with no color rule of their own (ScreenHeader's <h1>, etc.) inherit the
-     *computed* color from body, not a live re-evaluation of --text-primary — and body sits
-     outside this scope, so it'd still resolve to the light theme's near-black text. Re-declaring
-     color here re-anchors that inheritance chain to the pinned dark value above. */
-  color: var(--text-primary);
 }
 
 .vch__title-accent {
