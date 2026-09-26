@@ -6,9 +6,15 @@
   background-color: #1a1a0a;
   /* This dark backdrop is a fixed "torch mode" effect, independent of the
      app's light/dark theme — pin readable text colors here too, since the
-     light theme's dark --text-primary would otherwise be unreadable on it. */
+     light theme's dark --text-primary would otherwise be unreadable on it.
+     Redefining the custom properties alone isn't enough: elements like the
+     header's <h1> have no explicit `color` of their own, so they inherit
+     the already-computed value from `body` and never re-read these vars.
+     Setting `color` here re-establishes a fresh inherited value at this
+     scope so those elements pick it up too. */
   --text-primary: #f5f7fa;
   --text-secondary: #9aa4b6;
+  color: var(--text-primary);
 }
 
 .fl__body {

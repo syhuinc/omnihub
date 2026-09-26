@@ -274,7 +274,7 @@ export function DebtCalculator() {
               <label className="dc__field-label">Due date</label>
               <button type="button" className="dc__input-row dc__due-btn" onClick={() => setShowDueCalendar((v) => !v)}>
                 <Icon name="calendar" size={14} />
-                <span>{dueAt ? formatDue(dueAt) : 'Select date'}</span>
+                <span>{dueAt ? formatDue(dueAt) : 'Set date'}</span>
               </button>
             </div>
           </div>
@@ -294,7 +294,7 @@ export function DebtCalculator() {
           <div className="dc__field">
             <div className="dc__input-row">
               <Icon name="file" size={14} />
-              <input placeholder="Note (optional) e.g. For lunch, borrowed money, etc." value={note} onChange={(e) => setNote(e.target.value)} />
+              <input placeholder="Note (e.g. borrowed money)" value={note} onChange={(e) => setNote(e.target.value)} />
             </div>
           </div>
 

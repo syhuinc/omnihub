@@ -50,8 +50,13 @@ export function Profile() {
       await Filesystem.writeFile({ path: filename, data: json, directory: Directory.Cache, encoding: Encoding.UTF8 });
       const { uri } = await Filesystem.getUri({ path: filename, directory: Directory.Cache });
       await Share.share({ title: 'Omni Hub Backup', url: uri, dialogTitle: 'Save your backup' });
-    } catch {
-      setImportStatus({ type: 'error', message: 'Could not export your backup. Please try again.' });
+    } catch (err) {
+      // Android's Share plugin rejects with "Share canceled" when the user backs out of the
+      // share sheet without picking a destination — that's not a failure worth reporting.
+      const message = err instanceof Error ? err.message : '';
+      if (!/cancel/i.test(message)) {
+        setImportStatus({ type: 'error', message: 'Could not export your backup. Please try again.' });
+      }
     }
   }
 
@@ -275,7 +280,7 @@ export function Profile() {
               <span className="pf__row-text">
                 <strong>Version</strong>
               </span>
-              <span className="pf__row-value">1.20.1</span>
+              <span className="pf__row-value">1.20.2</span>
             </div>
           </div>
         </section>
