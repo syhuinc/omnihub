@@ -256,7 +256,7 @@ export function Profile() {
               <span className="pf__row-text">
                 <strong>Version</strong>
               </span>
-              <span className="pf__row-value">1.19.4</span>
+              <span className="pf__row-value">1.19.5</span>
             </div>
           </div>
         </section>
