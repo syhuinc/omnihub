@@ -51,7 +51,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const result = await FirebaseAuthentication.signInWithGoogle();
       setUser(result.user);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Sign-in failed. Please try again.');
+      const message = err instanceof Error ? err.message : '';
+      // The user backing out of the account chooser isn't an error worth
+      // surfacing, and the raw native message (e.g. "[16] Cancelled by
+      // user.") is never something to show as-is.
+      if (!/cancel/i.test(message)) {
+        setError('Sign-in failed. Please try again.');
+      }
     } finally {
       setSigningIn(false);
     }

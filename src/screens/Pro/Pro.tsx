@@ -21,7 +21,7 @@ export function Pro() {
         <div className="pro__hero">
           <span className="pro__hero-badge">
             <Icon name="crown" size={14} />
-            Coming Soon
+            Paid Plans Coming Soon
           </span>
           <h2>More Power.{'\n'}More Freedom.{'\n'}A Better You.</h2>
         </div>

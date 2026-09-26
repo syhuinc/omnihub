@@ -1,4 +1,7 @@
 import { useRef, useState } from 'react';
+import { Capacitor } from '@capacitor/core';
+import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
+import { Share } from '@capacitor/share';
 import { ScreenHeader } from '../../components/ScreenHeader';
 import { Icon } from '../../components/Icon';
 import { storageGet, storageSet, StorageKeys, exportBackup, importBackup, clearAllData } from '../../storage/db';
@@ -22,18 +25,34 @@ export function Profile() {
     document.documentElement.dataset.theme = next;
   }
 
-  function handleExport() {
+  async function handleExport() {
     const payload = exportBackup();
-    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const json = JSON.stringify(payload, null, 2);
     const date = new Date().toISOString().slice(0, 10);
-    a.href = url;
-    a.download = `omni-hub-backup-${date}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    const filename = `omni-hub-backup-${date}.json`;
+
+    if (!Capacitor.isNativePlatform()) {
+      // Blob + <a download> works fine in a real browser; it's the native
+      // WebView that has no download manager to hand it to.
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      return;
+    }
+
+    try {
+      await Filesystem.writeFile({ path: filename, data: json, directory: Directory.Cache, encoding: Encoding.UTF8 });
+      const { uri } = await Filesystem.getUri({ path: filename, directory: Directory.Cache });
+      await Share.share({ title: 'Omni Hub Backup', url: uri, dialogTitle: 'Save your backup' });
+    } catch {
+      setImportStatus({ type: 'error', message: 'Could not export your backup. Please try again.' });
+    }
   }
 
   function handleImportClick() {
@@ -256,7 +275,7 @@ export function Profile() {
               <span className="pf__row-text">
                 <strong>Version</strong>
               </span>
-              <span className="pf__row-value">1.19.5</span>
+              <span className="pf__row-value">1.20.0</span>
             </div>
           </div>
         </section>

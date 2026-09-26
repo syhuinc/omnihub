@@ -162,7 +162,7 @@ export function DebtCalculator() {
             <div>
               <span>Owed to You</span>
               <strong className="dc__summary-value--green">{formatMoney(owedToMe)}</strong>
-              <em>{owedToMeDebts.length} people owe you</em>
+              <em>{owedToMeDebts.length} {owedToMeDebts.length === 1 ? 'person owes' : 'people owe'} you</em>
             </div>
           </div>
           <div className="dc__summary-item dc__summary-item--red">
@@ -172,7 +172,7 @@ export function DebtCalculator() {
             <div>
               <span>You Owe</span>
               <strong className="dc__summary-value--red">{formatMoney(iOwe)}</strong>
-              <em>{iOweDebts.length} person you owe</em>
+              <em>{iOweDebts.length} {iOweDebts.length === 1 ? 'person' : 'people'} you owe</em>
             </div>
           </div>
         </div>
@@ -241,7 +241,7 @@ export function DebtCalculator() {
               <div className="dc__input-row">
                 <Icon name="tag" size={14} />
                 <input
-                  placeholder="Debt name (optional)"
+                  placeholder="Debt name"
                   value={debtName}
                   onChange={(e) => setDebtName(e.target.value)}
                 />

@@ -7,6 +7,8 @@ import { Icon, type IconName } from '../../components/Icon';
 import { useRouter } from '../../app/Router';
 import { hapticTap } from '../../haptics';
 import { FlashAlertPlugin, type FlashAlertSettings } from '../../flashalert/plugin';
+import { useIsLightTheme } from '../../theme/useTheme';
+import { setStatusBarStyle } from '../../theme/statusBar';
 import './Flashlight.css';
 
 type Status = 'checking' | 'unavailable' | 'ready';
@@ -68,6 +70,7 @@ export function Flashlight() {
   const [mode, setMode] = useState<Mode>('normal');
   const [alerts, setAlerts] = useState<FlashAlertSettings>(DEFAULT_ALERT_SETTINGS);
   const isNative = Capacitor.isNativePlatform();
+  const isLightTheme = useIsLightTheme();
   const runIdRef = useRef(0);
 
   useEffect(() => {
@@ -140,6 +143,14 @@ export function Flashlight() {
       clearTimeout(timer);
     };
   }, [on, mode]);
+
+  // The torch-on backdrop (.fl--on) is a fixed dark color regardless of app
+  // theme, so the status bar icons need to follow that backdrop rather than
+  // the app's own light/dark setting while it's showing.
+  useEffect(() => {
+    setStatusBarStyle(lit ? false : isLightTheme);
+    return () => setStatusBarStyle(isLightTheme);
+  }, [lit, isLightTheme]);
 
   function toggle() {
     hapticTap();

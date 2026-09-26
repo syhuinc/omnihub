@@ -4,6 +4,11 @@
 
 .fl--on {
   background-color: #1a1a0a;
+  /* This dark backdrop is a fixed "torch mode" effect, independent of the
+     app's light/dark theme — pin readable text colors here too, since the
+     light theme's dark --text-primary would otherwise be unreadable on it. */
+  --text-primary: #f5f7fa;
+  --text-secondary: #9aa4b6;
 }
 
 .fl__body {

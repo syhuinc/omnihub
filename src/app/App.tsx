@@ -16,6 +16,8 @@ import { HealthCheck } from '../screens/PhoneCenter/HealthCheck';
 import { storageGet, StorageKeys } from '../storage/db';
 import { hapticTap } from '../haptics';
 import { AuthProvider } from '../cloud/AuthContext';
+import { useIsLightTheme } from '../theme/useTheme';
+import { setStatusBarStyle, initStatusBarOverlay } from '../theme/statusBar';
 import './App.css';
 
 const TOP_LEVEL_PATHS = new Set(['/', '/tools', '/pro', '/profile']);
@@ -69,10 +71,17 @@ function Shell() {
 }
 
 function App() {
+  const isLight = useIsLightTheme();
+
   useEffect(() => {
     const theme = storageGet<'dark' | 'light'>(StorageKeys.theme, 'dark');
     document.documentElement.dataset.theme = theme;
+    initStatusBarOverlay();
   }, []);
+
+  useEffect(() => {
+    setStatusBarStyle(isLight);
+  }, [isLight]);
 
   useEffect(() => {
     function onPointerDown(e: PointerEvent) {
