@@ -116,9 +116,16 @@
 }
 
 .pro__feature-text {
+  flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 2px;
+}
+
+.pro__feature-lock {
+  flex-shrink: 0;
+  color: var(--text-tertiary);
 }
 
 .pro__feature-text strong {

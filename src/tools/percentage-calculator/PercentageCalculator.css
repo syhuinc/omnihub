@@ -225,7 +225,8 @@
 }
 
 .pc__calculate:disabled {
-  opacity: 0.4;
+  background: var(--bg-active);
+  color: var(--text-tertiary);
   box-shadow: none;
 }
 

@@ -656,6 +656,8 @@
 }
 
 .alarm-editor__save {
+  position: sticky;
+  bottom: calc(16px + var(--safe-bottom));
   margin-top: 32px;
   min-height: 52px;
   border-radius: var(--radius-pill);

@@ -224,7 +224,8 @@
 
 .ad__cal-row {
   display: flex;
-  gap: 10px;
+  flex-direction: column;
+  gap: 20px;
 }
 
 .ad__cal-col {

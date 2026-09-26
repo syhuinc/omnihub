@@ -132,7 +132,7 @@ export function Home() {
       )}
 
       <div className="home__search">
-        <SearchBar value={query} onChange={setQuery} placeholder="Search tools, or anything..." />
+        <SearchBar value={query} onChange={setQuery} placeholder="Search tools or ask a question..." />
       </div>
 
       {query ? (

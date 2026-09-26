@@ -29,7 +29,7 @@
 .home__section-actions {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 14px;
 }
 
 .home__section-close {

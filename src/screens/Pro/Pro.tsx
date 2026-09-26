@@ -47,6 +47,7 @@ export function Pro() {
                 <strong>{f.title}</strong>
                 <span>{f.desc}</span>
               </span>
+              <Icon name="lock" size={16} className="pro__feature-lock" />
             </li>
           ))}
         </ul>

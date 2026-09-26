@@ -92,6 +92,12 @@
   font-size: 22px;
 }
 
+/* --accent is the same medium blue in both themes; against light theme's
+   near-white pale tint that's low contrast, unlike on dark theme's dark tint. */
+:root[data-theme='light'] .calc__key--fn {
+  color: color-mix(in srgb, var(--accent) 65%, black);
+}
+
 .calc__key--op {
   background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 85%, white 10%), var(--accent));
   border: none;

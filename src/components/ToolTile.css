@@ -87,6 +87,7 @@
   text-align: center;
   line-height: 1.25;
   max-width: 100%;
+  text-wrap: balance;
 }
 
 .tool-tile__remove {

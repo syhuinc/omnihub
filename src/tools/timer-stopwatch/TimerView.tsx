@@ -282,11 +282,13 @@ export function TimerView() {
                   <span>{dispS}</span>
                 </div>
               )}
-              <div className="tm2__unit-row">
-                {showHours || isEditing ? <span>HR</span> : null}
-                <span>MIN</span>
-                <span>SEC</span>
-              </div>
+              {!isEditing && (
+                <div className="tm2__unit-row">
+                  {showHours && <span>HR</span>}
+                  <span>MIN</span>
+                  <span>SEC</span>
+                </div>
+              )}
             </div>
           </div>
 
