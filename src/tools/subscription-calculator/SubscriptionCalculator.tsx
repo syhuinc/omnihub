@@ -183,7 +183,7 @@ export function SubscriptionCalculator() {
             <div className="sc__field">
               <label className="sc__field-label">Price</label>
               <div className="sc__input-row">
-                <span>$</span>
+                <span>{currencyOption?.symbol ?? '$'}</span>
                 <input
                   type="number"
                   inputMode="decimal"

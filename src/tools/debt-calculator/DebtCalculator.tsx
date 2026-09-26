@@ -253,7 +253,7 @@ export function DebtCalculator() {
             <div className="dc__field">
               <label className="dc__field-label">Amount</label>
               <div className="dc__input-row">
-                <span>$</span>
+                <span>{currencyOption?.symbol ?? '$'}</span>
                 <input
                   type="number"
                   inputMode="decimal"

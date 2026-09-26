@@ -1,6 +1,7 @@
 package com.syhuinc.omnihub;
 
 import android.os.Bundle;
+import android.view.View;
 import android.webkit.RenderProcessGoneDetail;
 import android.webkit.WebView;
 
@@ -21,6 +22,16 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(DeviceStatsPlugin.class);
         registerPlugin(RingtonePlugin.class);
         super.onCreate(savedInstanceState);
+
+        // The app's CSS relies on the WebView drawing edge-to-edge under the status bar
+        // (env(safe-area-inset-top) padding, set up alongside StatusBar.setOverlaysWebView).
+        // The WebView's own native overscroll/edge-glow effect isn't covered by the CSS
+        // overscroll-behavior:none already on the scroll container - that only stops
+        // scroll-chaining to parent elements, not Android's native touch/fling physics -
+        // so a fast fling to the top can still show the glow effect over the status bar
+        // area before the content settles back into its padded position. Disabling it here
+        // removes that class of glitch entirely.
+        this.bridge.getWebView().setOverScrollMode(View.OVER_SCROLL_NEVER);
 
         // Capacitor's own BridgeWebViewClient.onRenderProcessGone() returns false (meaning "not
         // handled") whenever nothing here overrides it - and per the WebViewClient contract,
