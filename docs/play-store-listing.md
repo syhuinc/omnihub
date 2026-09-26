@@ -72,6 +72,14 @@ Download Omni Hub and get everyday things done, all in one place.
 
 (≈3,746 characters — under the 4000 limit)
 
+## Privacy Policy URL
+
+```
+https://claude.ai/artifact/KN6frRqjrW1N1qZg9R3DCq
+```
+
+Before submitting: open this link and check the Share menu is set to "Anyone with the link can view" — it's private by default, and both Play Console review and end users need to be able to open it. Also linked in-app from Profile ▸ Privacy ▸ Privacy Policy.
+
 ## Category
 
 **Tools**

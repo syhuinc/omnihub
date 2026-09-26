@@ -11,6 +11,8 @@ import './Profile.css';
 
 type Theme = 'dark' | 'light';
 
+const PRIVACY_POLICY_URL = 'https://claude.ai/artifact/KN6frRqjrW1N1qZg9R3DCq';
+
 export function Profile() {
   const { user, loading: authLoading, signingIn, error: authError, signInWithGoogle, signOut } = useAuth();
   const [theme, setTheme] = useState<Theme>(() => storageGet(StorageKeys.theme, 'dark'));
@@ -254,15 +256,28 @@ export function Profile() {
 
         <section className="pf__section">
           <h2 className="pf__section-title">Privacy</h2>
-          <div className="pf__card pf__privacy">
-            <span className="pf__row-icon pf__row-icon--green pf__privacy-icon">
-              <Icon name="shield" size={18} />
-            </span>
-            <p>
-              Omni Hub works fully offline by default — no account needed, nothing leaves this device.
-              Signing in above is entirely optional and only used to sync your data across your own devices;
-              nothing is shared, sold, or used for ads or analytics.
-            </p>
+          <div className="pf__card">
+            <div className="pf__privacy">
+              <span className="pf__row-icon pf__row-icon--green pf__privacy-icon">
+                <Icon name="shield" size={18} />
+              </span>
+              <p>
+                Omni Hub works fully offline by default — no account needed, nothing leaves this device.
+                Signing in above is entirely optional and only used to sync your data across your own devices;
+                nothing is shared, sold, or used for ads or analytics.
+              </p>
+            </div>
+            <div className="pf__divider" />
+            <button type="button" className="pf__row" onClick={() => window.open(PRIVACY_POLICY_URL, '_blank')}>
+              <span className="pf__row-icon pf__row-icon--green">
+                <Icon name="file" size={18} />
+              </span>
+              <span className="pf__row-text">
+                <strong>Privacy Policy</strong>
+                <span>Exactly what's collected, and when</span>
+              </span>
+              <Icon name="chevron-right" size={18} className="pf__row-chevron" />
+            </button>
           </div>
         </section>
 
@@ -280,7 +295,7 @@ export function Profile() {
               <span className="pf__row-text">
                 <strong>Version</strong>
               </span>
-              <span className="pf__row-value">1.21.0</span>
+              <span className="pf__row-value">1.21.1</span>
             </div>
           </div>
         </section>
