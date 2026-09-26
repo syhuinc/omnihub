@@ -102,7 +102,8 @@ export type IconName =
   | 'send'
   | 'mail'
   | 'bluetooth'
-  | 'bookmark';
+  | 'bookmark'
+  | 'gamepad';
 
 interface IconProps {
   name: IconName;
@@ -371,6 +372,9 @@ const paths: Record<IconName, React.ReactNode> = {
   mail: <path d="M4 5h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z M3 6l9 7 9-7" />,
   bluetooth: <path d="M7 7l10 10-5 5V2l5 5L7 17" />,
   bookmark: <path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1Z" />,
+  gamepad: (
+    <path d="M7 6h10a5 5 0 0 1 5 5.3l.7 4.6a2.2 2.2 0 0 1-3.9 1.8L16.5 15h-9L5.2 17.7a2.2 2.2 0 0 1-3.9-1.8L2 11.3A5 5 0 0 1 7 6Z M7 10.5v3M5.5 12h3M15.5 11h.01M18 13h.01" />
+  ),
 };
 
 export function Icon({ name, size = 20, strokeWidth = 2, className, style }: IconProps) {
