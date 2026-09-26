@@ -3,15 +3,15 @@
 ## Short description (max 80 characters)
 
 ```
-24 everyday tools in one app — offline-first, no ads, sign-in optional.
+26 tools plus a game — offline-first, no ads, sign-in optional.
 ```
 
-(73 characters)
+(63 characters)
 
 ## Full description (max 4000 characters)
 
 ```
-Omni Hub is an all-in-one toolbox for everyday tasks — calculator, notes, alarms, a compass, QR scanner, expense tracker, and more — all in one clean, fast app. No ads, no clutter, and most of it works fully offline with no account required.
+Omni Hub is an all-in-one toolbox for everyday tasks — calculator, notes, alarms, a compass, QR scanner, expense tracker, and more, plus a bonus arcade game — all in one clean, fast app. No ads, no clutter, and most of it works fully offline with no account required.
 
 WORKS OFFLINE, NO ACCOUNT NEEDED
 Sign-up and internet access are never required to use Omni Hub. Everything you create is stored on your device, and you're always in control: back up your data to a file whenever you like, or clear it all with one tap. No ads, no tracking, no analytics — ever.
@@ -19,7 +19,7 @@ Sign-up and internet access are never required to use Omni Hub. Everything you c
 OPTIONAL: SYNC ACROSS YOUR DEVICES
 Want your data available on more than one device? Sign in with Google, entirely optional, to sync Notes, Checklist, Expense Tracker, Budget, Subscription Calculator, Debt Tracker, Alarms, and your private Vault automatically. Your Vault stays end-to-end protected — only your already PIN-encrypted data ever leaves your device, and your PIN itself never does. Nothing is shared, sold, or used for ads either way.
 
-24 TOOLS
+26 TOOLS
 
 Essentials
 • Calculator — with a history of your past calculations
@@ -29,6 +29,7 @@ Essentials
 • Timer — a simple countdown with an alert when time's up
 • Stopwatch — with lap times
 • Alarm — reliable alarms with optional backup re-rings, custom sounds, and optional flash alerts
+• Sleep Mode — nags you to put the phone down and get some sleep
 
 Utilities
 • Compass — find true and magnetic north
@@ -56,8 +57,9 @@ Time & Date
 
 Fun
 • Random Generator — roll dice, flip a coin, generate a random number, or pick from a list
+• Voice Changer — record your voice, transform it, share it
 
-Plus a private, PIN-locked Vault for notes, photos, and files you want extra protected.
+Plus a private, PIN-locked Vault for notes, photos, and files you want extra protected, and Snake — a classic arcade game for when you need a break, swipe or use the on-screen pad to play, with your best score saved on your device.
 
 FIND WHAT YOU NEED, FAST
 Just start typing in the search bar — Omni Hub understands what you mean, not just tool names. Search "split" for the bill splitter, "how old" for the age calculator, "cm to inches" for the converter, and more. Pin your most-used tools to the Home screen and drag to reorder them anytime.
@@ -68,7 +70,7 @@ Omni Hub is built to be fast and simple, with a dark or light theme and nothing 
 Download Omni Hub and get everyday things done, all in one place.
 ```
 
-(≈3,450 characters — under the 4000 limit)
+(≈3,746 characters — under the 4000 limit)
 
 ## Category
 
@@ -76,4 +78,4 @@ Download Omni Hub and get everyday things done, all in one place.
 
 ## Tags / keywords (for ASO, not shown to users directly)
 
-calculator, scientific calculator, percentage calculator, unit converter, timer, stopwatch, alarm clock, compass, flashlight, qr scanner, barcode scanner, notes app, checklist, to-do list, expense tracker, budget planner, tip calculator, split bill, subscription tracker, debt tracker, age calculator, date calculator, time zone converter, world clock, random generator, offline app, private vault, no ads, privacy
+calculator, scientific calculator, percentage calculator, unit converter, timer, stopwatch, alarm clock, sleep mode, compass, flashlight, qr scanner, barcode scanner, notes app, checklist, to-do list, expense tracker, budget planner, tip calculator, split bill, subscription tracker, debt tracker, age calculator, date calculator, time zone converter, world clock, random generator, voice changer, snake game, arcade game, offline app, private vault, no ads, privacy
