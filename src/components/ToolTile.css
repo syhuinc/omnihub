@@ -44,6 +44,13 @@
   box-shadow: 0 8px 16px -8px rgba(0, 0, 0, 0.5);
 }
 
+/* That same black shadow is invisible against the dark theme's dark
+   background, but reads as a visible second rounded shape under each icon
+   on the light theme's pale background — soften it there specifically. */
+:root[data-theme='light'] .tool-tile__icon--image {
+  box-shadow: 0 4px 10px -6px rgba(15, 23, 42, 0.18);
+}
+
 .tool-tile__icon-img {
   width: 100%;
   height: 100%;
