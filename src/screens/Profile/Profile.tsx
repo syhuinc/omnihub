@@ -4,6 +4,7 @@ import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
 import { Share } from '@capacitor/share';
 import { ScreenHeader } from '../../components/ScreenHeader';
 import { Icon } from '../../components/Icon';
+import { useRouter } from '../../app/Router';
 import { storageGet, storageSet, StorageKeys, exportBackup, importBackup, clearAllData } from '../../storage/db';
 import { hapticWarning } from '../../haptics';
 import { useAuth } from '../../cloud/AuthContext';
@@ -11,9 +12,8 @@ import './Profile.css';
 
 type Theme = 'dark' | 'light';
 
-const PRIVACY_POLICY_URL = 'https://claude.ai/artifact/KN6frRqjrW1N1qZg9R3DCq';
-
 export function Profile() {
+  const { navigate } = useRouter();
   const { user, loading: authLoading, signingIn, error: authError, signInWithGoogle, signOut } = useAuth();
   const [theme, setTheme] = useState<Theme>(() => storageGet(StorageKeys.theme, 'dark'));
   const [importStatus, setImportStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
@@ -268,7 +268,7 @@ export function Profile() {
               </p>
             </div>
             <div className="pf__divider" />
-            <button type="button" className="pf__row" onClick={() => window.open(PRIVACY_POLICY_URL, '_blank')}>
+            <button type="button" className="pf__row" onClick={() => navigate('/privacy-policy')}>
               <span className="pf__row-icon pf__row-icon--green">
                 <Icon name="file" size={18} />
               </span>
@@ -295,7 +295,7 @@ export function Profile() {
               <span className="pf__row-text">
                 <strong>Version</strong>
               </span>
-              <span className="pf__row-value">1.22.0</span>
+              <span className="pf__row-value">1.22.1</span>
             </div>
           </div>
         </section>

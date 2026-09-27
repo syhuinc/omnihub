@@ -78,7 +78,9 @@ Download Omni Hub and get everyday things done, all in one place.
 https://claude.ai/artifact/KN6frRqjrW1N1qZg9R3DCq
 ```
 
-Before submitting: open this link and check the Share menu is set to "Anyone with the link can view" — it's private by default, and both Play Console review and end users need to be able to open it. Also linked in-app from Profile ▸ Privacy ▸ Privacy Policy.
+This is only for the Play Console field itself (Google requires a public URL there, reachable before someone installs the app). Before submitting: open this link and check the Share menu is set to "Anyone with the link can view" — it's private by default, and Play Console review needs to be able to open it.
+
+In-app, Profile ▸ Privacy ▸ Privacy Policy shows the same content natively (no external link, no network request) — that's the copy real users will read.
 
 ## Category
 

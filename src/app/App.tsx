@@ -12,6 +12,7 @@ import { PhoneCenter } from '../screens/PhoneCenter/PhoneCenter';
 import { DeviceInfo } from '../screens/PhoneCenter/DeviceInfo';
 import { StorageDetails } from '../screens/PhoneCenter/StorageDetails';
 import { HealthCheck } from '../screens/PhoneCenter/HealthCheck';
+import { PrivacyPolicy } from '../screens/PrivacyPolicy/PrivacyPolicy';
 import { storageGet, StorageKeys } from '../storage/db';
 import { hapticTap } from '../haptics';
 import { AuthProvider } from '../cloud/AuthContext';
@@ -32,6 +33,7 @@ function Screen() {
   if (path === '/device-info') return <DeviceInfo />;
   if (path === '/storage-details') return <StorageDetails />;
   if (path === '/health-check') return <HealthCheck />;
+  if (path === '/privacy-policy') return <PrivacyPolicy />;
   if (path.startsWith('/tools/')) {
     return <ToolRoute toolId={path.slice('/tools/'.length)} />;
   }
