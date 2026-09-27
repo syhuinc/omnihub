@@ -5,6 +5,7 @@ import { useRouter } from '../../app/Router';
 import { hapticTap, hapticSelect, hapticWarning } from '../../haptics';
 import { storageGet, storageSet, StorageKeys } from '../../storage/db';
 import { SNAKE_ASSETS } from '../../assets/snake';
+import { Snake3D } from './Snake3D';
 import './Snake.css';
 
 interface Point {
@@ -260,8 +261,11 @@ export function Snake() {
                 if (isHead) {
                   return (
                     <div key={i} className="sn__seg sn__seg--head" style={style}>
-                      <div
-                        className={`sn__sprite sn__sprite--head${status === 'over' ? ' sn__sprite--head-dead' : ''}${status === 'paused' ? ' sn__sprite--paused' : ''}`}
+                      <Snake3D
+                        kind="head"
+                        anim={status === 'over' ? 'dying' : 'idle'}
+                        paused={status === 'paused'}
+                        className="sn__sprite sn__sprite--head"
                       />
                     </div>
                   );
@@ -278,7 +282,7 @@ export function Snake() {
                   height: `${CELL_PCT_Y}%`,
                 }}
               >
-                <div className={`sn__sprite sn__sprite--egg${status === 'paused' ? ' sn__sprite--paused' : ''}`} />
+                <Snake3D kind="egg" anim="idle" paused={status === 'paused'} className="sn__sprite sn__sprite--egg" />
               </div>
               {eatBurst && (
                 <div
@@ -290,7 +294,7 @@ export function Snake() {
                     height: `${CELL_PCT_Y}%`,
                   }}
                 >
-                  <div key={eatBurst.key} className="sn__sprite sn__sprite--egg-eat" />
+                  <Snake3D key={eatBurst.key} kind="egg" anim="eating" className="sn__sprite sn__sprite--egg-eat" />
                 </div>
               )}
             </div>
