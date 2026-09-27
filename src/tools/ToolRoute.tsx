@@ -28,6 +28,7 @@ import { QrScanner } from './qr-scanner/QrScanner';
 import { BarcodeScannerTool } from './barcode-scanner/BarcodeScannerTool';
 import { VoiceChanger } from './voice-changer/VoiceChanger';
 import { Snake } from './snake/Snake';
+import { Vault } from '../vault/Vault';
 
 const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
   calculator: Calculator,
@@ -57,6 +58,7 @@ const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
   'barcode-scanner': BarcodeScannerTool,
   'voice-changer': VoiceChanger,
   snake: Snake,
+  vault: Vault,
 };
 
 export function ToolRoute({ toolId }: { toolId: string }) {

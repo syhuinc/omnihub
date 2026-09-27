@@ -8,7 +8,6 @@ import { Tools } from '../screens/Tools/Tools';
 import { Pro } from '../screens/Pro/Pro';
 import { Profile } from '../screens/Profile/Profile';
 import { ToolRoute } from '../tools/ToolRoute';
-import { Vault } from '../vault/Vault';
 import { PhoneCenter } from '../screens/PhoneCenter/PhoneCenter';
 import { DeviceInfo } from '../screens/PhoneCenter/DeviceInfo';
 import { StorageDetails } from '../screens/PhoneCenter/StorageDetails';
@@ -29,7 +28,6 @@ function Screen() {
   if (path === '/tools') return <Tools />;
   if (path === '/pro') return <Pro />;
   if (path === '/profile') return <Profile />;
-  if (path === '/vault') return <Vault />;
   if (path === '/phone-center') return <PhoneCenter />;
   if (path === '/device-info') return <DeviceInfo />;
   if (path === '/storage-details') return <StorageDetails />;

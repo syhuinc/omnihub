@@ -1,6 +1,5 @@
 import { ScreenHeader } from '../../components/ScreenHeader';
 import { Icon } from '../../components/Icon';
-import { useRouter } from '../../app/Router';
 import './Pro.css';
 
 const FEATURES = [
@@ -11,8 +10,6 @@ const FEATURES = [
 ];
 
 export function Pro() {
-  const { navigate } = useRouter();
-
   return (
     <div className="screen">
       <ScreenHeader title="Go Pro" subtitle="Unlock your full potential." />
@@ -25,17 +22,6 @@ export function Pro() {
           </span>
           <h2>More Power.{'\n'}More Freedom.{'\n'}A Better You.</h2>
         </div>
-
-        <button type="button" className="pro__vault-card" onClick={() => navigate('/vault')}>
-          <span className="pro__vault-icon">
-            <Icon name="lock" size={22} />
-          </span>
-          <span className="pro__vault-text">
-            <strong>Vault</strong>
-            <span>PIN-locked notes, photos & files, available now</span>
-          </span>
-          <Icon name="chevron-right" size={20} className="pro__vault-chevron" />
-        </button>
 
         <ul className="pro__features">
           {FEATURES.map((f) => (

@@ -114,6 +114,16 @@ export const TOOLS: ToolMeta[] = [
     presentation: 'page',
   },
   {
+    id: 'vault',
+    name: 'Vault',
+    shortDescription: 'PIN-locked notes, photos & files',
+    category: 'productivity',
+    color: 'var(--purple)',
+    icon: 'lock',
+    keywords: ['vault', 'pin', 'lock', 'locked', 'private', 'secure', 'hidden', 'photos', 'files', 'password'],
+    presentation: 'page',
+  },
+  {
     id: 'age-calculator',
     name: 'Age Calculator',
     shortDescription: 'How old am I?',
