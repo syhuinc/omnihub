@@ -19,3 +19,6 @@ ios
 # Play Store; back it up somewhere safe outside this repo.
 android/app/release-keystore.jks
 android/keystore.properties
+
+# Local secrets (API keys, etc.) — never commit these.
+.claude-local/

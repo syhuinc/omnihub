@@ -4,6 +4,7 @@ import { Icon } from '../../components/Icon';
 import { useRouter } from '../../app/Router';
 import { hapticTap, hapticSelect, hapticWarning } from '../../haptics';
 import { storageGet, storageSet, StorageKeys } from '../../storage/db';
+import { SNAKE_ASSETS } from '../../assets/snake';
 import './Snake.css';
 
 interface Point {
@@ -44,6 +45,19 @@ function randomFood(snake: Point[]): Point {
 function speedForScore(score: number): number {
   const foodEaten = score / 10;
   return Math.max(70, 150 - foodEaten * 4);
+}
+
+// The sprites' native pose faces down (south) — rotate from there to match
+// whichever way this segment is actually facing on the board.
+function angleForDir(dir: Point): number {
+  if (dir.y === 1) return 0;
+  if (dir.y === -1) return 180;
+  if (dir.x === -1) return 90;
+  return -90;
+}
+
+function dirBetween(from: Point, to: Point): Point {
+  return { x: Math.sign(to.x - from.x), y: Math.sign(to.y - from.y) };
 }
 
 export function Snake() {
@@ -202,7 +216,7 @@ export function Snake() {
         action={
           status === 'playing' || status === 'paused' ? (
             <button type="button" className="sn__pause-btn" onClick={togglePause} aria-label={status === 'paused' ? 'Resume' : 'Pause'}>
-              <Icon name={status === 'paused' ? 'play' : 'pause'} size={18} />
+              <img src={status === 'paused' ? SNAKE_ASSETS.iconPlay : SNAKE_ASSETS.iconPause} alt="" />
             </button>
           ) : undefined
         }
@@ -223,18 +237,26 @@ export function Snake() {
 
         <div className="sn__board-wrap" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
           <div className="sn__board">
-            {snake.map((seg, i) => (
-              <div
-                key={i}
-                className={`sn__seg${i === 0 ? ' sn__seg--head' : ''}`}
-                style={{
-                  left: `${seg.x * CELL_PCT}%`,
-                  top: `${seg.y * CELL_PCT}%`,
-                  width: `${CELL_PCT}%`,
-                  height: `${CELL_PCT}%`,
-                }}
-              />
-            ))}
+            {snake.map((seg, i) => {
+              const isHead = i === 0;
+              const isTail = i === snake.length - 1;
+              const sprite = isHead ? SNAKE_ASSETS.head : isTail ? SNAKE_ASSETS.tail : SNAKE_ASSETS.body;
+              const dir = isHead ? dirRef.current : dirBetween(seg, snake[i - 1]);
+              return (
+                <div
+                  key={i}
+                  className="sn__seg"
+                  style={{
+                    left: `${seg.x * CELL_PCT}%`,
+                    top: `${seg.y * CELL_PCT}%`,
+                    width: `${CELL_PCT}%`,
+                    height: `${CELL_PCT}%`,
+                    backgroundImage: `url(${sprite})`,
+                    transform: `rotate(${angleForDir(dir)}deg)`,
+                  }}
+                />
+              );
+            })}
             <div
               className="sn__food"
               style={{
@@ -242,6 +264,7 @@ export function Snake() {
                 top: `${food.y * CELL_PCT}%`,
                 width: `${CELL_PCT}%`,
                 height: `${CELL_PCT}%`,
+                backgroundImage: `url(${SNAKE_ASSETS.egg})`,
               }}
             />
           </div>
@@ -255,8 +278,8 @@ export function Snake() {
                   </span>
                   <p className="sn__overlay-title">Ready?</p>
                   <p className="sn__overlay-hint">Swipe or tap the pad to move</p>
-                  <button type="button" className="sn__start-btn" onClick={() => startGame()}>
-                    Tap to Start
+                  <button type="button" className="sn__cta-btn" onClick={() => startGame()}>
+                    <img src={SNAKE_ASSETS.btnPlay} alt="Tap to Start" />
                   </button>
                   {highScore > 0 && <p className="sn__overlay-best">Best: {highScore}</p>}
                 </>
@@ -267,8 +290,8 @@ export function Snake() {
                     <Icon name="pause" size={30} />
                   </span>
                   <p className="sn__overlay-title">Paused</p>
-                  <button type="button" className="sn__start-btn" onClick={togglePause}>
-                    Resume
+                  <button type="button" className="sn__cta-btn" onClick={togglePause}>
+                    <img src={SNAKE_ASSETS.btnPlay} alt="Resume" />
                   </button>
                 </>
               )}
@@ -277,9 +300,14 @@ export function Snake() {
                   <p className="sn__overlay-title">Game Over</p>
                   <p className="sn__overlay-score">Score: {score}</p>
                   {isNewBest && <p className="sn__overlay-best sn__overlay-best--new">New Best!</p>}
-                  <button type="button" className="sn__start-btn" onClick={() => startGame()}>
-                    Play Again
-                  </button>
+                  <div className="sn__cta-row">
+                    <button type="button" className="sn__cta-btn" onClick={() => startGame()}>
+                      <img src={SNAKE_ASSETS.btnRestart} alt="Play Again" />
+                    </button>
+                    <button type="button" className="sn__cta-btn" onClick={back}>
+                      <img src={SNAKE_ASSETS.btnHome} alt="Home" />
+                    </button>
+                  </div>
                 </>
               )}
             </div>

@@ -1,13 +1,19 @@
 .sn__pause-btn {
-  width: 36px;
-  height: 36px;
-  border-radius: var(--radius-sm);
-  background: var(--bg-elevated-2);
-  border: 1px solid var(--border-strong);
-  color: var(--text-secondary);
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.sn__pause-btn img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.sn__pause-btn:active img {
+  transform: scale(0.92);
 }
 
 .sn__body {
@@ -88,45 +94,24 @@
 .sn__seg {
   position: absolute;
   box-sizing: border-box;
-  padding: 1px;
-}
-
-.sn__seg::after {
-  content: '';
-  display: block;
-  width: 100%;
-  height: 100%;
-  border-radius: 4px;
-  background: var(--green);
-  opacity: 0.85;
-}
-
-.sn__seg--head::after {
-  opacity: 1;
-  border-radius: 6px;
-  box-shadow: 0 0 10px -1px color-mix(in srgb, var(--green) 70%, transparent);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 122% 122%;
+  transition: transform 0.05s linear;
 }
 
 .sn__food {
   position: absolute;
   box-sizing: border-box;
-  padding: 3px;
-}
-
-.sn__food::after {
-  content: '';
-  display: block;
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  background: var(--red);
-  box-shadow: 0 0 10px -1px color-mix(in srgb, var(--red) 70%, transparent);
-  animation: sn-food-pulse 1s ease-in-out infinite;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 88% 88%;
+  animation: sn-food-pulse 1.1s ease-in-out infinite;
 }
 
 @keyframes sn-food-pulse {
   0%, 100% { transform: scale(1); }
-  50% { transform: scale(0.82); }
+  50% { transform: scale(0.9); }
 }
 
 .sn__overlay {
@@ -178,14 +163,20 @@
   margin-top: 4px;
 }
 
-.sn__start-btn {
-  padding: 12px 28px;
-  border-radius: var(--radius-pill);
-  background: linear-gradient(135deg, var(--green), #16a34a);
-  color: #fff;
-  font-size: 15px;
-  font-weight: 700;
-  box-shadow: 0 4px 16px -4px color-mix(in srgb, var(--green) 60%, transparent);
+.sn__cta-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.sn__cta-btn img {
+  height: 52px;
+  width: auto;
+  display: block;
+}
+
+.sn__cta-btn:active img {
+  transform: scale(0.95);
 }
 
 .sn__pad {
