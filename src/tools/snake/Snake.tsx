@@ -79,6 +79,11 @@ export function Snake() {
   const [score, setScore] = useState(0);
   const [highScore, setHighScore] = useState(() => storageGet(StorageKeys.snakeHighScore, 0));
   const [isNewBest, setIsNewBest] = useState(false);
+  // Held back briefly on game over so the head's death animation is visible
+  // on the board before the dark overlay covers it.
+  const [overlayVisible, setOverlayVisible] = useState(true);
+  const [eatBurst, setEatBurst] = useState<{ x: number; y: number; key: number } | null>(null);
+  const eatBurstIdRef = useRef(0);
 
   // Mirrors of the latest values, read synchronously from the tick loop so
   // it never acts on a stale closure or a not-yet-committed React state.
@@ -133,6 +138,11 @@ export function Snake() {
       scoreRef.current += 10;
       setScore(scoreRef.current);
       hapticSelect();
+      const burstKey = ++eatBurstIdRef.current;
+      setEatBurst({ x: newHead.x, y: newHead.y, key: burstKey });
+      setTimeout(() => {
+        setEatBurst((cur) => (cur && cur.key === burstKey ? null : cur));
+      }, 450);
       const nextFood = randomFood(newSnake);
       foodRef.current = nextFood;
       setFood(nextFood);
@@ -170,6 +180,8 @@ export function Snake() {
     setFood(foodStart);
     setScore(0);
     setIsNewBest(false);
+    setEatBurst(null);
+    setOverlayVisible(true);
     setStatusBoth('playing');
   }
 
@@ -180,7 +192,10 @@ export function Snake() {
       storageSet(StorageKeys.snakeHighScore, scoreRef.current);
       setIsNewBest(true);
     }
+    // Let the head's death animation play on the board before the overlay covers it.
+    setOverlayVisible(false);
     setStatusBoth('over');
+    setTimeout(() => setOverlayVisible(true), 620);
   }
 
   function setStatusBoth(next: Status) {
@@ -234,22 +249,25 @@ export function Snake() {
               {snake.map((seg, i) => {
                 const isHead = i === 0;
                 const isTail = i === snake.length - 1;
-                const sprite = isHead ? SNAKE_ASSETS.head : isTail ? SNAKE_ASSETS.tail : SNAKE_ASSETS.body;
                 const dir = isHead ? dirRef.current : dirBetween(seg, snake[i - 1]);
-                return (
-                  <div
-                    key={i}
-                    className="sn__seg"
-                    style={{
-                      left: `${seg.x * CELL_PCT_X}%`,
-                      top: `${seg.y * CELL_PCT_Y}%`,
-                      width: `${CELL_PCT_X}%`,
-                      height: `${CELL_PCT_Y}%`,
-                      backgroundImage: `url(${sprite})`,
-                      transform: `rotate(${angleForDir(dir)}deg)`,
-                    }}
-                  />
-                );
+                const style = {
+                  left: `${seg.x * CELL_PCT_X}%`,
+                  top: `${seg.y * CELL_PCT_Y}%`,
+                  width: `${CELL_PCT_X}%`,
+                  height: `${CELL_PCT_Y}%`,
+                  transform: `rotate(${angleForDir(dir)}deg)`,
+                };
+                if (isHead) {
+                  return (
+                    <div key={i} className="sn__seg sn__seg--head" style={style}>
+                      <div
+                        className={`sn__sprite sn__sprite--head${status === 'over' ? ' sn__sprite--head-dead' : ''}${status === 'paused' ? ' sn__sprite--paused' : ''}`}
+                      />
+                    </div>
+                  );
+                }
+                const sprite = isTail ? SNAKE_ASSETS.tail : SNAKE_ASSETS.body;
+                return <div key={i} className="sn__seg" style={{ ...style, backgroundImage: `url(${sprite})` }} />;
               })}
               <div
                 className="sn__food"
@@ -258,9 +276,23 @@ export function Snake() {
                   top: `${food.y * CELL_PCT_Y}%`,
                   width: `${CELL_PCT_X}%`,
                   height: `${CELL_PCT_Y}%`,
-                  backgroundImage: `url(${SNAKE_ASSETS.egg})`,
                 }}
-              />
+              >
+                <div className={`sn__sprite sn__sprite--egg${status === 'paused' ? ' sn__sprite--paused' : ''}`} />
+              </div>
+              {eatBurst && (
+                <div
+                  className="sn__eat-burst"
+                  style={{
+                    left: `${eatBurst.x * CELL_PCT_X}%`,
+                    top: `${eatBurst.y * CELL_PCT_Y}%`,
+                    width: `${CELL_PCT_X}%`,
+                    height: `${CELL_PCT_Y}%`,
+                  }}
+                >
+                  <div key={eatBurst.key} className="sn__sprite sn__sprite--egg-eat" />
+                </div>
+              )}
             </div>
 
             <div className="sn__hud">
@@ -280,7 +312,7 @@ export function Snake() {
               )}
             </div>
 
-            {status !== 'playing' && (
+            {status !== 'playing' && overlayVisible && (
               <div className="sn__overlay">
                 {status === 'idle' && (
                   <>
