@@ -14,8 +14,12 @@ interface Point {
 
 type Status = 'idle' | 'playing' | 'paused' | 'over';
 
-const GRID_SIZE = 15;
-const CELL_PCT = 100 / GRID_SIZE;
+// Matches the board art's own proportions (941:1672) so the grid lines up
+// with the stone tiles without stretching or cropping the artwork.
+const COLS = 9;
+const ROWS = 16;
+const CELL_PCT_X = 100 / COLS;
+const CELL_PCT_Y = 100 / ROWS;
 const SWIPE_THRESHOLD = 24;
 
 const UP: Point = { x: 0, y: -1 };
@@ -23,19 +27,22 @@ const DOWN: Point = { x: 0, y: 1 };
 const LEFT: Point = { x: -1, y: 0 };
 const RIGHT: Point = { x: 1, y: 0 };
 
+// Body trails behind the head — opposite the starting direction (down), so
+// it extends upward — or the very first move would run the snake into itself.
 function initialSnake(): Point[] {
-  const mid = Math.floor(GRID_SIZE / 2);
+  const midX = Math.floor(COLS / 2);
+  const midY = Math.floor(ROWS / 2);
   return [
-    { x: mid, y: mid },
-    { x: mid - 1, y: mid },
-    { x: mid - 2, y: mid },
+    { x: midX, y: midY },
+    { x: midX, y: midY - 1 },
+    { x: midX, y: midY - 2 },
   ];
 }
 
 function randomFood(snake: Point[]): Point {
   let candidate: Point;
   do {
-    candidate = { x: Math.floor(Math.random() * GRID_SIZE), y: Math.floor(Math.random() * GRID_SIZE) };
+    candidate = { x: Math.floor(Math.random() * COLS), y: Math.floor(Math.random() * ROWS) };
   } while (snake.some((seg) => seg.x === candidate.x && seg.y === candidate.y));
   return candidate;
 }
@@ -60,6 +67,10 @@ function dirBetween(from: Point, to: Point): Point {
   return { x: Math.sign(to.x - from.x), y: Math.sign(to.y - from.y) };
 }
 
+// The initial snake above faces down (head has the larger y), so that's the
+// starting direction rather than the usual "moving right".
+const START_DIR = DOWN;
+
 export function Snake() {
   const { back } = useRouter();
   const [snake, setSnake] = useState<Point[]>(initialSnake);
@@ -75,8 +86,8 @@ export function Snake() {
   const foodRef = useRef(food);
   const scoreRef = useRef(score);
   const statusRef = useRef(status);
-  const dirRef = useRef<Point>(RIGHT);
-  const pendingDirRef = useRef<Point>(RIGHT);
+  const dirRef = useRef<Point>(START_DIR);
+  const pendingDirRef = useRef<Point>(START_DIR);
   const touchStartRef = useRef<Point | null>(null);
 
   function setDirection(dir: Point) {
@@ -101,7 +112,7 @@ export function Snake() {
     const head = snakeRef.current[0];
     const newHead: Point = { x: head.x + dir.x, y: head.y + dir.y };
 
-    if (newHead.x < 0 || newHead.x >= GRID_SIZE || newHead.y < 0 || newHead.y >= GRID_SIZE) {
+    if (newHead.x < 0 || newHead.x >= COLS || newHead.y < 0 || newHead.y >= ROWS) {
       endGame();
       return;
     }
@@ -146,7 +157,7 @@ export function Snake() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status]);
 
-  function startGame(dir: Point = RIGHT) {
+  function startGame(dir: Point = START_DIR) {
     hapticTap();
     const snakeStart = initialSnake();
     const foodStart = randomFood(snakeStart);
@@ -209,125 +220,113 @@ export function Snake() {
 
   return (
     <div className="screen sn">
-      <ScreenHeader
-        title="Snake"
-        subtitle="Swipe or use the pad to steer."
-        onBack={back}
-        action={
-          status === 'playing' || status === 'paused' ? (
-            <button type="button" className="sn__pause-btn" onClick={togglePause} aria-label={status === 'paused' ? 'Resume' : 'Pause'}>
-              <img src={status === 'paused' ? SNAKE_ASSETS.iconPlay : SNAKE_ASSETS.iconPause} alt="" />
-            </button>
-          ) : undefined
-        }
-      />
+      <ScreenHeader title="Snake" subtitle="Swipe to move" onBack={back} />
 
       <div className="sn__body">
-        <div className="sn__stats">
-          <div className="sn__stat">
-            <span className="sn__stat-label">Score</span>
-            <span className="sn__stat-value">{score}</span>
-          </div>
-          <div className="sn__stat sn__stat--best">
-            <Icon name="star" size={14} />
-            <span className="sn__stat-label">Best</span>
-            <span className="sn__stat-value">{highScore}</span>
-          </div>
-        </div>
+        <div className="sn__board-outer">
+          <div
+            className="sn__board-wrap"
+            style={{ aspectRatio: `${COLS} / ${ROWS}` }}
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+          >
+            <div className="sn__board">
+              {snake.map((seg, i) => {
+                const isHead = i === 0;
+                const isTail = i === snake.length - 1;
+                const sprite = isHead ? SNAKE_ASSETS.head : isTail ? SNAKE_ASSETS.tail : SNAKE_ASSETS.body;
+                const dir = isHead ? dirRef.current : dirBetween(seg, snake[i - 1]);
+                return (
+                  <div
+                    key={i}
+                    className="sn__seg"
+                    style={{
+                      left: `${seg.x * CELL_PCT_X}%`,
+                      top: `${seg.y * CELL_PCT_Y}%`,
+                      width: `${CELL_PCT_X}%`,
+                      height: `${CELL_PCT_Y}%`,
+                      backgroundImage: `url(${sprite})`,
+                      transform: `rotate(${angleForDir(dir)}deg)`,
+                    }}
+                  />
+                );
+              })}
+              <div
+                className="sn__food"
+                style={{
+                  left: `${food.x * CELL_PCT_X}%`,
+                  top: `${food.y * CELL_PCT_Y}%`,
+                  width: `${CELL_PCT_X}%`,
+                  height: `${CELL_PCT_Y}%`,
+                  backgroundImage: `url(${SNAKE_ASSETS.egg})`,
+                }}
+              />
+            </div>
 
-        <div className="sn__board-wrap" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
-          <div className="sn__board">
-            {snake.map((seg, i) => {
-              const isHead = i === 0;
-              const isTail = i === snake.length - 1;
-              const sprite = isHead ? SNAKE_ASSETS.head : isTail ? SNAKE_ASSETS.tail : SNAKE_ASSETS.body;
-              const dir = isHead ? dirRef.current : dirBetween(seg, snake[i - 1]);
-              return (
-                <div
-                  key={i}
-                  className="sn__seg"
-                  style={{
-                    left: `${seg.x * CELL_PCT}%`,
-                    top: `${seg.y * CELL_PCT}%`,
-                    width: `${CELL_PCT}%`,
-                    height: `${CELL_PCT}%`,
-                    backgroundImage: `url(${sprite})`,
-                    transform: `rotate(${angleForDir(dir)}deg)`,
-                  }}
-                />
-              );
-            })}
-            <div
-              className="sn__food"
-              style={{
-                left: `${food.x * CELL_PCT}%`,
-                top: `${food.y * CELL_PCT}%`,
-                width: `${CELL_PCT}%`,
-                height: `${CELL_PCT}%`,
-                backgroundImage: `url(${SNAKE_ASSETS.egg})`,
-              }}
-            />
-          </div>
-
-          {status !== 'playing' && (
-            <div className="sn__overlay">
-              {status === 'idle' && (
-                <>
-                  <span className="sn__overlay-icon">
-                    <Icon name="gamepad" size={30} />
-                  </span>
-                  <p className="sn__overlay-title">Ready?</p>
-                  <p className="sn__overlay-hint">Swipe or tap the pad to move</p>
-                  <button type="button" className="sn__cta-btn" onClick={() => startGame()}>
-                    <img src={SNAKE_ASSETS.btnPlay} alt="Tap to Start" />
-                  </button>
-                  {highScore > 0 && <p className="sn__overlay-best">Best: {highScore}</p>}
-                </>
-              )}
-              {status === 'paused' && (
-                <>
-                  <span className="sn__overlay-icon">
-                    <Icon name="pause" size={30} />
-                  </span>
-                  <p className="sn__overlay-title">Paused</p>
-                  <button type="button" className="sn__cta-btn" onClick={togglePause}>
-                    <img src={SNAKE_ASSETS.btnPlay} alt="Resume" />
-                  </button>
-                </>
-              )}
-              {status === 'over' && (
-                <>
-                  <p className="sn__overlay-title">Game Over</p>
-                  <p className="sn__overlay-score">Score: {score}</p>
-                  {isNewBest && <p className="sn__overlay-best sn__overlay-best--new">New Best!</p>}
-                  <div className="sn__cta-row">
-                    <button type="button" className="sn__cta-btn" onClick={() => startGame()}>
-                      <img src={SNAKE_ASSETS.btnRestart} alt="Play Again" />
-                    </button>
-                    <button type="button" className="sn__cta-btn" onClick={back}>
-                      <img src={SNAKE_ASSETS.btnHome} alt="Home" />
-                    </button>
-                  </div>
-                </>
+            <div className="sn__hud">
+              <div className="sn__hud-score">
+                <Icon name="crown" size={16} />
+                <span>{score}</span>
+              </div>
+              {(status === 'playing' || status === 'paused') && (
+                <button
+                  type="button"
+                  className="sn__pause-btn"
+                  onClick={togglePause}
+                  aria-label={status === 'paused' ? 'Resume' : 'Pause'}
+                >
+                  <img src={status === 'paused' ? SNAKE_ASSETS.iconPlay : SNAKE_ASSETS.iconPause} alt="" />
+                </button>
               )}
             </div>
-          )}
-        </div>
 
-        <div className="sn__pad">
-          <button type="button" className="sn__pad-btn sn__pad-btn--up" onClick={() => setDirection(UP)} aria-label="Up">
-            <Icon name="chevron-right" size={22} />
-          </button>
-          <button type="button" className="sn__pad-btn sn__pad-btn--left" onClick={() => setDirection(LEFT)} aria-label="Left">
-            <Icon name="chevron-right" size={22} />
-          </button>
-          <span className="sn__pad-center" />
-          <button type="button" className="sn__pad-btn sn__pad-btn--right" onClick={() => setDirection(RIGHT)} aria-label="Right">
-            <Icon name="chevron-right" size={22} />
-          </button>
-          <button type="button" className="sn__pad-btn sn__pad-btn--down" onClick={() => setDirection(DOWN)} aria-label="Down">
-            <Icon name="chevron-right" size={22} />
-          </button>
+            {status !== 'playing' && (
+              <div className="sn__overlay">
+                {status === 'idle' && (
+                  <>
+                    <span className="sn__overlay-icon">
+                      <Icon name="gamepad" size={30} />
+                    </span>
+                    <p className="sn__overlay-title">Ready?</p>
+                    <p className="sn__overlay-hint">Swipe to move</p>
+                    <button type="button" className="sn__cta-btn" onClick={() => startGame()}>
+                      <img src={SNAKE_ASSETS.btnPlay} alt="Tap to Start" />
+                    </button>
+                    {highScore > 0 && <p className="sn__overlay-best">Best: {highScore}</p>}
+                  </>
+                )}
+                {status === 'paused' && (
+                  <>
+                    <span className="sn__overlay-icon">
+                      <Icon name="pause" size={30} />
+                    </span>
+                    <p className="sn__overlay-title">Paused</p>
+                    <button type="button" className="sn__cta-btn" onClick={togglePause}>
+                      <img src={SNAKE_ASSETS.btnPlay} alt="Resume" />
+                    </button>
+                  </>
+                )}
+                {status === 'over' && (
+                  <>
+                    <p className="sn__overlay-title">Game Over</p>
+                    <p className="sn__overlay-score">
+                      Score: {score}
+                      {highScore > 0 && <span className="sn__overlay-best-inline"> · Best: {highScore}</span>}
+                    </p>
+                    {isNewBest && <p className="sn__overlay-best sn__overlay-best--new">New Best!</p>}
+                    <div className="sn__cta-row">
+                      <button type="button" className="sn__cta-btn" onClick={() => startGame()}>
+                        <img src={SNAKE_ASSETS.btnRestart} alt="Play Again" />
+                      </button>
+                      <button type="button" className="sn__cta-btn" onClick={back}>
+                        <img src={SNAKE_ASSETS.btnHome} alt="Home" />
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
