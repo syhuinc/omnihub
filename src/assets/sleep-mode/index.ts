@@ -15,6 +15,12 @@ import sampleFriendly from './sample-audio/sample-friendly.m4a';
 import sampleTeasing from './sample-audio/sample-teasing.m4a';
 import sampleStrict from './sample-audio/sample-strict.m4a';
 import sampleSavage from './sample-audio/sample-savage.m4a';
+import audioRain from './sound-audio/rain.mp3';
+import audioForest from './sound-audio/forest.mp3';
+import audioOcean from './sound-audio/ocean.mp3';
+import audioNightAmbience from './sound-audio/night-ambience.mp3';
+import audioCampfire from './sound-audio/campfire.mp3';
+import audioCafe from './sound-audio/cafe.mp3';
 
 export { heroBanner };
 
@@ -33,6 +39,16 @@ export const SOUND_IMAGES: Record<string, string> = {
   'night-ambience': soundNightAmbience,
   campfire: soundCampfire,
   cafe: soundCafe,
+};
+
+/** Looping ambient audio beds (60s loops) for Sleep Sounds — bundled with the app, played on-device. */
+export const SOUND_AUDIO: Record<string, string> = {
+  rain: audioRain,
+  forest: audioForest,
+  ocean: audioOcean,
+  'night-ambience': audioNightAmbience,
+  campfire: audioCampfire,
+  cafe: audioCafe,
 };
 
 /**

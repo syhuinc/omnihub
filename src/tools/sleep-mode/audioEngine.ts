@@ -1,88 +1,58 @@
 /**
- * Synthesized ambient loops for Sleep Sounds — filtered/modulated noise generated on-device with
- * the Web Audio API, not licensed field recordings (we don't have any). Each sound is a rough
- * character approximation, not a literal "rain" or "ocean" recording.
+ * Looping ambient audio for Sleep Sounds — real 60s recordings bundled with the app, decoded once
+ * per sound and looped via the Web Audio API.
  */
+import { SOUND_AUDIO } from '../../assets/sleep-mode';
 
 type SoundId = 'rain' | 'forest' | 'ocean' | 'night-ambience' | 'campfire' | 'cafe';
 
 interface ActiveSound {
   source: AudioBufferSourceNode;
-  filter: BiquadFilterNode;
   gain: GainNode;
-  lfo?: OscillatorNode;
 }
 
 let audioCtx: AudioContext | null = null;
 let active: ActiveSound | null = null;
 let activeId: SoundId | null = null;
-let noiseBuffer: AudioBuffer | null = null;
+let loadToken = 0;
+const bufferCache: Partial<Record<SoundId, AudioBuffer>> = {};
 
 function getContext(): AudioContext {
   if (!audioCtx) audioCtx = new AudioContext();
   return audioCtx;
 }
 
-function getNoiseBuffer(ctx: AudioContext): AudioBuffer {
-  if (noiseBuffer) return noiseBuffer;
-  const seconds = 4;
-  const buffer = ctx.createBuffer(1, ctx.sampleRate * seconds, ctx.sampleRate);
-  const data = buffer.getChannelData(0);
-  let lastOut = 0;
-  for (let i = 0; i < data.length; i++) {
-    const white = Math.random() * 2 - 1;
-    // Light brownian smoothing so raw white noise doesn't sound harsh/hissy on its own.
-    lastOut = (lastOut + 0.02 * white) / 1.02;
-    data[i] = lastOut * 8;
-  }
-  noiseBuffer = buffer;
+async function getBuffer(ctx: AudioContext, id: SoundId): Promise<AudioBuffer> {
+  const cached = bufferCache[id];
+  if (cached) return cached;
+  const res = await fetch(SOUND_AUDIO[id]);
+  const arrayBuffer = await res.arrayBuffer();
+  const buffer = await ctx.decodeAudioData(arrayBuffer);
+  bufferCache[id] = buffer;
   return buffer;
 }
 
-const SOUND_PARAMS: Record<SoundId, { filterType: BiquadFilterType; freq: number; q: number; lfoHz?: number; lfoDepth?: number }> = {
-  rain: { filterType: 'highpass', freq: 1200, q: 0.6 },
-  forest: { filterType: 'bandpass', freq: 900, q: 0.9 },
-  ocean: { filterType: 'lowpass', freq: 500, q: 0.5, lfoHz: 0.12, lfoDepth: 0.4 },
-  'night-ambience': { filterType: 'lowpass', freq: 300, q: 0.4 },
-  campfire: { filterType: 'lowpass', freq: 700, q: 1.2, lfoHz: 3.5, lfoDepth: 0.15 },
-  cafe: { filterType: 'bandpass', freq: 1500, q: 0.7 },
-};
-
-export function playSound(id: SoundId, volume: number): void {
+export async function playSound(id: SoundId, volume: number): Promise<void> {
   stopSound();
+  const token = ++loadToken;
   const ctx = getContext();
-  if (ctx.state === 'suspended') ctx.resume();
+  if (ctx.state === 'suspended') await ctx.resume();
 
-  const params = SOUND_PARAMS[id];
+  const buffer = await getBuffer(ctx, id);
+  if (token !== loadToken) return; // superseded by a newer play/stop call while loading
+
   const source = ctx.createBufferSource();
-  source.buffer = getNoiseBuffer(ctx);
+  source.buffer = buffer;
   source.loop = true;
-
-  const filter = ctx.createBiquadFilter();
-  filter.type = params.filterType;
-  filter.frequency.value = params.freq;
-  filter.Q.value = params.q;
 
   const gain = ctx.createGain();
   gain.gain.value = volume;
 
-  source.connect(filter);
-  filter.connect(gain);
+  source.connect(gain);
   gain.connect(ctx.destination);
-
-  let lfo: OscillatorNode | undefined;
-  if (params.lfoHz) {
-    lfo = ctx.createOscillator();
-    lfo.frequency.value = params.lfoHz;
-    const lfoGain = ctx.createGain();
-    lfoGain.gain.value = volume * (params.lfoDepth ?? 0.3);
-    lfo.connect(lfoGain);
-    lfoGain.connect(gain.gain);
-    lfo.start();
-  }
-
   source.start();
-  active = { source, filter, gain, lfo };
+
+  active = { source, gain };
   activeId = id;
 }
 
@@ -91,15 +61,14 @@ export function setVolume(volume: number): void {
 }
 
 export function stopSound(): void {
+  loadToken++;
   if (active) {
     try {
       active.source.stop();
-      active.lfo?.stop();
     } catch {
       // already stopped — ignore
     }
     active.source.disconnect();
-    active.filter.disconnect();
     active.gain.disconnect();
     active = null;
     activeId = null;

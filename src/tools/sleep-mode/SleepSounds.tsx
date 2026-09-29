@@ -74,8 +74,7 @@ export function SleepSounds({ onBack }: SleepSoundsProps) {
         </div>
 
         <p className="sm__pro-note">
-          These are synthesized ambient loops generated on your device, not licensed recordings —
-          they're an approximation of each sound, not the real thing.
+          Looping ambient audio, bundled with the app and played entirely on your device.
         </p>
 
         <div className="ss__volume-row">
