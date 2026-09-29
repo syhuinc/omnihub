@@ -23,6 +23,11 @@ import barcodeScanner from './barcode-scanner.webp';
 import subscriptionCalculator from './subscription-calculator.webp';
 import debtCalculator from './debt-calculator.webp';
 import sleepMode from './sleep-mode.webp';
+import audioConverter from './audio-converter.webp';
+import pdfConverter from './pdf-converter.webp';
+import qrGenerator from './qr-generator.webp';
+import journal from './journal.webp';
+import vault from './vault.webp';
 
 export const TOOL_ICON_IMAGES: Record<string, string> = {
   calculator,
@@ -50,4 +55,9 @@ export const TOOL_ICON_IMAGES: Record<string, string> = {
   'subscription-calculator': subscriptionCalculator,
   'debt-calculator': debtCalculator,
   'sleep-mode': sleepMode,
+  'audio-converter': audioConverter,
+  'pdf-converter': pdfConverter,
+  'qr-generator': qrGenerator,
+  journal,
+  vault,
 };

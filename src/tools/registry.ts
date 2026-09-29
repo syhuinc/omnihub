@@ -350,17 +350,6 @@ export const TOOLS: ToolMeta[] = [
     locked: true,
   },
   {
-    id: 'habit-tracker',
-    name: 'Habit Tracker',
-    shortDescription: 'Build habits and track your daily streaks',
-    category: 'productivity',
-    color: 'var(--yellow)',
-    icon: 'target',
-    keywords: ['habit', 'tracker', 'streak', 'daily', 'routine', 'goal', 'consistency'],
-    presentation: 'page',
-    locked: true,
-  },
-  {
     id: 'journal',
     name: 'Journal',
     shortDescription: 'Write and reflect on your day',

@@ -25,6 +25,11 @@ import subscriptionCalculator from './light/subscription-calculator.webp';
 import debtCalculator from './light/debt-calculator.webp';
 import sleepMode from './light/sleep-mode.webp';
 import voiceChanger from './light/voice-changer.webp';
+import audioConverter from './light/audio-converter.webp';
+import pdfConverter from './light/pdf-converter.webp';
+import qrGenerator from './light/qr-generator.webp';
+import journal from './light/journal.webp';
+import vault from './light/vault.webp';
 
 export const TOOL_ICON_IMAGES_LIGHT: Record<string, string> = {
   calculator,
@@ -53,4 +58,9 @@ export const TOOL_ICON_IMAGES_LIGHT: Record<string, string> = {
   'debt-calculator': debtCalculator,
   'sleep-mode': sleepMode,
   'voice-changer': voiceChanger,
+  'audio-converter': audioConverter,
+  'pdf-converter': pdfConverter,
+  'qr-generator': qrGenerator,
+  journal,
+  vault,
 };
