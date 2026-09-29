@@ -120,9 +120,9 @@ export function PrivacyPolicy() {
         <section className="pp__section">
           <h2>Permissions</h2>
           <p>
-            Omni Hub does not access your microphone or contacts. It requests these permissions,
-            all used only to make features work, never to collect or transmit data beyond what's
-            described above:
+            Omni Hub does not access your contacts. It requests these permissions, all used only
+            to make features work (or reserved for a locked feature not yet available to use),
+            never to collect or transmit data beyond what's described above:
           </p>
           <ul>
             <li>
@@ -142,6 +142,12 @@ export function PrivacyPolicy() {
               alarms after the device reboots) — all used solely by the <strong>Alarm</strong>{' '}
               feature, so an alarm you set still rings even if Omni Hub is closed. None of this
               involves any network access.
+            </li>
+            <li>
+              <strong>Display over other apps</strong> — used only by <strong>Sleep Mode</strong>
+              's on-screen reminder card, so it can appear on top of whatever you're doing when a
+              reminder fires, but only while your phone is unlocked and in active use. Without
+              this permission granted, the same reminder still shows as a normal notification.
             </li>
             <li>
               <strong>Camera / flashlight</strong> — used by the <strong>QR Scanner</strong>,{' '}
@@ -171,6 +177,18 @@ export function PrivacyPolicy() {
               and link speed (Android requires location access to read these two specific Wi-Fi
               details; Omni Hub never reads or uses your actual location for this). Read entirely
               on-device; never stored, logged, or transmitted anywhere.
+            </li>
+            <li>
+              <strong>Microphone and audio settings</strong> (not yet in use) — reserved for the{' '}
+              <strong>Voice Changer</strong> tool's recording feature, which is currently locked
+              and not yet available. When it launches, recording will only ever start when you
+              tap record, will be processed entirely on your device, and will only ever be sent
+              anywhere if you explicitly tap Share.
+            </li>
+            <li>
+              <strong>Modify system settings</strong> (not yet in use) — reserved for Voice
+              Changer's upcoming "Set as Ringtone" option, needed to change your device's default
+              ringtone. Not used for anything else.
             </li>
             <li>
               <strong>Photos, Videos, and Audio</strong> (optional, requested only if you open{' '}

@@ -2,7 +2,7 @@
 
 **Last updated:** September 2026
 
-Omni Hub is an offline-first utility app. Everything works fully on your device with no account needed. Signing in with Google is entirely optional and only unlocks syncing some of your data across your own devices — nothing else changes, and nothing is shared, sold, or used for ads or analytics either way.
+Omni Hub doesn't require an account. Signing in with Google is entirely optional and only unlocks syncing some of your data across your own devices — nothing else changes, and nothing is shared, sold, or used for ads or analytics either way.
 
 ## What we collect
 
@@ -35,15 +35,18 @@ Your PIN is never stored anywhere, on-device or in the cloud — only used to de
 
 ## Permissions
 
-Omni Hub does not access your microphone or contacts. It requests these permissions, all used only to make features work, never to collect or transmit data beyond what's described above:
+Omni Hub does not access your contacts. It requests these permissions, all used only to make features work (or reserved for a locked feature not yet available to use), never to collect or transmit data beyond what's described above:
 
 - **Internet / network access** — required only for the optional Google Sign-In and cloud sync described above. Unused unless you sign in. Omni Hub separately checks (but does not use to connect anywhere) whether you currently have a Wi-Fi or mobile connection, to show connection status on the "My Phone" card and Phone Health Check.
 - **Vibrate** — haptic feedback (tap and completion vibrations).
 - **Alarms, notifications, and background wake permissions** (schedule alarms, post notifications, run in the foreground briefly while an alarm rings, keep the device awake for that, show the ringing screen over the lock screen, and restart alarms after the device reboots) — all used solely by the **Alarm** feature, so an alarm you set still rings even if Omni Hub is closed. None of this involves any network access.
+- **Display over other apps** — used only by **Sleep Mode**'s on-screen reminder card, so it can appear on top of whatever you're doing when a reminder fires, but only while your phone is unlocked and in active use. Without this permission granted, the same reminder still shows as a normal notification.
 - **Camera / flashlight** — used by the **QR Scanner**, **Barcode Scanner**, and **Flashlight** tools, and by the **Phone Health Check**'s Front Camera and Rear Camera tests (Phone Center) to show you a live preview so you can confirm your cameras work. In every case the preview is shown to you only, entirely on your device — no photo, video, or scanned image is ever saved or transmitted; a scanned code's decoded text stays on-device too.
 - **Phone state** (optional, off by default) — used only by the **Flashlight** tool's "Flash Alerts" setting to detect when your phone starts or stops ringing, so it can blink the flash for an incoming call. Omni Hub never reads phone numbers, call logs, or call content.
 - **Notification access** (optional, off by default, granted separately in Android Settings) — used only by the same "Flash Alerts" setting to detect that some other app posted a notification, so it can blink the flash. Omni Hub never reads, stores, or transmits any notification's content.
 - **Location** — used by the **Compass** tool's optional location, altitude, and accuracy display, and optionally by the **Phone Center**'s Connection card to show your Wi-Fi signal strength and link speed (Android requires location access to read these two specific Wi-Fi details; Omni Hub never reads or uses your actual location for this). Read entirely on-device; never stored, logged, or transmitted anywhere.
+- **Microphone and audio settings** (not yet in use) — reserved for the **Voice Changer** tool's recording feature, which is currently locked and not yet available. When it launches, recording will only ever start when you tap record, will be processed entirely on your device, and will only ever be sent anywhere if you explicitly tap Share.
+- **Modify system settings** (not yet in use) — reserved for Voice Changer's upcoming "Set as Ringtone" option, needed to change your device's default ringtone. Not used for anything else.
 - **Photos, Videos, and Audio** (optional, requested only if you open **Phone Center ▸ Storage Details**) — used only to show how much space your photos, videos, and audio files take up. Omni Hub reads file sizes and counts from your media library; it never opens, previews, uploads, or transmits the files themselves.
 
 Two more things Phone Center and Phone Health Check read, neither of which needs a permission prompt and neither of which is ever stored or transmitted: your device's battery level/temperature, total and free storage, total RAM, and Wi-Fi connection status (for the "My Phone" card and related screens); and motion-sensor readings like your accelerometer (only while you're actively running the Sensors test in Phone Health Check, to confirm the sensor responds when you move your phone).
