@@ -102,6 +102,7 @@ export function ToolTile({
               <Icon name="lock" size={11} strokeWidth={2.5} />
             </span>
           )}
+          {tool.beta && <span className="tool-tile__beta-badge">Beta</span>}
         </span>
         <span className="tool-tile__label">{tool.name}</span>
       </button>

@@ -20,4 +20,6 @@ export interface ToolMeta {
   presentation: ToolPresentation;
   /** Shown in the grid with a lock badge; opening it shows a "locked" screen instead of the tool. */
   locked?: boolean;
+  /** Shown in the grid with a "Beta" badge, and on the tool's own screen title. */
+  beta?: boolean;
 }

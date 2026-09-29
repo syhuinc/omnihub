@@ -38,6 +38,20 @@
   color: var(--text-secondary);
 }
 
+.screen-header__beta-tag {
+  display: inline-block;
+  vertical-align: middle;
+  margin-left: 2px;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--orange);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
 .screen-header__action {
   flex-shrink: 0;
   display: flex;

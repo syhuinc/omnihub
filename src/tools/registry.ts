@@ -82,6 +82,7 @@ export const TOOLS: ToolMeta[] = [
     icon: 'moon',
     keywords: ['sleep', 'bedtime', 'sleep mode', 'phone addiction', 'screen time', 'wind down', 'nag', 'reminder'],
     presentation: 'page',
+    beta: true,
   },
   {
     id: 'random-generator',

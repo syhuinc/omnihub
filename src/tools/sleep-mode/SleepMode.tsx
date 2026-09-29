@@ -177,7 +177,15 @@ export function SleepMode() {
   } else {
     body = (
       <div className="screen">
-        <ScreenHeader title="Sleep Mode" subtitle="Your bedtime companion" onBack={back} />
+        <ScreenHeader
+          title={
+            <>
+              Sleep Mode <span className="screen-header__beta-tag">Beta</span>
+            </>
+          }
+          subtitle="Your bedtime companion"
+          onBack={back}
+        />
 
         <div className="sm__body">
           <div className="sm__banner">
