@@ -306,6 +306,17 @@ export const TOOLS: ToolMeta[] = [
     locked: true,
   },
   {
+    id: 'password-generator',
+    name: 'Password Generator',
+    shortDescription: 'Create strong, random passwords',
+    category: 'essentials',
+    color: 'var(--green)',
+    icon: 'shield',
+    keywords: ['password', 'generator', 'generate', 'random', 'secure', 'strong', 'security'],
+    presentation: 'page',
+    locked: true,
+  },
+  {
     id: 'audio-converter',
     name: 'Audio Converter',
     shortDescription: 'Convert audio between formats',
