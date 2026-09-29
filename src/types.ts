@@ -18,4 +18,6 @@ export interface ToolMeta {
   icon: IconName;
   keywords: string[];
   presentation: ToolPresentation;
+  /** Shown in the grid with a lock badge; opening it shows a "locked" screen instead of the tool. */
+  locked?: boolean;
 }

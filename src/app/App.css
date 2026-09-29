@@ -48,6 +48,15 @@
   font-size: 14px;
 }
 
+.screen__empty--locked {
+  flex-direction: column;
+  gap: 12px;
+}
+
+.screen__empty-lock-icon {
+  color: var(--text-tertiary);
+}
+
 /* Quick tools (calculator, converters, timers…) enter with a slide up
    from the bottom edge instead of the default fade, since that's how
    they were opened — but once settled they're a normal full screen,

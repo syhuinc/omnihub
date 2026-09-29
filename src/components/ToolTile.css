@@ -17,6 +17,31 @@
   opacity: 1;
 }
 
+.tool-tile__icon-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.tool-tile__icon-wrap--locked .tool-tile__icon {
+  opacity: 0.5;
+}
+
+.tool-tile__lock-badge {
+  position: absolute;
+  bottom: -3px;
+  right: -3px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--bg-elevated-2);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--bg);
+  z-index: 1;
+}
+
 .tool-tile__icon {
   position: relative;
   display: flex;

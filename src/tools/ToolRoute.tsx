@@ -1,4 +1,5 @@
 import { ScreenHeader } from '../components/ScreenHeader';
+import { Icon } from '../components/Icon';
 import { useRouter } from '../app/Router';
 import { getToolById } from './registry';
 import { Calculator } from './calculator/Calculator';
@@ -63,6 +64,18 @@ export function ToolRoute({ toolId }: { toolId: string }) {
   const { navigate } = useRouter();
   const tool = getToolById(toolId);
   const ToolComponent = TOOL_COMPONENTS[toolId];
+
+  if (tool?.locked) {
+    return (
+      <div className="screen">
+        <ScreenHeader title={tool.name} onBack={() => navigate('/tools')} />
+        <div className="screen__empty screen__empty--locked">
+          <Icon name="lock" size={28} className="screen__empty-lock-icon" />
+          <p>{tool.name} is locked for now — check back soon.</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!ToolComponent) {
     return (

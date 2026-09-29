@@ -92,7 +92,7 @@ export function Home() {
   }
 
   const pinLimitReached = pinnedIds.length >= MAX_PINNED_TOOLS;
-  const pinnableTools = TOOLS.filter((tool) => !pinnedIds.includes(tool.id));
+  const pinnableTools = TOOLS.filter((tool) => !tool.locked && !pinnedIds.includes(tool.id));
 
   return (
     <div className="screen home">

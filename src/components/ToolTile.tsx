@@ -50,7 +50,9 @@ export function ToolTile({
     // over from the long-press that just revealed the pin badge can eat the
     // very next tap (e.g. on the badge itself), forcing a second tap to pin.
     suppressClickRef.current = false;
-    if (!onLongPress) return;
+    // A locked tool has no real pinnable destination yet — skip the
+    // long-press-to-pin gesture entirely rather than offering to pin it.
+    if (!onLongPress || tool.locked) return;
     startRef.current = { x: e.clientX, y: e.clientY };
     timerRef.current = setTimeout(() => {
       timerRef.current = null;
@@ -84,16 +86,23 @@ export function ToolTile({
       onClickCapture={handleClickCapture}
     >
       <button type="button" className="tool-tile__button" onClick={onClick}>
-        {image ? (
-          <span className="tool-tile__icon tool-tile__icon--image">
-            <img src={image} alt="" className="tool-tile__icon-img" />
-          </span>
-        ) : (
-          <span className="tool-tile__icon" style={{ '--tool-color': tool.color } as CSSProperties}>
-            <span className="tool-tile__icon-gloss" />
-            <Icon name={tool.icon} size={28} className="tool-tile__icon-svg" />
-          </span>
-        )}
+        <span className={`tool-tile__icon-wrap${tool.locked ? ' tool-tile__icon-wrap--locked' : ''}`}>
+          {image ? (
+            <span className="tool-tile__icon tool-tile__icon--image">
+              <img src={image} alt="" className="tool-tile__icon-img" />
+            </span>
+          ) : (
+            <span className="tool-tile__icon" style={{ '--tool-color': tool.color } as CSSProperties}>
+              <span className="tool-tile__icon-gloss" />
+              <Icon name={tool.icon} size={28} className="tool-tile__icon-svg" />
+            </span>
+          )}
+          {tool.locked && (
+            <span className="tool-tile__lock-badge">
+              <Icon name="lock" size={11} strokeWidth={2.5} />
+            </span>
+          )}
+        </span>
         <span className="tool-tile__label">{tool.name}</span>
       </button>
       {onRemove && (
