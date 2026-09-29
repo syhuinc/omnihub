@@ -3,7 +3,7 @@
 ## Short description (max 80 characters)
 
 ```
-25 tools in one place — no ads, sign-in optional.
+26 tools in one place — no ads, sign-in optional.
 ```
 
 (50 characters)
@@ -19,7 +19,7 @@ Sign-up is never required to use Omni Hub. Everything you create is stored on yo
 OPTIONAL: SYNC ACROSS YOUR DEVICES
 Want your data available on more than one device? Sign in with Google, entirely optional, to sync Notes, Checklist, Expense Tracker, Budget, Subscription Calculator, Debt Tracker, Alarms, and your private Vault automatically. Your Vault stays end-to-end protected — only your already PIN-encrypted data ever leaves your device, and your PIN itself never does. Nothing is shared, sold, or used for ads either way.
 
-25 TOOLS
+26 TOOLS
 
 Essentials
 • Calculator — with a history of your past calculations
