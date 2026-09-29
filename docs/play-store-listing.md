@@ -74,10 +74,10 @@ Download Omni Hub and get everyday things done, all in one place.
 ## Privacy Policy URL
 
 ```
-https://claude.ai/artifact/KN6frRqjrW1N1qZg9R3DCq
+https://syhuinc.github.io/omnihub/
 ```
 
-This is only for the Play Console field itself (Google requires a public URL there, reachable before someone installs the app). Before submitting: open this link and check the Share menu is set to "Anyone with the link can view" — it's private by default, and Play Console review needs to be able to open it.
+This is only for the Play Console field itself (Google requires a public URL there, reachable before someone installs the app). Served via GitHub Pages from `docs/index.html` in this repo — enable Pages under Settings ▸ Pages ▸ Source: Deploy from a branch ▸ `main` ▸ `/docs`, then it's live at that URL with no further upkeep.
 
 In-app, Profile ▸ Privacy ▸ Privacy Policy shows the same content natively (no external link, no network request) — that's the copy real users will read.
 
