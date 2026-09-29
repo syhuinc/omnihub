@@ -278,6 +278,8 @@
 
 .bg__menu-sheet {
   width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -309,6 +311,31 @@
 
 .bg__menu-item--danger {
   color: var(--red);
+}
+
+.bg__currency-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.bg__currency-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  border-radius: var(--radius-md);
+  background: var(--bg-active);
+  border: 1px solid var(--border-strong);
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.bg__currency-chip--active {
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  background: color-mix(in srgb, var(--accent) 14%, var(--bg-active));
 }
 
 .bg__menu-cancel {

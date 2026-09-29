@@ -6,16 +6,11 @@ import { useRouter } from '../../app/Router';
 import { storageGet, storageSet, StorageKeys } from '../../storage/db';
 import { useCloudSync } from '../../cloud/useCloudSync';
 import { hapticSelect, hapticTap } from '../../haptics';
-import { CURRENCIES, DEFAULT_CURRENCY } from '../shared/currencies';
+import { CURRENCIES, DEFAULT_CURRENCY, formatMoney } from '../shared/currencies';
 import { CalendarPicker } from '../age-date/CalendarPicker';
 import { parseISODate, toISODate } from '../age-date/dateMath';
 import type { DebtDirection, DebtEntry } from './types';
 import './DebtCalculator.css';
-
-function formatMoney(amount: number): string {
-  if (!Number.isFinite(amount)) return '$0.00';
-  return `$${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-}
 
 function formatDue(ts: number | undefined): string {
   if (!ts) return 'Select date';
@@ -161,7 +156,7 @@ export function DebtCalculator() {
             </span>
             <div>
               <span>Owed to You</span>
-              <strong className="dc__summary-value--green">{formatMoney(owedToMe)}</strong>
+              <strong className="dc__summary-value--green">{formatMoney(owedToMe, currency)}</strong>
               <em>{owedToMeDebts.length} {owedToMeDebts.length === 1 ? 'person owes' : 'people owe'} you</em>
             </div>
           </div>
@@ -171,7 +166,7 @@ export function DebtCalculator() {
             </span>
             <div>
               <span>You Owe</span>
-              <strong className="dc__summary-value--red">{formatMoney(iOwe)}</strong>
+              <strong className="dc__summary-value--red">{formatMoney(iOwe, currency)}</strong>
               <em>{iOweDebts.length} {iOweDebts.length === 1 ? 'person' : 'people'} you owe</em>
             </div>
           </div>
@@ -186,7 +181,7 @@ export function DebtCalculator() {
               <span>Overall Balance</span>
               <strong>
                 {net >= 0 ? 'People owe you ' : 'You owe people '}
-                {formatMoney(Math.abs(net))}
+                {formatMoney(Math.abs(net), currency)}
               </strong>
             </div>
           </div>
@@ -319,6 +314,7 @@ export function DebtCalculator() {
               openSwipeId={openSwipeId}
               onOpenChange={setOpenSwipeId}
               onSettle={settleDebt}
+              totalCurrency={currency}
             />
             <DebtGroup
               title="You Owe Them"
@@ -327,6 +323,7 @@ export function DebtCalculator() {
               openSwipeId={openSwipeId}
               onOpenChange={setOpenSwipeId}
               onSettle={settleDebt}
+              totalCurrency={currency}
             />
           </>
         )}
@@ -415,17 +412,17 @@ export function DebtCalculator() {
               </div>
               <div className="dc__stat-row">
                 <span>Largest debt owed to you</span>
-                <strong>{formatMoney(Math.max(0, ...owedToMeDebts.map((d) => d.amount)))}</strong>
+                <strong>{formatMoney(Math.max(0, ...owedToMeDebts.map((d) => d.amount)), currency)}</strong>
               </div>
               <div className="dc__stat-row">
                 <span>Largest debt you owe</span>
-                <strong>{formatMoney(Math.max(0, ...iOweDebts.map((d) => d.amount)))}</strong>
+                <strong>{formatMoney(Math.max(0, ...iOweDebts.map((d) => d.amount)), currency)}</strong>
               </div>
               <div className="dc__stat-row">
                 <span>Net balance</span>
                 <strong className={net >= 0 ? 'dc__summary-value--green' : 'dc__summary-value--red'}>
                   {net >= 0 ? '+' : '-'}
-                  {formatMoney(Math.abs(net))}
+                  {formatMoney(Math.abs(net), currency)}
                 </strong>
               </div>
             </div>
@@ -518,6 +515,7 @@ function DebtGroup({
   openSwipeId,
   onOpenChange,
   onSettle,
+  totalCurrency,
 }: {
   title: string;
   debts: DebtEntry[];
@@ -525,6 +523,7 @@ function DebtGroup({
   openSwipeId: string | null;
   onOpenChange: (id: string | null) => void;
   onSettle: (id: string) => void;
+  totalCurrency: string;
 }) {
   if (debts.length === 0) return null;
   const total = debts.reduce((sum, d) => sum + d.amount, 0);
@@ -535,7 +534,7 @@ function DebtGroup({
           {title} ({debts.length})
         </strong>
         <span>
-          Total: <em className={`dc__summary-value--${tone}`}>{formatMoney(total)}</em>
+          Total: <em className={`dc__summary-value--${tone}`}>{formatMoney(total, totalCurrency)}</em>
         </span>
       </div>
       <ul className="dc__list">
@@ -566,7 +565,7 @@ function DebtGroup({
                     )}
                   </span>
                   <span className="dc__row-amount-col">
-                    <span className={`dc__row-amount dc__row-amount--${tone}`}>{formatMoney(debt.amount)}</span>
+                    <span className={`dc__row-amount dc__row-amount--${tone}`}>{formatMoney(debt.amount, debt.currency)}</span>
                     <span className="dc__row-currency">{debt.currency ?? DEFAULT_CURRENCY}</span>
                   </span>
                 </div>

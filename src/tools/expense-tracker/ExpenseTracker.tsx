@@ -9,14 +9,11 @@ import { hapticSelect, hapticTap } from '../../haptics';
 import { AddExpense } from './AddExpense';
 import { EXPENSE_CATEGORIES, getCategory } from './categories';
 import { currentMonthKey, formatMonthLabel, shiftMonthKey } from './month';
+import { CURRENCIES, DEFAULT_CURRENCY, currencySymbol, formatMoney } from '../shared/currencies';
 import type { Expense } from './types';
 import './ExpenseTracker.css';
 
 type Tab = 'overview' | 'categories' | 'history';
-
-function formatMoney(amount: number): string {
-  return `$${amount.toFixed(2)}`;
-}
 
 function formatDayHeader(iso: string): string {
   const d = new Date(`${iso}T00:00:00`);
@@ -38,7 +35,16 @@ export function ExpenseTracker() {
   const [historySearch, setHistorySearch] = useState('');
   const [historyFilter, setHistoryFilter] = useState<string | null>(null);
   const [showMenu, setShowMenu] = useState(false);
+  const [showCurrencySheet, setShowCurrencySheet] = useState(false);
+  const [currency, setCurrency] = useState(() => storageGet(StorageKeys.expenseDefaultCurrency, DEFAULT_CURRENCY));
   const [toast, setToast] = useState<string | null>(null);
+
+  function selectCurrency(code: string) {
+    hapticSelect();
+    setCurrency(code);
+    storageSet(StorageKeys.expenseDefaultCurrency, code);
+    setShowCurrencySheet(false);
+  }
 
   function rawPersist(next: Expense[]) {
     setExpenses(next);
@@ -129,6 +135,7 @@ export function ExpenseTracker() {
     return (
       <AddExpense
         initialCategoryId={adding ? adding.categoryId : undefined}
+        currencySymbol={currencySymbol(currency)}
         onSave={addExpense}
         onClose={() => setAdding(false)}
       />
@@ -175,7 +182,7 @@ export function ExpenseTracker() {
         <div className="et__body">
           <div className="et__hero">
             <span className="et__hero-label">Total Spent</span>
-            <span className="et__hero-amount">{formatMoney(total)}</span>
+            <span className="et__hero-amount">{formatMoney(total, currency)}</span>
             {monthChange !== null && (
               <span className={`et__hero-change${monthChange > 0 ? ' et__hero-change--up' : monthChange < 0 ? ' et__hero-change--down' : ''}`}>
                 <Icon name="trending-up" size={12} className={monthChange < 0 ? 'et__hero-change-icon--down' : undefined} />
@@ -188,12 +195,12 @@ export function ExpenseTracker() {
           <div className="et__stat-row">
             <div className="et__stat-card">
               <Icon name="calendar" size={16} />
-              <strong>{formatMoney(dailyAverage)}</strong>
+              <strong>{formatMoney(dailyAverage, currency)}</strong>
               <span>Daily Avg</span>
             </div>
             <div className="et__stat-card">
               <Icon name="receipt" size={16} />
-              <strong>{formatMoney(avgPerTransaction)}</strong>
+              <strong>{formatMoney(avgPerTransaction, currency)}</strong>
               <span>Per Transaction</span>
             </div>
             <div className="et__stat-card">
@@ -248,7 +255,7 @@ export function ExpenseTracker() {
                     <div className="et__chart-track">
                       <div className="et__chart-bar" style={{ width: `${(amount / maxCategoryAmount) * 100}%`, background: cat.color }} />
                     </div>
-                    <span className="et__chart-amount">{formatMoney(amount)}</span>
+                    <span className="et__chart-amount">{formatMoney(amount, currency)}</span>
                   </div>
                 ))}
               </div>
@@ -267,7 +274,7 @@ export function ExpenseTracker() {
             ) : (
               <ul className="et__list">
                 {monthExpenses.slice(0, 5).map((expense) => (
-                  <ExpenseRow key={expense.id} expense={expense} onDelete={deleteExpense} />
+                  <ExpenseRow key={expense.id} expense={expense} currency={currency} onDelete={deleteExpense} />
                 ))}
               </ul>
             )}
@@ -297,7 +304,7 @@ export function ExpenseTracker() {
                     <span className="et__cat-info">
                       <span className="et__cat-name-row">
                         <strong>{cat.label}</strong>
-                        <strong>{formatMoney(amount)}</strong>
+                        <strong>{formatMoney(amount, currency)}</strong>
                       </span>
                       <div className="et__chart-track">
                         <div className="et__chart-bar" style={{ width: `${(amount / maxCategoryAmount) * 100}%`, background: cat.color }} />
@@ -346,11 +353,11 @@ export function ExpenseTracker() {
                 <div key={dateISO} className="et__day-group">
                   <div className="et__day-header">
                     <span>{formatDayHeader(dateISO)}</span>
-                    <span>{formatMoney(items.reduce((sum, e) => sum + e.amount, 0))}</span>
+                    <span>{formatMoney(items.reduce((sum, e) => sum + e.amount, 0), currency)}</span>
                   </div>
                   <ul className="et__list">
                     {items.map((expense) => (
-                      <ExpenseRow key={expense.id} expense={expense} onDelete={deleteExpense} />
+                      <ExpenseRow key={expense.id} expense={expense} currency={currency} onDelete={deleteExpense} />
                     ))}
                   </ul>
                 </div>
@@ -371,7 +378,41 @@ export function ExpenseTracker() {
             <button type="button" className="et__menu-item" onClick={exportCsv}>
               <Icon name="download" size={16} /> Export {formatMonthLabel(monthKey)} as CSV
             </button>
+            <button
+              type="button"
+              className="et__menu-item"
+              onClick={() => {
+                setShowMenu(false);
+                setShowCurrencySheet(true);
+              }}
+            >
+              <Icon name="wallet" size={16} /> Currency ({currency})
+            </button>
             <button type="button" className="et__sheet-close" onClick={() => setShowMenu(false)}>
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
+      {showCurrencySheet && (
+        <div className="et__sheet" onClick={() => setShowCurrencySheet(false)}>
+          <div className="et__sheet-content" onClick={(e) => e.stopPropagation()}>
+            <h2>Select Currency</h2>
+            <div className="et__currency-grid">
+              {CURRENCIES.map((c) => (
+                <button
+                  key={c.code}
+                  type="button"
+                  className={`et__currency-chip${currency === c.code ? ' et__currency-chip--active' : ''}`}
+                  onClick={() => selectCurrency(c.code)}
+                >
+                  <span>{c.flag}</span>
+                  {c.code}
+                </button>
+              ))}
+            </div>
+            <button type="button" className="et__sheet-close" onClick={() => setShowCurrencySheet(false)}>
               Close
             </button>
           </div>
@@ -387,7 +428,7 @@ export function ExpenseTracker() {
   );
 }
 
-function ExpenseRow({ expense, onDelete }: { expense: Expense; onDelete: (id: string) => void }) {
+function ExpenseRow({ expense, currency, onDelete }: { expense: Expense; currency: string; onDelete: (id: string) => void }) {
   const cat = getCategory(expense.categoryId);
   return (
     <li className="et__row">
@@ -398,7 +439,7 @@ function ExpenseRow({ expense, onDelete }: { expense: Expense; onDelete: (id: st
         <span className="et__row-title">{expense.note || cat.label}</span>
         <span className="et__row-date">{cat.label}</span>
       </span>
-      <span className="et__row-amount">{formatMoney(expense.amount)}</span>
+      <span className="et__row-amount">{formatMoney(expense.amount, currency)}</span>
       <button type="button" className="et__row-delete" onClick={() => onDelete(expense.id)} aria-label="Delete expense">
         <Icon name="x" size={14} />
       </button>

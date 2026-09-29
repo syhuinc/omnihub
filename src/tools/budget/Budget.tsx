@@ -8,14 +8,11 @@ import { hapticTap, hapticWarning } from '../../haptics';
 import { useCloudSync } from '../../cloud/useCloudSync';
 import { EXPENSE_CATEGORIES, getCategory } from '../expense-tracker/categories';
 import { currentMonthKey, formatMonthLabel, shiftMonthKey } from '../expense-tracker/month';
+import { CURRENCIES, DEFAULT_CURRENCY, formatMoney } from '../shared/currencies';
 import type { Expense } from '../expense-tracker/types';
 import type { BudgetLimit } from './types';
 import { SetBudget } from './SetBudget';
 import './Budget.css';
-
-function formatMoney(amount: number): string {
-  return `$${amount.toFixed(2)}`;
-}
 
 const RING_R = 44;
 const RING_C = 2 * Math.PI * RING_R;
@@ -42,6 +39,15 @@ export function Budget() {
   const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
   const [showMenu, setShowMenu] = useState(false);
   const [confirmingResetAll, setConfirmingResetAll] = useState(false);
+  const [showCurrencySheet, setShowCurrencySheet] = useState(false);
+  const [currency, setCurrency] = useState(() => storageGet(StorageKeys.budgetDefaultCurrency, DEFAULT_CURRENCY));
+
+  function selectCurrency(code: string) {
+    hapticTap();
+    setCurrency(code);
+    storageSet(StorageKeys.budgetDefaultCurrency, code);
+    setShowCurrencySheet(false);
+  }
 
   useBackHandler(() => setShowMenu(false), showMenu);
   useBackHandler(() => setConfirmingResetAll(false), confirmingResetAll);
@@ -117,6 +123,7 @@ export function Budget() {
       <SetBudget
         category={category}
         budget={budget}
+        currency={currency}
         monthLabel={formatMonthLabel(monthKey)}
         spent={spentByCategory.get(editingCategoryId) ?? 0}
         onSave={(patch) => saveBudget(editingCategoryId, patch)}
@@ -178,11 +185,11 @@ export function Budget() {
         <div className="bg__overview-stats">
           <div className="bg__overview-stat">
             <span>Total Budget</span>
-            <strong>{formatMoney(totalBudget)}</strong>
+            <strong>{formatMoney(totalBudget, currency)}</strong>
           </div>
           <div className="bg__overview-stat">
             <span>Total Spent</span>
-            <strong>{formatMoney(totalSpent)}</strong>
+            <strong>{formatMoney(totalSpent, currency)}</strong>
           </div>
           <div className={`bg__overview-remaining${remaining === 0 && totalBudget > 0 ? ' bg__overview-remaining--over' : ''}`}>
             {remaining === 0 && totalBudget > 0 && <Icon name="info" size={14} />}
@@ -190,7 +197,7 @@ export function Budget() {
               ? 'Set a budget to get started'
               : remaining === 0
                 ? "You've reached your budget"
-                : `${formatMoney(remaining)} left`}
+                : `${formatMoney(remaining, currency)} left`}
           </div>
         </div>
       </div>
@@ -200,7 +207,7 @@ export function Budget() {
           <div className="bg__mini-stat">
             <Icon name="wallet" size={16} />
             <div>
-              <strong>{formatMoney(dailyAverage)}</strong>
+              <strong>{formatMoney(dailyAverage, currency)}</strong>
               <span>Daily Average</span>
             </div>
           </div>
@@ -245,7 +252,7 @@ export function Budget() {
                 </div>
                 <div className="bg__card-bottom">
                   <span className={over ? 'bg__over' : ''}>
-                    {formatMoney(spent)} / {hasLimit ? formatMoney(limit) : formatMoney(0)}
+                    {formatMoney(spent, currency)} / {hasLimit ? formatMoney(limit, currency) : formatMoney(0, currency)}
                   </span>
                   <span className={over ? 'bg__over' : ''}>{hasLimit ? `${Math.round(pct)}%` : '0%'}</span>
                 </div>
@@ -265,6 +272,17 @@ export function Budget() {
           <div className="bg__menu-sheet" onClick={(e) => e.stopPropagation()}>
             <button
               type="button"
+              className="bg__menu-item"
+              onClick={() => {
+                setShowMenu(false);
+                setShowCurrencySheet(true);
+              }}
+            >
+              <Icon name="wallet" size={18} />
+              Currency ({currency})
+            </button>
+            <button
+              type="button"
               className="bg__menu-item bg__menu-item--danger"
               onClick={() => setConfirmingResetAll(true)}
             >
@@ -273,6 +291,29 @@ export function Budget() {
             </button>
             <button type="button" className="bg__menu-cancel" onClick={() => setShowMenu(false)}>
               Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      {showCurrencySheet && (
+        <div className="bg__menu-overlay" onClick={() => setShowCurrencySheet(false)}>
+          <div className="bg__menu-sheet" onClick={(e) => e.stopPropagation()}>
+            <div className="bg__currency-grid">
+              {CURRENCIES.map((c) => (
+                <button
+                  key={c.code}
+                  type="button"
+                  className={`bg__currency-chip${currency === c.code ? ' bg__currency-chip--active' : ''}`}
+                  onClick={() => selectCurrency(c.code)}
+                >
+                  <span>{c.flag}</span>
+                  {c.code}
+                </button>
+              ))}
+            </div>
+            <button type="button" className="bg__menu-cancel" onClick={() => setShowCurrencySheet(false)}>
+              Close
             </button>
           </div>
         </div>

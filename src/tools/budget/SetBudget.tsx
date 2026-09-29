@@ -7,16 +7,15 @@ import type { ExpenseCategory } from '../expense-tracker/categories';
 import type { BudgetLimit } from './types';
 import './SetBudget.css';
 
+import { currencySymbol, formatMoney } from '../shared/currencies';
+
 const PRESETS = [50, 100, 200, 500];
 const THRESHOLDS = [50, 80, 100];
-
-function formatMoney(amount: number): string {
-  return `$${amount.toFixed(2)}`;
-}
 
 interface SetBudgetProps {
   category: ExpenseCategory;
   budget: BudgetLimit | undefined;
+  currency: string;
   monthLabel: string;
   spent: number;
   onSave: (patch: { amount: number; alertEnabled: boolean; alertThresholdPct: number }) => void;
@@ -24,7 +23,7 @@ interface SetBudgetProps {
   onClose: () => void;
 }
 
-export function SetBudget({ category, budget, monthLabel, spent, onSave, onDelete, onClose }: SetBudgetProps) {
+export function SetBudget({ category, budget, currency, monthLabel, spent, onSave, onDelete, onClose }: SetBudgetProps) {
   const [amountText, setAmountText] = useState(budget ? String(budget.amount) : '');
   const [alertEnabled, setAlertEnabled] = useState(budget?.alertEnabled ?? true);
   const [threshold, setThreshold] = useState(budget?.alertThresholdPct ?? 80);
@@ -68,7 +67,7 @@ export function SetBudget({ category, budget, monthLabel, spent, onSave, onDelet
 
         <h2 className="sb__label">Monthly Budget</h2>
         <div className="sb__amount-row">
-          <span className="sb__currency">$</span>
+          <span className="sb__currency">{currencySymbol(currency)}</span>
           <input
             className="sb__amount-input"
             type="number"
@@ -94,7 +93,7 @@ export function SetBudget({ category, budget, monthLabel, spent, onSave, onDelet
                 setAmountText(String(p));
               }}
             >
-              ${p}
+              {currencySymbol(currency)}{p}
             </button>
           ))}
         </div>
@@ -153,7 +152,7 @@ export function SetBudget({ category, budget, monthLabel, spent, onSave, onDelet
           <div className="sb__preview-stats">
             <div className="sb__preview-stat">
               <span>Budget</span>
-              <strong>{formatMoney(amount)}</strong>
+              <strong>{formatMoney(amount, currency)}</strong>
             </div>
             <div className="sb__preview-stat sb__preview-stat--status">
               <span>Projected Status</span>

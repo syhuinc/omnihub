@@ -497,6 +497,30 @@
   font-weight: 600;
 }
 
+.et__currency-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.et__currency-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  border-radius: var(--radius-md);
+  background: var(--bg-active);
+  border: 1px solid var(--border-strong);
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.et__currency-chip--active {
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  background: color-mix(in srgb, var(--accent) 14%, var(--bg-active));
+}
+
 .et__toast {
   position: fixed;
   left: 50%;

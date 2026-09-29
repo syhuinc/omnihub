@@ -7,6 +7,7 @@ import type { Expense } from './types';
 
 interface AddExpenseProps {
   initialCategoryId?: string;
+  currencySymbol: string;
   onSave: (expense: Expense) => void;
   onClose: () => void;
 }
@@ -15,7 +16,7 @@ function todayISO(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
-export function AddExpense({ initialCategoryId, onSave, onClose }: AddExpenseProps) {
+export function AddExpense({ initialCategoryId, currencySymbol, onSave, onClose }: AddExpenseProps) {
   const [amount, setAmount] = useState('');
   const [categoryId, setCategoryId] = useState(initialCategoryId ?? EXPENSE_CATEGORIES[0].id);
   const [note, setNote] = useState('');
@@ -49,7 +50,7 @@ export function AddExpense({ initialCategoryId, onSave, onClose }: AddExpensePro
 
       <div className="ae__body">
         <div className="ae__amount-row">
-          <span className="ae__currency">$</span>
+          <span className="ae__currency">{currencySymbol}</span>
           <input
             className="ae__amount"
             type="number"

@@ -6,7 +6,7 @@ import { useRouter } from '../../app/Router';
 import { storageGet, storageSet, StorageKeys } from '../../storage/db';
 import { useCloudSync } from '../../cloud/useCloudSync';
 import { hapticSelect, hapticTap } from '../../haptics';
-import { CURRENCIES, DEFAULT_CURRENCY } from '../shared/currencies';
+import { CURRENCIES, DEFAULT_CURRENCY, formatMoney } from '../shared/currencies';
 import type { BillingCycle, Subscription } from './types';
 import './SubscriptionCalculator.css';
 
@@ -37,17 +37,12 @@ const EXAMPLES: Example[] = [
   { name: 'PlayStation Plus', amount: 17.99, cycle: 'monthly', color: 'var(--blue)' },
 ];
 
-function formatMoney(amount: number): string {
-  if (!Number.isFinite(amount)) return '$0.00';
-  return `$${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-}
-
 export function SubscriptionCalculator() {
   const { back } = useRouter();
   const [subs, setSubs] = useState<Subscription[]>(() => storageGet(StorageKeys.subscriptions, []));
   const [name, setName] = useState('');
   const [amountText, setAmountText] = useState('');
-  const [currency, setCurrency] = useState(DEFAULT_CURRENCY);
+  const [currency, setCurrency] = useState(() => storageGet(StorageKeys.subscriptionDefaultCurrency, DEFAULT_CURRENCY));
   const [cycle, setCycle] = useState<BillingCycle>('monthly');
   const [openSwipeId, setOpenSwipeId] = useState<string | null>(null);
   const [filterTab, setFilterTab] = useState<FilterTab>('all');
@@ -143,7 +138,7 @@ export function SubscriptionCalculator() {
             </span>
             <div>
               <span>Total per Month</span>
-              <strong>{formatMoney(monthlyTotal)}</strong>
+              <strong>{formatMoney(monthlyTotal, currency)}</strong>
               <em>{subs.length} subscription{subs.length === 1 ? '' : 's'}</em>
             </div>
           </div>
@@ -154,7 +149,7 @@ export function SubscriptionCalculator() {
             </span>
             <div>
               <span>Total per Year</span>
-              <strong>{formatMoney(yearlyTotal)}</strong>
+              <strong>{formatMoney(yearlyTotal, currency)}</strong>
               <em>Save smarter. Live better.</em>
             </div>
           </div>
@@ -284,7 +279,7 @@ export function SubscriptionCalculator() {
                       <span className="sc__row-cycle">{CYCLES.find((c) => c.id === sub.cycle)?.label}</span>
                     </span>
                     <span className="sc__row-amount-col">
-                      <span className="sc__row-amount">{formatMoney(sub.amount)}</span>
+                      <span className="sc__row-amount">{formatMoney(sub.amount, sub.currency)}</span>
                       {sub.currency && sub.currency !== DEFAULT_CURRENCY && (
                         <span className="sc__row-currency">{sub.currency}</span>
                       )}
@@ -340,6 +335,7 @@ export function SubscriptionCalculator() {
                   onClick={() => {
                     hapticSelect();
                     setCurrency(c.code);
+                    storageSet(StorageKeys.subscriptionDefaultCurrency, c.code);
                     setShowCurrencySheet(false);
                   }}
                 >
