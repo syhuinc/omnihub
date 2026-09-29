@@ -30,6 +30,14 @@
           }
         },
         {
+          "client_id": "354903225183-otl19t4vrnpk2tfnasqp8fqrmb8vlgmf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.syhuinc.omnihub",
+            "certificate_hash": "fb729d0eb8a464fe0d40f391cb30d54f648a8a12"
+          }
+        },
+        {
           "client_id": "354903225183-i5mo7tg37ram06ji5ccrnksj23p1jrre.apps.googleusercontent.com",
           "client_type": 3
         }
