@@ -14,11 +14,22 @@ type Theme = 'dark' | 'light';
 
 export function Profile() {
   const { navigate } = useRouter();
-  const { user, loading: authLoading, signingIn, error: authError, signInWithGoogle, signOut } = useAuth();
+  const {
+    user,
+    loading: authLoading,
+    signingIn,
+    deletingAccount,
+    error: authError,
+    signInWithGoogle,
+    signOut,
+    deleteAccount,
+  } = useAuth();
   const [theme, setTheme] = useState<Theme>(() => storageGet(StorageKeys.theme, 'dark'));
   const [importStatus, setImportStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [confirmingClear, setConfirmingClear] = useState(false);
   const [confirmingSignOut, setConfirmingSignOut] = useState(false);
+  const [confirmingDeleteAccount, setConfirmingDeleteAccount] = useState(false);
+  const [deleteAccountError, setDeleteAccountError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   function applyTheme(next: Theme) {
@@ -90,6 +101,18 @@ export function Profile() {
     window.location.reload();
   }
 
+  async function handleDeleteAccount() {
+    hapticWarning();
+    setDeleteAccountError(null);
+    try {
+      await deleteAccount();
+      clearAllData();
+      window.location.reload();
+    } catch (err) {
+      setDeleteAccountError(err instanceof Error ? err.message : 'Could not delete your account. Please try again.');
+    }
+  }
+
   return (
     <div className="screen">
       <ScreenHeader title="Profile" subtitle="Manage your app and data." />
@@ -149,6 +172,48 @@ export function Profile() {
                     </div>
                   </div>
                 )}
+                <div className="pf__divider" />
+                {!confirmingDeleteAccount ? (
+                  <button
+                    type="button"
+                    className="pf__row pf__row--danger"
+                    onClick={() => setConfirmingDeleteAccount(true)}
+                  >
+                    <span className="pf__row-icon pf__row-icon--danger">
+                      <Icon name="trash" size={18} />
+                    </span>
+                    <span className="pf__row-text">
+                      <strong>Delete My Account</strong>
+                      <span>Permanently erase your synced data and account</span>
+                    </span>
+                  </button>
+                ) : (
+                  <div className="pf__confirm">
+                    <p>
+                      This permanently deletes everything synced to your account (notes, checklists, expenses,
+                      budgets, subscriptions, debts, alarms, and Vault) from our servers, deletes your account
+                      itself, and clears this device's local data too. This can't be undone.
+                    </p>
+                    <div className="pf__confirm-actions">
+                      <button
+                        type="button"
+                        onClick={() => setConfirmingDeleteAccount(false)}
+                        disabled={deletingAccount}
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="button"
+                        className="pf__confirm-delete"
+                        onClick={handleDeleteAccount}
+                        disabled={deletingAccount}
+                      >
+                        {deletingAccount ? 'Deleting…' : 'Delete Account'}
+                      </button>
+                    </div>
+                  </div>
+                )}
+                {deleteAccountError && <p className="pf__status pf__status--error">{deleteAccountError}</p>}
               </>
             ) : (
               <button type="button" className="pf__row" onClick={signInWithGoogle} disabled={signingIn}>

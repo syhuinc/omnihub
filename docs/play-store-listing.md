@@ -81,6 +81,14 @@ This is only for the Play Console field itself (Google requires a public URL the
 
 In-app, Profile ▸ Privacy ▸ Privacy Policy shows the same content natively (no external link, no network request) — that's the copy real users will read.
 
+## Delete Account URL
+
+```
+https://syhuinc.github.io/omnihub/delete-account.html
+```
+
+For Play Console's App content ▸ Data safety ▸ "Delete account URL" field. Served the same way as the privacy policy, from `docs/delete-account.html`. Describes the in-app "Delete My Account" flow (Profile ▸ Cloud Sync) plus an email fallback for users without the app installed.
+
 ## Category
 
 **Tools**

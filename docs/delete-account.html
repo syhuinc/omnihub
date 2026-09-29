@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Delete Your Omni Hub Account</title>
+<style>
+  :root {
+    --bg: #f3f4f8;
+    --bg-elevated: #ffffff;
+    --bg-elevated-2: #eceef4;
+    --border: rgba(15, 23, 42, 0.08);
+    --border-strong: rgba(15, 23, 42, 0.14);
+    --text-primary: #10131a;
+    --text-secondary: #4c5568;
+    --text-tertiary: #7d879a;
+    --accent: #3b63e0;
+    --accent-soft: rgba(59, 99, 224, 0.1);
+    --red: #dc2626;
+    --red-soft: rgba(220, 38, 38, 0.1);
+    --radius-sm: 10px;
+    --radius-md: 16px;
+    --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06), 0 1px 1px rgba(15, 23, 42, 0.04);
+    color-scheme: light;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0a0e16;
+      --bg-elevated: #131a27;
+      --bg-elevated-2: #1b2434;
+      --border: rgba(255, 255, 255, 0.08);
+      --border-strong: rgba(255, 255, 255, 0.14);
+      --text-primary: #f5f7fa;
+      --text-secondary: #9aa4b6;
+      --text-tertiary: #6b7484;
+      --accent: #6c8fff;
+      --accent-soft: rgba(108, 143, 255, 0.14);
+      --red: #f87171;
+      --red-soft: rgba(248, 113, 113, 0.14);
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3), 0 1px 1px rgba(0, 0, 0, 0.2);
+      color-scheme: dark;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    padding-inline: 20px;
+    padding-block: 28px 64px;
+  }
+
+  h1, h2 { font-family: "Manrope", -apple-system, BlinkMacSystemFont, sans-serif; text-wrap: balance; }
+
+  .page { max-width: 640px; margin-inline: auto; }
+
+  .masthead { display: flex; align-items: center; gap: 12px; margin-bottom: 22px; }
+
+  .mark {
+    flex-shrink: 0; width: 40px; height: 40px; border-radius: 12px;
+    background: linear-gradient(135deg, #6366f1 0%, #3b82f6 100%);
+    display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-sm);
+  }
+  .mark svg { width: 20px; height: 20px; }
+
+  .masthead-text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+  .app-name { font-size: 13px; font-weight: 700; color: var(--text-secondary); letter-spacing: 0.02em; }
+
+  h1 { font-size: 25px; font-weight: 800; line-height: 1.2; margin: 4px 0 6px; letter-spacing: -0.01em; }
+
+  .lede { font-size: 15.5px; line-height: 1.6; color: var(--text-secondary); margin: 18px 0 26px; max-width: 62ch; }
+
+  .step-card {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    padding: 20px;
+    margin-bottom: 18px;
+    display: flex;
+    gap: 14px;
+  }
+
+  .step-num {
+    flex-shrink: 0;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-weight: 800;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .step-content h2 { font-size: 16.5px; font-weight: 800; margin: 2px 0 8px; }
+  .step-content p { font-size: 14px; line-height: 1.65; color: var(--text-secondary); margin: 0 0 8px; max-width: 58ch; }
+  .step-content p:last-child { margin-bottom: 0; }
+  .step-content code {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.92em;
+    background: var(--bg-elevated-2);
+    padding: 0.15em 0.45em;
+    border-radius: 5px;
+    color: var(--text-primary);
+  }
+
+  .email-box {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg-elevated-2);
+    border-radius: var(--radius-sm);
+    padding: 8px 14px;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-top: 4px;
+  }
+
+  section { margin-bottom: 28px; }
+  h2.section-title {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-tertiary);
+    margin: 0 0 12px;
+  }
+
+  .callout {
+    background: var(--red-soft);
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: var(--text-primary);
+    margin-top: 8px;
+  }
+  .callout strong { color: var(--red); }
+
+  ul { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; }
+  li { font-size: 14px; line-height: 1.55; color: var(--text-secondary); }
+  li strong { color: var(--text-primary); }
+
+  footer {
+    margin-top: 36px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    font-size: 13px;
+    color: var(--text-tertiary);
+  }
+
+  a { color: var(--accent); }
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="page">
+  <div class="masthead">
+    <div class="mark">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6 11V8a6 6 0 0 1 12 0v3 M5 11h14a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-8a1 1 0 0 1 1-1Z M12 15v3" />
+      </svg>
+    </div>
+    <div class="masthead-text">
+      <span class="app-name">OMNI HUB</span>
+    </div>
+  </div>
+
+  <h1>Delete your Omni Hub account and data</h1>
+  <p class="lede">
+    Omni Hub never requires an account — everything works fully on your device without one. This page is only
+    relevant if you chose to sign in with Google (Profile ▸ Cloud Sync) to sync your data across devices, and
+    now want that account and its synced data permanently removed.
+  </p>
+
+  <section>
+    <h2 class="section-title">How to delete</h2>
+
+    <div class="step-card">
+      <span class="step-num">1</span>
+      <div class="step-content">
+        <h2>From the app (fastest)</h2>
+        <p>
+          Open Omni Hub, go to <strong>Profile</strong>, and under <strong>Cloud Sync</strong> tap
+          <strong>Delete My Account</strong>. Confirm the prompt. This deletes everything immediately —
+          no waiting period.
+        </p>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <span class="step-num">2</span>
+      <div class="step-content">
+        <h2>Without the app installed</h2>
+        <p>
+          If you no longer have Omni Hub installed, email us from the same address your Google account
+          uses to sign in, with the subject "Delete my Omni Hub account":
+        </p>
+        <div class="email-box">syhu.inc@gmail.com</div>
+        <p>We'll delete your account and all synced data within 30 days and confirm by email once it's done.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="section-title">What gets deleted</h2>
+    <ul>
+      <li><strong>Your account</strong> — your Firebase Authentication identity (name, email, profile photo) is deleted entirely.</li>
+      <li><strong>Everything synced to it</strong> — Notes, Checklist, Expense Tracker, Budget, Subscription Calculator, Debt Tracker, Alarms, and your Vault's encrypted ciphertext, all removed from our servers.</li>
+      <li><strong>Local data on the device you deleted from</strong> — cleared automatically as part of the in-app deletion. (If you have Omni Hub installed on other devices, their local copies aren't reachable remotely — uninstall the app there too, or open it once signed out to clear it.)</li>
+    </ul>
+    <div class="callout">
+      <strong>This can't be undone.</strong> There's no recovery period or backup retention on our end — once
+      deleted, the data is gone.
+    </div>
+  </section>
+
+  <footer>
+    Omni Hub, by Syhu Inc. — see the full <a href="./">Privacy Policy</a> for everything else about how your data is handled.
+  </footer>
+</div>
+
+</body>
+</html>

@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import { FirebaseAuthentication, type User } from '@capacitor-firebase/authentication';
+import { deleteAccountAndData } from './deleteAccount';
 
 export type { User };
 
@@ -7,9 +8,12 @@ interface AuthContextValue {
   user: User | null;
   loading: boolean;
   signingIn: boolean;
+  deletingAccount: boolean;
   error: string | null;
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
+  /** Permanently deletes the signed-in user's synced data and their account. Throws on failure. */
+  deleteAccount: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -18,6 +22,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [signingIn, setSigningIn] = useState(false);
+  const [deletingAccount, setDeletingAccount] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -73,8 +78,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  async function deleteAccount() {
+    if (!user) throw new Error('Not signed in.');
+    setError(null);
+    setDeletingAccount(true);
+    try {
+      await deleteAccountAndData(user.uid, async () => {
+        await FirebaseAuthentication.signInWithGoogle();
+      });
+      setUser(null);
+    } finally {
+      setDeletingAccount(false);
+    }
+  }
+
   return (
-    <AuthContext.Provider value={{ user, loading, signingIn, error, signInWithGoogle, signOut }}>
+    <AuthContext.Provider
+      value={{ user, loading, signingIn, deletingAccount, error, signInWithGoogle, signOut, deleteAccount }}
+    >
       {children}
     </AuthContext.Provider>
   );
