@@ -295,6 +295,17 @@ export const TOOLS: ToolMeta[] = [
     locked: true,
   },
   {
+    id: 'voice-recorder',
+    name: 'Voice Recorder',
+    shortDescription: 'Record and save voice memos',
+    category: 'productivity',
+    color: 'var(--pink)',
+    icon: 'mic',
+    keywords: ['voice', 'recorder', 'record', 'memo', 'audio', 'save', 'microphone'],
+    presentation: 'page',
+    locked: true,
+  },
+  {
     id: 'audio-converter',
     name: 'Audio Converter',
     shortDescription: 'Convert audio between formats',

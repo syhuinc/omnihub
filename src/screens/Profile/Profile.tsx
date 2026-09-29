@@ -262,9 +262,9 @@ export function Profile() {
                 <Icon name="shield" size={18} />
               </span>
               <p>
-                Omni Hub works fully offline by default — no account needed, nothing leaves this device.
-                Signing in above is entirely optional and only used to sync your data across your own devices;
-                nothing is shared, sold, or used for ads or analytics.
+                No account is needed to use Omni Hub. Signing in above is entirely optional and only
+                used to sync your data across your own devices; nothing is shared, sold, or used for
+                ads or analytics.
               </p>
             </div>
             <div className="pf__divider" />
@@ -295,7 +295,7 @@ export function Profile() {
               <span className="pf__row-text">
                 <strong>Version</strong>
               </span>
-              <span className="pf__row-value">1.29.0</span>
+              <span className="pf__row-value">1.30.0</span>
             </div>
           </div>
         </section>

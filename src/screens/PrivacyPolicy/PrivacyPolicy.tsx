@@ -1,5 +1,4 @@
 import { ScreenHeader } from '../../components/ScreenHeader';
-import { Icon } from '../../components/Icon';
 import { useRouter } from '../../app/Router';
 import './PrivacyPolicy.css';
 
@@ -12,10 +11,9 @@ export function PrivacyPolicy() {
 
       <div className="pp__body">
         <p className="pp__lede">
-          Omni Hub is an offline-first utility app. Everything works fully on your device with no
-          account needed. Signing in with Google is entirely optional and only unlocks syncing
-          some of your data across your own devices — nothing else changes, and nothing is
-          shared, sold, or used for ads or analytics either way.
+          Omni Hub doesn't require an account. Signing in with Google is entirely optional and
+          only unlocks syncing some of your data across your own devices — nothing else changes,
+          and nothing is shared, sold, or used for ads or analytics either way.
         </p>
 
         <section className="pp__section">
@@ -248,11 +246,6 @@ export function PrivacyPolicy() {
             Hub Google Play Store listing.
           </p>
         </section>
-
-        <div className="pp__offline-note">
-          <Icon name="shield" size={16} />
-          <span>You're reading this on-device — loading this page made no network request.</span>
-        </div>
       </div>
     </div>
   );
