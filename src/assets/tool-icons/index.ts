@@ -28,6 +28,9 @@ import pdfConverter from './pdf-converter.webp';
 import qrGenerator from './qr-generator.webp';
 import journal from './journal.webp';
 import vault from './vault.webp';
+import voiceChanger from './voice-changer.webp';
+import voiceRecorder from './voice-recorder.webp';
+import passwordGenerator from './password-generator.webp';
 
 export const TOOL_ICON_IMAGES: Record<string, string> = {
   calculator,
@@ -60,4 +63,7 @@ export const TOOL_ICON_IMAGES: Record<string, string> = {
   'qr-generator': qrGenerator,
   journal,
   vault,
+  'voice-changer': voiceChanger,
+  'voice-recorder': voiceRecorder,
+  'password-generator': passwordGenerator,
 };

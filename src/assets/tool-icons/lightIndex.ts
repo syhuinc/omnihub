@@ -30,6 +30,8 @@ import pdfConverter from './light/pdf-converter.webp';
 import qrGenerator from './light/qr-generator.webp';
 import journal from './light/journal.webp';
 import vault from './light/vault.webp';
+import voiceRecorder from './light/voice-recorder.webp';
+import passwordGenerator from './light/password-generator.webp';
 
 export const TOOL_ICON_IMAGES_LIGHT: Record<string, string> = {
   calculator,
@@ -63,4 +65,6 @@ export const TOOL_ICON_IMAGES_LIGHT: Record<string, string> = {
   'qr-generator': qrGenerator,
   journal,
   vault,
+  'voice-recorder': voiceRecorder,
+  'password-generator': passwordGenerator,
 };
