@@ -7,11 +7,11 @@ import { useRouter } from '../../app/Router';
 import { CATEGORY_LABELS, TOOLS } from '../../tools/registry';
 import { searchTools } from '../../search/searchIndex';
 import { storageGet, storageSet, StorageKeys } from '../../storage/db';
-import { hapticSelect, hapticSuccess } from '../../haptics';
+import { hapticSelect, hapticSuccess, hapticWarning } from '../../haptics';
 import { TOOL_ICON_IMAGES } from '../../assets/tool-icons';
 import { TOOL_ICON_IMAGES_LIGHT } from '../../assets/tool-icons/lightIndex';
 import { useIsLightTheme } from '../../theme/useTheme';
-import { loadPinnedToolIds, savePinnedToolIds } from '../../tools/pinnedTools';
+import { loadPinnedToolIds, savePinnedToolIds, MAX_PINNED_TOOLS } from '../../tools/pinnedTools';
 import type { ToolCategory, ToolMeta } from '../../types';
 import './Tools.css';
 
@@ -71,12 +71,19 @@ export function Tools() {
   }
 
   function togglePin(id: string) {
-    const next = pinnedIds.includes(id) ? pinnedIds.filter((p) => p !== id) : [...pinnedIds, id];
+    const isPinned = pinnedIds.includes(id);
+    if (!isPinned && pinnedIds.length >= MAX_PINNED_TOOLS) {
+      hapticWarning();
+      return;
+    }
+    const next = isPinned ? pinnedIds.filter((p) => p !== id) : [...pinnedIds, id];
     setPinnedIds(next);
     savePinnedToolIds(next);
     hapticSuccess();
     setLongPressedId(null);
   }
+
+  const pinLimitReached = pinnedIds.length >= MAX_PINNED_TOOLS;
 
   function renderTile(tool: ToolMeta) {
     return (
@@ -88,6 +95,7 @@ export function Tools() {
         showPinBadge={longPressedId === tool.id}
         pinned={pinnedIds.includes(tool.id)}
         onTogglePin={() => togglePin(tool.id)}
+        pinLimitReached={pinLimitReached}
       />
     );
   }

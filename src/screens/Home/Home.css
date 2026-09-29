@@ -26,40 +26,6 @@
   padding: 0 4px;
 }
 
-.home__section-actions {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-
-.home__section-close {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  color: var(--text-tertiary);
-  background: var(--bg-elevated);
-}
-
-.home__section-close:active {
-  color: var(--text-primary);
-  background: var(--bg-active);
-}
-
-.home__restore-sections {
-  margin: 4px 20px 8px;
-  padding: 10px;
-  min-height: 40px;
-  border-radius: var(--radius-sm);
-  border: 1px dashed var(--border-strong);
-  color: var(--text-secondary);
-  font-size: 13px;
-  font-weight: 600;
-  text-align: center;
-}
-
 .home__myphone-pill {
   display: flex;
   align-items: center;
@@ -268,36 +234,3 @@
   color: #ffffff;
 }
 
-.home__quick-actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-
-.home__quick-action {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 14px;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-primary);
-  min-height: 48px;
-}
-
-.home__quick-action span {
-  flex: 1;
-  min-width: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  text-align: left;
-}
-
-.home__quick-action-chevron {
-  flex-shrink: 0;
-  color: var(--text-tertiary);
-}

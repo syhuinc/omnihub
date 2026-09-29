@@ -1,24 +1,17 @@
 import { useMemo, useState } from 'react';
 import { ScreenHeader } from '../../components/ScreenHeader';
 import { SearchBar } from '../../components/SearchBar';
-import { ToolTile } from '../../components/ToolTile';
 import { Icon } from '../../components/Icon';
 import { useRouter } from '../../app/Router';
 import { TOOLS, getToolById } from '../../tools/registry';
 import { searchTools } from '../../search/searchIndex';
 import { storageGet, storageSet, StorageKeys } from '../../storage/db';
-import { loadPinnedToolIds, savePinnedToolIds } from '../../tools/pinnedTools';
+import { loadPinnedToolIds, savePinnedToolIds, MAX_PINNED_TOOLS } from '../../tools/pinnedTools';
+import { hapticWarning } from '../../haptics';
 import { PinnedToolsGrid } from './PinnedToolsGrid';
 import { PhoneStatusCard } from './PhoneStatusCard';
 import type { ToolMeta } from '../../types';
 import './Home.css';
-
-const QUICK_ACTIONS: { label: string; toolId: string; icon: ToolMeta['icon'] }[] = [
-  { label: 'New Note', toolId: 'notes', icon: 'note' },
-  { label: 'Add Expense', toolId: 'expense-tracker', icon: 'wallet' },
-  { label: 'Start Timer', toolId: 'timer', icon: 'timer' },
-  { label: 'Split Bill', toolId: 'split-bill', icon: 'receipt' },
-];
 
 function greeting(): string {
   const hour = new Date().getHours();
@@ -28,14 +21,12 @@ function greeting(): string {
 }
 
 interface HomeSections {
-  recommended: boolean;
-  quickActions: boolean;
   myPhone: boolean;
 }
 
 type MyPhonePosition = 'top' | 'afterPinned';
 
-const DEFAULT_SECTIONS: HomeSections = { recommended: true, quickActions: true, myPhone: true };
+const DEFAULT_SECTIONS: HomeSections = { myPhone: true };
 
 export function Home() {
   const { navigate } = useRouter();
@@ -71,15 +62,6 @@ export function Home() {
     storageSet(StorageKeys.homeSections, next);
   }
 
-  function restoreSections() {
-    setSections(DEFAULT_SECTIONS);
-    storageSet(StorageKeys.homeSections, DEFAULT_SECTIONS);
-  }
-
-  // myPhone has its own dedicated inline restore banner (right where the card lives) instead of
-  // sharing the generic "Show hidden sections" button — keeps one obvious way back per section.
-  const hasHiddenSections = !sections.recommended || !sections.quickActions;
-
   function toggleMyPhonePosition() {
     const next: MyPhonePosition = myPhonePosition === 'top' ? 'afterPinned' : 'top';
     setMyPhonePosition(next);
@@ -87,7 +69,6 @@ export function Home() {
   }
 
   const pinnedTools = pinnedIds.map(getToolById).filter((t): t is ToolMeta => !!t);
-  const recommended = TOOLS.filter((tool) => !pinnedIds.includes(tool.id)).slice(0, 4);
   const results = useMemo(() => searchTools(query), [query]);
 
   const openTool = (id: string) => navigate(`/tools/${id}`);
@@ -103,9 +84,14 @@ export function Home() {
 
   function pin(id: string) {
     if (pinnedIds.includes(id)) return;
+    if (pinnedIds.length >= MAX_PINNED_TOOLS) {
+      hapticWarning();
+      return;
+    }
     updatePinned([...pinnedIds, id]);
   }
 
+  const pinLimitReached = pinnedIds.length >= MAX_PINNED_TOOLS;
   const pinnableTools = TOOLS.filter((tool) => !pinnedIds.includes(tool.id));
 
   return (
@@ -188,21 +174,27 @@ export function Home() {
             )}
             {editingPinned && pinnableTools.length > 0 && (
               <div className="home__pin-picker">
-                <p>Add a tool</p>
-                <div className="home__pin-picker-list">
-                  {pinnableTools.map((tool) => (
-                    <button
-                      key={tool.id}
-                      type="button"
-                      className="home__pin-picker-item"
-                      onClick={() => pin(tool.id)}
-                    >
-                      <Icon name={tool.icon} size={14} />
-                      {tool.name}
-                      <Icon name="plus" size={14} />
-                    </button>
-                  ))}
-                </div>
+                <p>
+                  {pinLimitReached
+                    ? `Pin limit reached (${MAX_PINNED_TOOLS}/${MAX_PINNED_TOOLS}) — unpin a tool to add another`
+                    : `Add a tool (${pinnedTools.length}/${MAX_PINNED_TOOLS})`}
+                </p>
+                {!pinLimitReached && (
+                  <div className="home__pin-picker-list">
+                    {pinnableTools.map((tool) => (
+                      <button
+                        key={tool.id}
+                        type="button"
+                        className="home__pin-picker-item"
+                        onClick={() => pin(tool.id)}
+                      >
+                        <Icon name={tool.icon} size={14} />
+                        {tool.name}
+                        <Icon name="plus" size={14} />
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -231,68 +223,6 @@ export function Home() {
               <Icon name="chevron-right" size={20} />
             </span>
           </button>
-
-          {sections.recommended && (
-            <div className="home__section">
-              <div className="home__section-header">
-                <h2>Recommended for You</h2>
-                <div className="home__section-actions">
-                  <button type="button" className="home__link" onClick={() => navigate('/tools')}>
-                    See All
-                  </button>
-                  <button
-                    type="button"
-                    className="home__section-close"
-                    onClick={() => hideSection('recommended')}
-                    aria-label="Hide Recommended for You"
-                  >
-                    <Icon name="x" size={14} strokeWidth={2.5} />
-                  </button>
-                </div>
-              </div>
-              <div className="home__grid">
-                {recommended.map((tool) => (
-                  <ToolTile key={tool.id} tool={tool} onClick={() => openTool(tool.id)} />
-                ))}
-              </div>
-            </div>
-          )}
-
-          {sections.quickActions && (
-            <div className="home__section">
-              <div className="home__section-header">
-                <h2>Quick Actions</h2>
-                <button
-                  type="button"
-                  className="home__section-close"
-                  onClick={() => hideSection('quickActions')}
-                  aria-label="Hide Quick Actions"
-                >
-                  <Icon name="x" size={14} strokeWidth={2.5} />
-                </button>
-              </div>
-              <div className="home__quick-actions">
-                {QUICK_ACTIONS.map((action) => (
-                  <button
-                    key={action.label}
-                    type="button"
-                    className="home__quick-action"
-                    onClick={() => openTool(action.toolId)}
-                  >
-                    <Icon name={action.icon} size={18} />
-                    <span>{action.label}</span>
-                    <Icon name="chevron-right" size={16} className="home__quick-action-chevron" />
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {hasHiddenSections && (
-            <button type="button" className="home__restore-sections" onClick={restoreSections}>
-              Show hidden sections
-            </button>
-          )}
         </>
       )}
     </div>

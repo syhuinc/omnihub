@@ -18,9 +18,20 @@ interface ToolTileProps {
   showPinBadge?: boolean;
   pinned?: boolean;
   onTogglePin?: () => void;
+  /** True when the pin limit is reached and this tool isn't already pinned. */
+  pinLimitReached?: boolean;
 }
 
-export function ToolTile({ tool, onClick, onRemove, onLongPress, showPinBadge, pinned, onTogglePin }: ToolTileProps) {
+export function ToolTile({
+  tool,
+  onClick,
+  onRemove,
+  onLongPress,
+  showPinBadge,
+  pinned,
+  onTogglePin,
+  pinLimitReached,
+}: ToolTileProps) {
   const isLight = useIsLightTheme();
   const image = (isLight ? TOOL_ICON_IMAGES_LIGHT : TOOL_ICON_IMAGES)[tool.id];
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -35,6 +46,10 @@ export function ToolTile({ tool, onClick, onRemove, onLongPress, showPinBadge, p
   }
 
   function handlePointerDown(e: PointerEvent) {
+    // Every new gesture starts clean — otherwise a stale suppress flag left
+    // over from the long-press that just revealed the pin badge can eat the
+    // very next tap (e.g. on the badge itself), forcing a second tap to pin.
+    suppressClickRef.current = false;
     if (!onLongPress) return;
     startRef.current = { x: e.clientX, y: e.clientY };
     timerRef.current = setTimeout(() => {
@@ -96,10 +111,11 @@ export function ToolTile({ tool, onClick, onRemove, onLongPress, showPinBadge, p
           type="button"
           className={`tool-tile__pin-badge${pinned ? ' tool-tile__pin-badge--active' : ''}`}
           onClick={onTogglePin}
+          disabled={!pinned && pinLimitReached}
           aria-label={pinned ? `Unpin ${tool.name}` : `Pin ${tool.name}`}
         >
           <Icon name="pin" size={17} />
-          {pinned ? 'Unpin' : 'Pin'}
+          {pinned ? 'Unpin' : pinLimitReached ? 'Limit reached' : 'Pin'}
         </button>
       )}
     </div>

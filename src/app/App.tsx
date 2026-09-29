@@ -5,7 +5,6 @@ import { RouterProvider, useRouter } from './Router';
 import { runTopBackHandler } from './useBackHandler';
 import { Home } from '../screens/Home/Home';
 import { Tools } from '../screens/Tools/Tools';
-import { Pro } from '../screens/Pro/Pro';
 import { Profile } from '../screens/Profile/Profile';
 import { ToolRoute } from '../tools/ToolRoute';
 import { PhoneCenter } from '../screens/PhoneCenter/PhoneCenter';
@@ -20,14 +19,13 @@ import { useIsLightTheme } from '../theme/useTheme';
 import { setStatusBarStyle, initStatusBarOverlay } from '../theme/statusBar';
 import './App.css';
 
-const TOP_LEVEL_PATHS = new Set(['/', '/tools', '/pro', '/profile']);
+const TOP_LEVEL_PATHS = new Set(['/', '/tools', '/profile']);
 
 function Screen() {
   const { path } = useRouter();
 
   if (path === '/') return <Home />;
   if (path === '/tools') return <Tools />;
-  if (path === '/pro') return <Pro />;
   if (path === '/profile') return <Profile />;
   if (path === '/phone-center') return <PhoneCenter />;
   if (path === '/device-info') return <DeviceInfo />;
