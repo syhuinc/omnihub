@@ -3,21 +3,21 @@
 ## Short description (max 80 characters)
 
 ```
-26+ tools in one place — no ads, sign-in optional.
+26+ tools in one place — sign-in optional.
 ```
 
-(51 characters)
+(43 characters)
 
 ## Full description (max 4000 characters)
 
 ```
-Omni Hub is an all-in-one toolbox for everyday tasks — calculator, notes, alarms, a compass, QR scanner, expense tracker, and more — all in one clean, fast app. No ads, no clutter, no account required.
+Omni Hub is an all-in-one toolbox for everyday tasks — a private PIN-locked Vault, Subscription Calculator, Sleep Mode, Debt Tracker, calculator, notes, and more — all in one clean, fast app. No clutter, no account required.
 
 NO ACCOUNT NEEDED
-Sign-up is never required to use Omni Hub. Everything you create is stored on your device, and you're always in control: back up your data to a file whenever you like, or clear it all with one tap. No ads, no tracking, no analytics — ever.
+Sign-up is never required to use Omni Hub. Everything you create is stored on your device, and you're always in control: back up your data to a file whenever you like, or clear it all with one tap. No tracking, no analytics — ever.
 
 OPTIONAL: SYNC ACROSS YOUR DEVICES
-Want your data available on more than one device? Sign in with Google, entirely optional, to sync Notes, Checklist, Expense Tracker, Budget, Subscription Calculator, Debt Tracker, Alarms, and your private Vault automatically. Your Vault stays end-to-end protected — only your already PIN-encrypted data ever leaves your device, and your PIN itself never does. Nothing is shared, sold, or used for ads either way.
+Want your data available on more than one device? Sign in with Google, entirely optional, to sync Notes, Checklist, Expense Tracker, Budget, Subscription Calculator, Debt Tracker, Alarms, and your private Vault automatically. Your Vault stays end-to-end protected — only your already PIN-encrypted data ever leaves your device, and your PIN itself never does. Nothing is shared or sold, ever.
 
 26+ TOOLS
 
@@ -95,4 +95,4 @@ For Play Console's App content ▸ Data safety ▸ "Delete account URL" field. S
 
 ## Tags / keywords (for ASO, not shown to users directly)
 
-calculator, scientific calculator, percentage calculator, unit converter, timer, stopwatch, alarm clock, sleep mode, compass, flashlight, qr scanner, barcode scanner, notes app, checklist, to-do list, expense tracker, budget planner, tip calculator, split bill, subscription tracker, debt tracker, age calculator, date calculator, time zone converter, world clock, random generator, private vault, no ads, privacy
+calculator, scientific calculator, percentage calculator, unit converter, timer, stopwatch, alarm clock, sleep mode, compass, flashlight, qr scanner, barcode scanner, notes app, checklist, to-do list, expense tracker, budget planner, tip calculator, split bill, subscription tracker, debt tracker, age calculator, date calculator, time zone converter, world clock, random generator, private vault, privacy
