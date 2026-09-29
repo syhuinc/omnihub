@@ -27,7 +27,6 @@ import { Flashlight } from './flashlight/Flashlight';
 import { QrScanner } from './qr-scanner/QrScanner';
 import { BarcodeScannerTool } from './barcode-scanner/BarcodeScannerTool';
 import { VoiceChanger } from './voice-changer/VoiceChanger';
-import { Snake } from './snake/Snake';
 import { Vault } from '../vault/Vault';
 
 const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
@@ -57,7 +56,6 @@ const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
   'qr-scanner': QrScanner,
   'barcode-scanner': BarcodeScannerTool,
   'voice-changer': VoiceChanger,
-  snake: Snake,
   vault: Vault,
 };
 

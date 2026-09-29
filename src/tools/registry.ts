@@ -293,16 +293,6 @@ export const TOOLS: ToolMeta[] = [
     keywords: ['voice', 'changer', 'record', 'pitch', 'chipmunk', 'robot', 'echo', 'funny', 'audio'],
     presentation: 'page',
   },
-  {
-    id: 'snake',
-    name: 'Snake',
-    shortDescription: 'Classic arcade snake, swipe to play',
-    category: 'more',
-    color: 'var(--green)',
-    icon: 'gamepad',
-    keywords: ['snake', 'game', 'arcade', 'play', 'classic', 'nokia', 'high score'],
-    presentation: 'page',
-  },
 ];
 
 export function getToolById(id: string): ToolMeta | undefined {
