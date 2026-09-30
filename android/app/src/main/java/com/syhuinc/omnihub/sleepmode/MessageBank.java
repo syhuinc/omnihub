@@ -388,6 +388,25 @@ public class MessageBank {
             String wakeTimeLabel,
             Set<String> recentKeys
     ) {
+        return pick(personality, tier, displayName, hasWorkTomorrow, interests, wakeTimeLabel, recentKeys, null);
+    }
+
+    /**
+     * Same as the 7-arg {@link #pick}, but also mixes in AI-generated lines for this personality
+     * when available. aiPool is indexed [tier][line], loaded via
+     * {@link SleepModeStore#loadAiMessages}; pass null when no AI pool is cached (falls back to
+     * the hand-written pools only, same as before AI-generated reminders existed).
+     */
+    public static Pick pick(
+            String personality,
+            int tier,
+            String displayName,
+            boolean hasWorkTomorrow,
+            String interests,
+            String wakeTimeLabel,
+            Set<String> recentKeys,
+            String[][] aiPool
+    ) {
         int p = idx(personality);
         int t = Math.max(0, Math.min(TIER_COUNT - 1, tier));
         boolean named = displayName != null && !displayName.trim().isEmpty();
@@ -397,6 +416,10 @@ public class MessageBank {
 
         pools.add(GENERIC[p][t]);
         prefixes.add("g" + t);
+        if (aiPool != null && aiPool.length > t && aiPool[t] != null && aiPool[t].length > 0) {
+            pools.add(aiPool[t]);
+            prefixes.add("ai" + t);
+        }
         if (named) {
             pools.add(NAMED[p][t]);
             prefixes.add("n" + t);

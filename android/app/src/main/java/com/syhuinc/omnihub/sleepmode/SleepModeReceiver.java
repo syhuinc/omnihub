@@ -95,6 +95,7 @@ public class SleepModeReceiver extends BroadcastReceiver {
     private void speak(Context context, SleepModeData data) {
         int tier = Math.min(data.nagCount, MessageBank.TIER_COUNT - 1);
         Set<String> recentKeys = new LinkedHashSet<>(Arrays.asList(data.recentKeysCsv.split(",")));
+        String[][] aiPool = SleepModeStore.loadAiMessages(context, data.personality);
 
         MessageBank.Pick pick = MessageBank.pick(
                 data.personality,
@@ -103,7 +104,8 @@ public class SleepModeReceiver extends BroadcastReceiver {
                 data.effectiveWorkSchoolRoutine() != null,
                 data.effectiveInterests(),
                 formatWakeTime(data),
-                recentKeys
+                recentKeys,
+                aiPool
         );
 
         int clipResId = SleepModeClipBank.resIdFor(context, pick.key);

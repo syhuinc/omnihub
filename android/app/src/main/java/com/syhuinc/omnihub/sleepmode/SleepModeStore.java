@@ -67,4 +67,59 @@ public class SleepModeStore {
         SharedPreferences prefs = ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
         prefs.edit().putString(KEY_HISTORY, arr.toString()).apply();
     }
+
+    /**
+     * Stores a freshly-generated AI reminder pool for one personality, as raw JSON in the shape
+     * {"tiers": [[...4 arrays of strings...]], "generatedAt": <millis>} — exactly what the
+     * generateSleepReminders Cloud Function returns (plus generatedAt attached by the caller).
+     * Stored as-is; only parsed back out (and validated) by loadAiMessages, so a malformed write
+     * here just means loadAiMessages returns null later rather than crashing anything.
+     */
+    public static synchronized void saveAiMessages(Context ctx, String personality, String tiersJson) {
+        SharedPreferences prefs = ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        prefs.edit().putString(aiMessagesKey(personality), tiersJson).apply();
+    }
+
+    /**
+     * Returns the cached AI-generated pool for this personality as [tier][line], or null if
+     * nothing is cached or the cached JSON doesn't parse into exactly MessageBank.TIER_COUNT
+     * tiers. Never throws — a corrupted/unexpected cache just means "no AI pool right now",
+     * same as if generation had never run.
+     */
+    public static synchronized String[][] loadAiMessages(Context ctx, String personality) {
+        SharedPreferences prefs = ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        String raw = prefs.getString(aiMessagesKey(personality), null);
+        if (raw == null) return null;
+        try {
+            JSONObject obj = new JSONObject(raw);
+            JSONArray tiersArr = obj.getJSONArray("tiers");
+            if (tiersArr.length() != MessageBank.TIER_COUNT) return null;
+            String[][] result = new String[MessageBank.TIER_COUNT][];
+            for (int t = 0; t < MessageBank.TIER_COUNT; t++) {
+                JSONArray lineArr = tiersArr.getJSONArray(t);
+                String[] lines = new String[lineArr.length()];
+                for (int i = 0; i < lineArr.length(); i++) lines[i] = lineArr.getString(i);
+                result[t] = lines;
+            }
+            return result;
+        } catch (JSONException e) {
+            return null;
+        }
+    }
+
+    /** millis the AI pool for this personality was generated, or 0 if none is cached. */
+    public static synchronized long loadAiMessagesGeneratedAt(Context ctx, String personality) {
+        SharedPreferences prefs = ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        String raw = prefs.getString(aiMessagesKey(personality), null);
+        if (raw == null) return 0;
+        try {
+            return new JSONObject(raw).optLong("generatedAt", 0);
+        } catch (JSONException e) {
+            return 0;
+        }
+    }
+
+    private static String aiMessagesKey(String personality) {
+        return "ai_messages_" + personality;
+    }
 }

@@ -13,6 +13,7 @@ import com.getcapacitor.annotation.CapacitorPlugin;
 import com.getcapacitor.annotation.Permission;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 
 @CapacitorPlugin(
         name = "SleepModePlugin",
@@ -80,12 +81,47 @@ public class SleepModePlugin extends Plugin {
         String workSchoolRoutine = call.getString("workSchoolRoutine", null);
         String interests = call.getString("interests", null);
         boolean hasWorkTomorrow = workSchoolRoutine != null && !workSchoolRoutine.trim().isEmpty();
+        String[][] aiPool = SleepModeStore.loadAiMessages(getContext(), personality);
 
         MessageBank.Pick pick = MessageBank.pick(
-                personality, tier, callName, hasWorkTomorrow, interests, null, java.util.Collections.emptySet());
+                personality, tier, callName, hasWorkTomorrow, interests, null, java.util.Collections.emptySet(), aiPool);
 
         JSObject ret = new JSObject();
         ret.put("text", pick.text);
+        call.resolve(ret);
+    }
+
+    /**
+     * Caches a freshly-generated AI reminder pool for one personality, so the fully-offline nag
+     * path (SleepModeReceiver, which never wakes the webview) can pick from it. tiersJson is the
+     * exact {"tiers": [...]} JSON the generateSleepReminders Cloud Function returned; this method
+     * just attaches a generatedAt timestamp and stores it as-is — no parsing happens here.
+     */
+    @PluginMethod
+    public void setAiMessages(PluginCall call) {
+        String personality = call.getString("personality");
+        String tiersJson = call.getString("tiersJson");
+        if (personality == null || tiersJson == null) {
+            call.reject("personality and tiersJson are required");
+            return;
+        }
+        try {
+            JSONObject obj = new JSONObject(tiersJson);
+            obj.put("generatedAt", System.currentTimeMillis());
+            SleepModeStore.saveAiMessages(getContext(), personality, obj.toString());
+            call.resolve();
+        } catch (JSONException e) {
+            call.reject("tiersJson must be valid JSON shaped {\"tiers\": [[...],[...],[...],[...]]}", e);
+        }
+    }
+
+    /** How old the cached AI pool for this personality is, so the JS side can decide whether to refresh it. */
+    @PluginMethod
+    public void getAiMessagesInfo(PluginCall call) {
+        String personality = call.getString("personality", "friendly");
+        long generatedAt = SleepModeStore.loadAiMessagesGeneratedAt(getContext(), personality);
+        JSObject ret = new JSObject();
+        ret.put("generatedAt", generatedAt);
         call.resolve(ret);
     }
 

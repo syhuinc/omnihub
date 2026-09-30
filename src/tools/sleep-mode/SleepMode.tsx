@@ -6,6 +6,8 @@ import { useBackHandler } from '../../app/useBackHandler';
 import { hapticSelect, hapticTap, hapticWarning } from '../../haptics';
 import { WheelTimePicker } from '../alarm/WheelTimePicker';
 import { SleepModePlugin, DEFAULT_SLEEP_MODE_CONFIG, type SleepModeConfig, type SleepModeStatus } from '../../sleep-mode/plugin';
+import { useAuth } from '../../cloud/AuthContext';
+import { generateSleepReminders, type SleepAiPersonality } from '../../cloud/generateSleepReminders';
 import { INTERVAL_OPTIONS_MIN, WIND_DOWN_ACTIONS } from './types';
 import { HomePersonalitySection } from './HomePersonalitySection';
 import { WindDownMode } from './WindDownMode';
@@ -32,8 +34,16 @@ type SubScreen = SleepTab | 'wind-down';
 
 const TAB_SCREENS = new Set<SubScreen>(['main', 'sleep-insights', 'sleep-sounds', 'ai']);
 
+const AI_ENABLED_PERSONALITIES = new Set<SleepAiPersonality>(['gentle', 'friendly']);
+const AI_POOL_MAX_AGE_MS = 24 * 60 * 60 * 1000;
+
+function isAiPersonality(p: string): p is SleepAiPersonality {
+  return AI_ENABLED_PERSONALITIES.has(p as SleepAiPersonality);
+}
+
 export function SleepMode() {
   const { back } = useRouter();
+  const { user } = useAuth();
   const [config, setConfig] = useState<SleepModeStatus>({ ...DEFAULT_SLEEP_MODE_CONFIG, sessionStartMillis: 0, nagCount: 0, mutedUntilMillis: 0 });
   const [timeSheet, setTimeSheet] = useState<TimeField | null>(null);
   const [needsExactAlarmPermission, setNeedsExactAlarmPermission] = useState(false);
@@ -75,6 +85,26 @@ export function SleepMode() {
       await SleepModePlugin.configure(next);
     } catch {
       // web fallback / unsupported platform — local state still reflects the change
+    }
+    void maybeRefreshAiReminders(next);
+  }
+
+  /** Best-effort background refresh of the cached AI reminder pool. Never surfaces an error or
+   *  blocks Sleep Mode — the hand-written MessageBank pool is always there as a fallback. */
+  async function maybeRefreshAiReminders(next: SleepModeConfig) {
+    if (!user || !isAiPersonality(next.personality)) return;
+    try {
+      const info = await SleepModePlugin.getAiMessagesInfo({ personality: next.personality });
+      if (Date.now() - info.generatedAt < AI_POOL_MAX_AGE_MS) return;
+      const tiersJson = await generateSleepReminders({
+        personality: next.personality,
+        displayName: next.callName,
+        workSchoolRoutine: next.workSchoolRoutine,
+        interests: next.interests,
+      });
+      await SleepModePlugin.setAiMessages({ personality: next.personality, tiersJson });
+    } catch {
+      // network hiccup, rate limit, or unsupported platform — fine, try again next edit
     }
   }
 

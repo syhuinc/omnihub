@@ -59,6 +59,10 @@ export interface SleepModePluginInterface {
   requestFullScreenIntentPermission(): Promise<void>;
   checkOverlayPermission(): Promise<{ granted: boolean }>;
   requestOverlayPermission(): Promise<void>;
+  /** Caches a freshly-generated AI reminder pool (from generateSleepReminders) for offline use by the nag path. */
+  setAiMessages(options: { personality: SleepPersonality; tiersJson: string }): Promise<void>;
+  /** 0 if no AI pool is cached for this personality yet. */
+  getAiMessagesInfo(options: { personality: SleepPersonality }): Promise<{ generatedAt: number }>;
 }
 
 export const DEFAULT_SLEEP_MODE_CONFIG: SleepModeConfig = {
@@ -173,6 +177,14 @@ class SleepModePluginWeb extends WebPlugin implements SleepModePluginInterface {
 
   async requestOverlayPermission(): Promise<void> {
     // no-op in browser
+  }
+
+  async setAiMessages(): Promise<void> {
+    // no-op in the web preview — the real nag path (and its cache) only exists natively
+  }
+
+  async getAiMessagesInfo(): Promise<{ generatedAt: number }> {
+    return { generatedAt: 0 };
   }
 }
 
