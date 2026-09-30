@@ -128,8 +128,11 @@
       - Sleep Mode never uses Android's Usage Access permission or reads which app is in the
         foreground. It only checks PowerManager#isInteractive() (is the screen currently on),
         which needs no special permission, as its "still using the phone" signal.
-      - CAMERA / FLASHLIGHT: used only by the QR Scanner, Barcode Scanner and Flashlight tools,
-        on-device — no image or video is ever stored or transmitted.
+      - CAMERA / FLASHLIGHT: used by the QR Scanner, Barcode Scanner and Flashlight tools, and by
+        Calculator's number-scanning mode (reads a number from the camera via on-device text
+        recognition). All entirely on-device — no image or video is ever stored or transmitted.
+        The number scanner writes each captured frame to a temporary cache file only long enough
+        to run recognition on it, then deletes it immediately.
       - READ_PHONE_STATE: only for the Flashlight tool's optional "blink on incoming call" alert
         (off by default) — used solely to detect the ringing/idle call state, never to read call
         logs, numbers, or content. The notification-listener service backing the "blink on

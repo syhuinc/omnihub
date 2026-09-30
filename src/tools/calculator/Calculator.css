@@ -9,6 +9,12 @@
   padding: calc(12px + var(--safe-top)) 16px 4px;
 }
 
+.calc__topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
 .calc__icon-btn {
   display: flex;
   align-items: center;

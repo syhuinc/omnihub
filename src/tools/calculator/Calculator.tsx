@@ -3,6 +3,7 @@ import { Icon } from '../../components/Icon';
 import { useRouter } from '../../app/Router';
 import { storageGet, storageSet, StorageKeys } from '../../storage/db';
 import { applyOperator, formatResult, type Operator, type CalculatorHistoryEntry } from './logic';
+import { NumberScanner } from './NumberScanner';
 import './Calculator.css';
 
 const MAX_HISTORY = 50;
@@ -15,6 +16,7 @@ export function Calculator() {
   const [waitingForNewValue, setWaitingForNewValue] = useState(false);
   const [expression, setExpression] = useState('');
   const [showHistory, setShowHistory] = useState(false);
+  const [showScanner, setShowScanner] = useState(false);
   const [history, setHistory] = useState<CalculatorHistoryEntry[]>(() =>
     storageGet(StorageKeys.calculatorHistory, []),
   );
@@ -96,6 +98,15 @@ export function Calculator() {
     saveHistory([]);
   }
 
+  function useScanResult(value: number) {
+    setDisplay(formatResult(value));
+    setStoredValue(null);
+    setOperator(null);
+    setWaitingForNewValue(true);
+    setExpression('');
+    setShowScanner(false);
+  }
+
   function useHistoryResult(entry: CalculatorHistoryEntry) {
     setDisplay(entry.result);
     setStoredValue(null);
@@ -105,20 +116,34 @@ export function Calculator() {
     setShowHistory(false);
   }
 
+  if (showScanner) {
+    return <NumberScanner onUseResult={useScanResult} onClose={() => setShowScanner(false)} />;
+  }
+
   return (
     <div className="screen calc-screen">
       <div className="calc__topbar">
         <button type="button" className="calc__icon-btn" onClick={back} aria-label="Back">
           <Icon name="back" size={22} />
         </button>
-        <button
-          type="button"
-          className="calc__icon-btn"
-          onClick={() => setShowHistory((v) => !v)}
-          aria-label="Toggle history"
-        >
-          <Icon name={showHistory ? 'x' : 'history'} size={20} />
-        </button>
+        <div className="calc__topbar-actions">
+          <button
+            type="button"
+            className="calc__icon-btn"
+            onClick={() => setShowScanner(true)}
+            aria-label="Scan numbers"
+          >
+            <Icon name="scan" size={20} />
+          </button>
+          <button
+            type="button"
+            className="calc__icon-btn"
+            onClick={() => setShowHistory((v) => !v)}
+            aria-label="Toggle history"
+          >
+            <Icon name={showHistory ? 'x' : 'history'} size={20} />
+          </button>
+        </div>
       </div>
 
       {showHistory ? (
