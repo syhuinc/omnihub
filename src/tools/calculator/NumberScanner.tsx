@@ -200,10 +200,10 @@ export function NumberScanner({ onUseResult, onClose }: NumberScannerProps) {
 
   return (
     <div className="screen ns">
+      <video ref={videoRef} className="ns__video" autoPlay playsInline muted />
+
       {(phase === 'scanning' || phase === 'processing' || phase === 'reviewing') && (
         <>
-          <video ref={videoRef} className="ns__video" autoPlay playsInline muted />
-
           <div className="ns__topbar">
             <button type="button" className="ns__icon-btn" onClick={closeAndExit} aria-label="Close scanner">
               <Icon name="x" size={20} />
