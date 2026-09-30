@@ -3,7 +3,6 @@ import { Icon } from '../../components/Icon';
 import { hapticSelect, hapticTap } from '../../haptics';
 import { SleepModePlugin, type SleepModeConfig, type SleepModeStatus, type SleepPersonality } from '../../sleep-mode/plugin';
 import { PERSONALITY_META } from './types';
-import { SAMPLE_AUDIO } from '../../assets/sleep-mode';
 
 interface HomePersonalitySectionProps {
   config: SleepModeStatus;
@@ -33,21 +32,6 @@ export function HomePersonalitySection({ config, onPersist }: HomePersonalitySec
     hapticTap();
     setSampleAvatarId(config.personality);
     setBurstKey((k) => k + 1);
-
-    const recorded = SAMPLE_AUDIO[config.personality];
-    if (recorded) {
-      setSampleText(recorded.text);
-      setSampleLoading(true);
-      const audio = new Audio(recorded.audio);
-      audio.onended = () => setSampleLoading(false);
-      audio.onerror = () => setSampleLoading(false);
-      try {
-        await audio.play();
-      } catch {
-        setSampleLoading(false);
-      }
-      return;
-    }
 
     setSampleLoading(true);
     try {

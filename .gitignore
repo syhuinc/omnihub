@@ -22,3 +22,6 @@ android/keystore.properties
 
 # Local secrets (API keys, etc.) — never commit these.
 .claude-local/
+
+# scripts/*.py TTS generation output — send the folder back, wire in the .m4a files, then discard.
+scripts/output*/
