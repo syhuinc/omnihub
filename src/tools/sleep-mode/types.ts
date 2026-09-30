@@ -11,12 +11,10 @@ export interface PersonalityMeta {
   color: string;
   /** 'normal' personalities are free and selectable today; 'ai' ones are shown but locked until Sleep Mode AI exists. */
   tier: 'normal' | 'ai';
-  /** True once this personality has a real, live AI chat backend — see SleepModeAiChat. */
-  chatEnabled?: boolean;
 }
 
 export const PERSONALITY_META: PersonalityMeta[] = [
-  { id: 'gentle', label: 'Gentle', description: 'Soft, caring nudges', emoji: '🍃', image: PERSONALITY_IMAGES.gentle, color: 'var(--green)', tier: 'normal', chatEnabled: true },
+  { id: 'gentle', label: 'Gentle', description: 'Soft, caring nudges', emoji: '🍃', image: PERSONALITY_IMAGES.gentle, color: 'var(--green)', tier: 'normal' },
   { id: 'friendly', label: 'Friendly', description: 'Casual, upbeat check-ins', emoji: '😊', image: PERSONALITY_IMAGES.friendly, color: 'var(--yellow)', tier: 'normal' },
   { id: 'teasing', label: 'Teasing', description: 'Playful ribbing', emoji: '😆', image: PERSONALITY_IMAGES.teasing, color: 'var(--orange)', tier: 'ai' },
   { id: 'strict', label: 'Strict', description: 'Firm, no-nonsense', emoji: '🛡️', image: PERSONALITY_IMAGES.strict, color: 'var(--blue)', tier: 'ai' },
