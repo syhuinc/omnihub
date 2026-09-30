@@ -17,12 +17,13 @@ const PERKS: { icon: string; title: string; desc: string }[] = [
 
 interface SleepModeAiTabProps {
   onBack: () => void;
+  onOpenChat: () => void;
 }
 
 /** Sleep Mode's "AI" tab: preview every personality's AI-voiced take (all locked — the AI
  *  backend doesn't exist yet) plus what's planned once it does. Gentle/Friendly's real,
  *  functional picker lives on the Home tab instead. */
-export function SleepModeAiTab({ onBack }: SleepModeAiTabProps) {
+export function SleepModeAiTab({ onBack, onOpenChat }: SleepModeAiTabProps) {
   const [sampleText, setSampleText] = useState<string | null>(null);
   const [sampleAvatarId, setSampleAvatarId] = useState<string | null>(null);
   const [sampleLoading, setSampleLoading] = useState(false);
@@ -70,31 +71,47 @@ export function SleepModeAiTab({ onBack }: SleepModeAiTabProps) {
 
       <div className="sm__body">
         <p className="sm__pro-note">
-          Sleep Mode AI isn't built yet, so these are locked — tap one to hear a preview of its
-          voice, but none are selectable until the AI backend is ready.
+          Gentle is live — tap it to start chatting. The rest are still locked previews until they
+          get their own AI backend.
         </p>
 
         <div className="sm__personality-list">
-          {PERSONALITY_META.map((p) => (
-            <button
-              key={p.id}
-              type="button"
-              className="sm__personality sm__personality--locked"
-              onClick={() => previewPersonality(p.id)}
-            >
-              <span className="sm__personality-emoji" style={{ '--emoji-color': p.color } as CSSProperties}>
-                {p.image ? <img src={p.image} alt="" /> : <Icon name={(p.icon ?? 'user') as never} size={18} />}
-              </span>
-              <span className="sm__personality-info">
-                <span className="sm__personality-label-row">
-                  <span className="sm__personality-label">{p.label}</span>
-                  <span className="sm__badge sm__badge--ai">AI</span>
+          {PERSONALITY_META.map((p) =>
+            p.chatEnabled ? (
+              <button key={p.id} type="button" className="sm__personality" onClick={onOpenChat}>
+                <span className="sm__personality-emoji" style={{ '--emoji-color': p.color } as CSSProperties}>
+                  {p.image ? <img src={p.image} alt="" /> : <Icon name={(p.icon ?? 'user') as never} size={18} />}
                 </span>
-                <span className="sm__personality-desc">{p.description}</span>
-              </span>
-              <Icon name="lock" size={16} className="sm__time-chevron" />
-            </button>
-          ))}
+                <span className="sm__personality-info">
+                  <span className="sm__personality-label-row">
+                    <span className="sm__personality-label">{p.label}</span>
+                    <span className="sm__badge sm__badge--ai">AI</span>
+                  </span>
+                  <span className="sm__personality-desc">Chat now</span>
+                </span>
+                <Icon name="chat" size={16} className="sm__time-chevron" />
+              </button>
+            ) : (
+              <button
+                key={p.id}
+                type="button"
+                className="sm__personality sm__personality--locked"
+                onClick={() => previewPersonality(p.id)}
+              >
+                <span className="sm__personality-emoji" style={{ '--emoji-color': p.color } as CSSProperties}>
+                  {p.image ? <img src={p.image} alt="" /> : <Icon name={(p.icon ?? 'user') as never} size={18} />}
+                </span>
+                <span className="sm__personality-info">
+                  <span className="sm__personality-label-row">
+                    <span className="sm__personality-label">{p.label}</span>
+                    <span className="sm__badge sm__badge--ai">AI</span>
+                  </span>
+                  <span className="sm__personality-desc">{p.description}</span>
+                </span>
+                <Icon name="lock" size={16} className="sm__time-chevron" />
+              </button>
+            ),
+          )}
         </div>
 
         {sampleText && (

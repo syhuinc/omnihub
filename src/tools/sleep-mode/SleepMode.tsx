@@ -12,6 +12,7 @@ import { WindDownMode } from './WindDownMode';
 import { SleepSounds } from './SleepSounds';
 import { SleepInsights } from './SleepInsights';
 import { SleepModeAiTab } from './SleepModeAiTab';
+import { SleepModeAiChat } from './SleepModeAiChat';
 import { SleepTabBar, type SleepTab } from './SleepTabBar';
 import { heroBanner } from '../../assets/sleep-mode';
 import './SleepMode.css';
@@ -28,7 +29,7 @@ function formatTimeOfDay(ms: number): string {
 }
 
 type TimeField = 'bedtime' | 'wake';
-type SubScreen = SleepTab | 'wind-down';
+type SubScreen = SleepTab | 'wind-down' | 'ai-chat';
 
 const TAB_SCREENS = new Set<SubScreen>(['main', 'sleep-insights', 'sleep-sounds', 'ai']);
 
@@ -165,6 +166,9 @@ export function SleepMode() {
       />
     );
   }
+  if (screen === 'ai-chat') {
+    return <SleepModeAiChat onBack={() => setScreen('ai')} />;
+  }
   const showTabBar = TAB_SCREENS.has(screen);
 
   let body: ReactNode;
@@ -173,7 +177,7 @@ export function SleepMode() {
   } else if (screen === 'sleep-sounds') {
     body = <SleepSounds onBack={() => setScreen('main')} />;
   } else if (screen === 'ai') {
-    body = <SleepModeAiTab onBack={() => setScreen('main')} />;
+    body = <SleepModeAiTab onBack={() => setScreen('main')} onOpenChat={() => setScreen('ai-chat')} />;
   } else {
     body = (
       <div className="screen">
