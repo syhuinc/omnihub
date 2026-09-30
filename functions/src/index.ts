@@ -4,16 +4,16 @@ import * as logger from 'firebase-functions/logger';
 import { initializeApp } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 import { getFirestore, FieldValue, Timestamp } from 'firebase-admin/firestore';
-import Anthropic from '@anthropic-ai/sdk';
+import { GoogleGenAI } from '@google/genai';
 
 initializeApp();
 
-const anthropicApiKey = defineSecret('ANTHROPIC_API_KEY');
+const geminiApiKey = defineSecret('GEMINI_API_KEY');
 
 const DAILY_MESSAGE_CAP = 30;
 const HISTORY_LIMIT = 20;
 const MAX_MESSAGE_LENGTH = 2000;
-const MODEL = 'claude-haiku-4-5-20251001';
+const MODEL = 'gemini-3.1-flash-lite';
 
 type Personality = 'gentle';
 
@@ -54,7 +54,7 @@ function todayKey(): string {
 }
 
 export const sleepAiChat = onRequest(
-  { secrets: [anthropicApiKey], cors: true, region: 'us-central1' },
+  { secrets: [geminiApiKey], cors: true, region: 'us-central1' },
   async (req, res) => {
     if (req.method !== 'POST') {
       res.status(405).json({ error: 'Method not allowed' });
@@ -118,31 +118,32 @@ export const sleepAiChat = onRequest(
       return;
     }
 
-    let history: { role: 'user' | 'assistant'; content: string }[] = [];
+    let history: { role: 'user' | 'model'; parts: { text: string }[] }[] = [];
     try {
       const historySnap = await chatCollection.orderBy('createdAt', 'desc').limit(HISTORY_LIMIT).get();
       history = historySnap.docs
         .map((d) => d.data() as ChatMessageDoc)
         .reverse()
-        .map((d) => ({ role: d.role, content: d.text }));
+        .map((d) => ({ role: d.role === 'assistant' ? ('model' as const) : ('user' as const), parts: [{ text: d.text }] }));
     } catch (err) {
       logger.warn('Failed to load chat history, continuing without it', err);
     }
 
-    const anthropic = new Anthropic({ apiKey: anthropicApiKey.value() });
+    const ai = new GoogleGenAI({ apiKey: geminiApiKey.value() });
     let replyText: string;
     try {
-      const response = await anthropic.messages.create({
+      const response = await ai.models.generateContent({
         model: MODEL,
-        max_tokens: 300,
-        system: SYSTEM_PROMPTS[personality],
-        messages: [...history, { role: 'user', content: rawMessage }],
+        contents: [...history, { role: 'user', parts: [{ text: rawMessage }] }],
+        config: {
+          systemInstruction: SYSTEM_PROMPTS[personality],
+          maxOutputTokens: 300,
+        },
       });
-      const textBlock = response.content.find((block) => block.type === 'text');
-      replyText = textBlock && textBlock.type === 'text' ? textBlock.text.trim() : '';
+      replyText = (response.text ?? '').trim();
       if (!replyText) throw new Error('Empty response from model');
     } catch (err) {
-      logger.error('Anthropic API call failed', err);
+      logger.error('Gemini API call failed', err);
       res.status(502).json({ error: "Couldn't reach Sleep Mode AI right now. Please try again." });
       return;
     }
