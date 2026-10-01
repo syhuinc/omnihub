@@ -43,7 +43,7 @@ function isAiPersonality(p: string): p is SleepAiPersonality {
 
 export function SleepMode() {
   const { back } = useRouter();
-  const { user } = useAuth();
+  const { user, isPro } = useAuth();
   const [config, setConfig] = useState<SleepModeStatus>({ ...DEFAULT_SLEEP_MODE_CONFIG, sessionStartMillis: 0, nagCount: 0, mutedUntilMillis: 0 });
   const [timeSheet, setTimeSheet] = useState<TimeField | null>(null);
   const [needsExactAlarmPermission, setNeedsExactAlarmPermission] = useState(false);
@@ -90,9 +90,12 @@ export function SleepMode() {
   }
 
   /** Best-effort background refresh of the cached AI reminder pool. Never surfaces an error or
-   *  blocks Sleep Mode — the hand-written MessageBank pool is always there as a fallback. */
+   *  blocks Sleep Mode — the hand-written MessageBank pool is always there as a fallback.
+   *  Sleep Mode AI is a Pro feature — free users stay on the hand-written pool only, with zero
+   *  network calls. The Cloud Function enforces this too; this check just avoids a wasted
+   *  round trip (and a guaranteed 403) for anyone who isn't Pro. */
   async function maybeRefreshAiReminders(next: SleepModeConfig) {
-    if (!user || !isAiPersonality(next.personality)) return;
+    if (!user || !isPro || !isAiPersonality(next.personality)) return;
     try {
       const info = await SleepModePlugin.getAiMessagesInfo({ personality: next.personality });
       if (Date.now() - info.generatedAt < AI_POOL_MAX_AGE_MS) return;

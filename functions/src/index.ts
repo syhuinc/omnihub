@@ -79,6 +79,21 @@ export const generateSleepReminders = onRequest(
     const interests = typeof body.interests === 'string' ? body.interests.trim().slice(0, 200) : '';
 
     const db = getFirestore();
+
+    // Sleep Mode AI is a Pro feature. isPro is never client-writable (see firestore.rules) —
+    // this is the authoritative check; the client also checks it to avoid a wasted round trip.
+    try {
+      const userSnap = await db.doc(`users/${uid}`).get();
+      if (userSnap.data()?.isPro !== true) {
+        res.status(403).json({ error: 'Sleep Mode AI is a Pro feature.', code: 'pro_required' });
+        return;
+      }
+    } catch (err) {
+      logger.error('Pro status check failed', err);
+      res.status(500).json({ error: 'Something went wrong. Please try again.' });
+      return;
+    }
+
     const usageRef = db.doc(`users/${uid}/sleepAiMeta/generationUsage`);
 
     try {
