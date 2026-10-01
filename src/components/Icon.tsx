@@ -103,7 +103,10 @@ export type IconName =
   | 'mail'
   | 'bluetooth'
   | 'bookmark'
-  | 'gamepad';
+  | 'gamepad'
+  | 'wrench'
+  | 'layers'
+  | 'chef-hat';
 
 interface IconProps {
   name: IconName;
@@ -374,6 +377,15 @@ const paths: Record<IconName, React.ReactNode> = {
   bookmark: <path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1Z" />,
   gamepad: (
     <path d="M7 6h10a5 5 0 0 1 5 5.3l.7 4.6a2.2 2.2 0 0 1-3.9 1.8L16.5 15h-9L5.2 17.7a2.2 2.2 0 0 1-3.9-1.8L2 11.3A5 5 0 0 1 7 6Z M7 10.5v3M5.5 12h3M15.5 11h.01M18 13h.01" />
+  ),
+  wrench: (
+    <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94Z" />
+  ),
+  layers: (
+    <path d="m12 2 9 5-9 5-9-5Z M3 12l9 5 9-5 M3 17l9 5 9-5" />
+  ),
+  'chef-hat': (
+    <path d="M6 18h12v3H6Z M8.5 18v-5.5 M15.5 18v-5.5 M6 12.5a4 4 0 0 1 1-7.8 4.5 4.5 0 0 1 8.7-1.6A4 4 0 0 1 18 12.5Z" />
   ),
 };
 

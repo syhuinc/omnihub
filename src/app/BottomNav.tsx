@@ -5,6 +5,7 @@ import './BottomNav.css';
 const TABS: { path: string; label: string; icon: IconName }[] = [
   { path: '/', label: 'Home', icon: 'home' },
   { path: '/tools', label: 'Tools', icon: 'grid' },
+  { path: '/craft', label: 'Craft', icon: 'wrench' },
   { path: '/profile', label: 'Profile', icon: 'user' },
 ];
 
