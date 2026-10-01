@@ -45,20 +45,24 @@ export function Craft() {
           <img className="craft__hero-img" src={heroCrafting} alt="Crafting Station" />
         </div>
 
-        <div className="craft__coming-soon">
-          <img className="craft__coming-soon-img" src={chefHat} alt="" />
-          <h3>Still Cooking&hellip;</h3>
-          <p>We&rsquo;re working hard to bring the Crafting Station to Omni Hub.</p>
-        </div>
-
-        <div className="craft__features">
-          {FEATURES.map((f) => (
-            <div key={f.title} className="craft__feature">
-              <img className="craft__feature-icon" src={f.icon} alt="" />
-              <strong>{f.title}</strong>
-              <span>{f.desc}</span>
+        <div className="craft__info-card">
+          <div className="craft__coming-soon">
+            <img className="craft__coming-soon-img" src={chefHat} alt="" />
+            <div className="craft__coming-soon-text">
+              <h3>Still Cooking&hellip;</h3>
+              <p>We&rsquo;re working hard to bring the Crafting Station to Omni Hub.</p>
             </div>
-          ))}
+          </div>
+
+          <div className="craft__features">
+            {FEATURES.map((f) => (
+              <div key={f.title} className="craft__feature">
+                <img className="craft__feature-icon" src={f.icon} alt="" />
+                <strong>{f.title}</strong>
+                <span>{f.desc}</span>
+              </div>
+            ))}
+          </div>
         </div>
 
         <div className="craft__section-head">

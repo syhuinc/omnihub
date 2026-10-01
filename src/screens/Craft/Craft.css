@@ -16,11 +16,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 10px;
-  border-radius: var(--radius-lg);
-  background: linear-gradient(160deg, #141225 0%, #1d1a38 50%, #141225 100%);
-  box-shadow: var(--shadow-sm);
-  overflow: hidden;
 }
 
 .craft__hero-img {
@@ -30,25 +25,40 @@
   display: block;
 }
 
-.craft__coming-soon {
+.craft__info-card {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  padding: 24px 20px;
-  text-align: center;
-  background: linear-gradient(160deg, color-mix(in srgb, var(--purple) 12%, var(--bg-elevated)), var(--bg-elevated));
-  border: 1px solid color-mix(in srgb, var(--purple) 30%, var(--border));
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
   border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.craft__coming-soon {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
 }
 
 .craft__coming-soon-img {
-  width: 72px;
+  width: 56px;
   height: auto;
+  flex-shrink: 0;
+}
+
+.craft__coming-soon-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .craft__coming-soon h3 {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 800;
   background: linear-gradient(135deg, #4d7cfe, var(--purple));
   -webkit-background-clip: text;
@@ -57,27 +67,35 @@
 }
 
 .craft__coming-soon p {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--text-secondary);
-  line-height: 1.5;
+  line-height: 1.4;
 }
 
 .craft__features {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
+  padding: 16px 8px;
 }
 
 .craft__feature {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  padding: 14px 8px;
+  padding: 0 8px;
   text-align: center;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
+}
+
+.craft__feature:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 6px;
+  bottom: 6px;
+  width: 1px;
+  background: var(--border);
 }
 
 .craft__feature strong {
@@ -92,8 +110,8 @@
 }
 
 .craft__feature-icon {
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   object-fit: contain;
 }
 
