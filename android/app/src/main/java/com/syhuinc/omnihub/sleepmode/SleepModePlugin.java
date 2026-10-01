@@ -32,6 +32,7 @@ public class SleepModePlugin extends Plugin {
         data.wakeHour = call.getInt("wakeHour", 7);
         data.wakeMinute = call.getInt("wakeMinute", 0);
         data.intervalMin = call.getInt("intervalMin", 30);
+        data.volumePercent = call.getInt("volumePercent", 85);
         data.personality = call.getString("personality", "friendly");
         data.mode = call.getString("mode", "normal");
         data.callName = call.getString("callName", null);
@@ -145,9 +146,8 @@ public class SleepModePlugin extends Plugin {
 
     /**
      * Speaks a sample line aloud right now, via the same foreground service the nightly loop
-     * uses - but always on the media stream (see SleepModeSpeakService's EXTRA_FORCE_AUDIBLE
-     * doc) so a preview you explicitly asked for is never silently swallowed by a muted
-     * notification channel or Do Not Disturb.
+     * uses — same alarm-stream audio attributes and app-controlled volume as a real reminder, so
+     * the preview sounds exactly like what will actually play at bedtime.
      */
     @PluginMethod
     public void speakTest(PluginCall call) {
@@ -158,7 +158,6 @@ public class SleepModePlugin extends Plugin {
         }
         Intent serviceIntent = new Intent(getContext(), SleepModeSpeakService.class);
         serviceIntent.putExtra(SleepModeSpeakService.EXTRA_TEXT, text);
-        serviceIntent.putExtra(SleepModeSpeakService.EXTRA_FORCE_AUDIBLE, true);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             getContext().startForegroundService(serviceIntent);
         } else {

@@ -52,6 +52,10 @@ export function SleepMode() {
   const [screen, setScreen] = useState<SubScreen>('main');
   const [windDownAutoStart, setWindDownAutoStart] = useState(false);
   const [windDownInitialAction, setWindDownInitialAction] = useState<string | undefined>(undefined);
+  /** Live drag value while dragging the volume slider, so persist() (a native write + possible AI
+   *  refresh network call) only fires once on release, not on every intermediate tick. */
+  const [volumeDraft, setVolumeDraft] = useState<number | null>(null);
+  const displayedVolume = volumeDraft ?? config.volumePercent;
 
   useBackHandler(() => setTimeSheet(null), timeSheet !== null);
   useBackHandler(() => setScreen('main'), screen !== 'main' && timeSheet === null);
@@ -176,6 +180,12 @@ export function SleepMode() {
   function selectInterval(min: number) {
     hapticSelect();
     persist({ ...config, intervalMin: min });
+  }
+
+  function commitVolume(percent: number) {
+    setVolumeDraft(null);
+    hapticSelect();
+    persist({ ...config, volumePercent: percent });
   }
 
   function openWindDown(opts?: { autoStart?: boolean; action?: string }) {
@@ -346,6 +356,31 @@ export function SleepMode() {
                   </button>
                 ))}
               </div>
+            </div>
+
+            <div className="sm__interval-row">
+              <span className="sm__interval-label">
+                <Icon name="volume" size={13} />
+                Reminder volume
+              </span>
+              <div className="sm__volume-row">
+                <input
+                  type="range"
+                  className="sm__volume-slider"
+                  min={0}
+                  max={100}
+                  step={5}
+                  value={displayedVolume}
+                  onChange={(e) => setVolumeDraft(Number(e.target.value))}
+                  onMouseUp={(e) => commitVolume(Number((e.target as HTMLInputElement).value))}
+                  onTouchEnd={(e) => commitVolume(Number((e.target as HTMLInputElement).value))}
+                  aria-label="Reminder volume"
+                />
+                <span className="sm__volume-value">{displayedVolume}%</span>
+              </div>
+              <p className="sm__volume-hint">
+                Always audible, even on silent or Do Not Disturb — set independently of your phone&rsquo;s own volume.
+              </p>
             </div>
           </section>
 

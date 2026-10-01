@@ -14,6 +14,10 @@ export interface SleepModeConfig {
   wakeHour: number;
   wakeMinute: number;
   intervalMin: number;
+  /** 0-100. Reminders always play on the device's alarm stream (same as any alarm clock —
+   *  bypasses ringer/silent/DND) at this level, independent of the phone's own notification or
+   *  media volume. */
+  volumePercent: number;
   personality: SleepPersonality;
   mode: SleepModeMode;
   callName?: string | null;
@@ -72,6 +76,7 @@ export const DEFAULT_SLEEP_MODE_CONFIG: SleepModeConfig = {
   wakeHour: 7,
   wakeMinute: 0,
   intervalMin: DEFAULT_INTERVAL_MIN,
+  volumePercent: 85,
   personality: 'friendly',
   mode: 'normal',
   callName: null,

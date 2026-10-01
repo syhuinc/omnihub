@@ -16,6 +16,11 @@ public class SleepModeData {
     public int wakeHour;
     public int wakeMinute;
     public int intervalMin = 30;
+    /** 0-100. Reminders always play on the alarm audio stream (bypasses ringer/silent/DND, same
+     *  as any alarm clock) at this app-controlled level, rather than the phone's current
+     *  notification/media volume — so Sleep Mode is reliably audible regardless of how the rest
+     *  of the phone is set, and the user tunes it here instead of in system settings. */
+    public int volumePercent = 85;
     // one of MessageBank.PERSONALITIES
     public String personality = "friendly";
     // "normal" | "personal"
@@ -47,6 +52,7 @@ public class SleepModeData {
         o.put("wakeHour", wakeHour);
         o.put("wakeMinute", wakeMinute);
         o.put("intervalMin", intervalMin);
+        o.put("volumePercent", volumePercent);
         o.put("personality", personality);
         o.put("mode", mode);
         o.put("callName", callName == null ? JSONObject.NULL : callName);
@@ -70,6 +76,7 @@ public class SleepModeData {
         d.wakeHour = o.optInt("wakeHour", 7);
         d.wakeMinute = o.optInt("wakeMinute", 0);
         d.intervalMin = o.optInt("intervalMin", 30);
+        d.volumePercent = o.optInt("volumePercent", 85);
         d.personality = o.optString("personality", "friendly");
         d.mode = o.optString("mode", "normal");
         d.callName = o.isNull("callName") ? null : o.optString("callName", null);

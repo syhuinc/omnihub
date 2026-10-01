@@ -401,6 +401,57 @@
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--purple) 30%, transparent), 0 3px 14px -4px color-mix(in srgb, var(--purple) 60%, transparent);
 }
 
+.sm__volume-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sm__volume-slider {
+  flex: 1;
+  appearance: none;
+  -webkit-appearance: none;
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-elevated-2);
+  outline: none;
+}
+
+.sm__volume-slider::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--purple);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--purple) 30%, transparent), 0 2px 8px -2px color-mix(in srgb, var(--purple) 70%, transparent);
+  cursor: pointer;
+}
+
+.sm__volume-slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border: none;
+  border-radius: 50%;
+  background: var(--purple);
+  cursor: pointer;
+}
+
+.sm__volume-value {
+  min-width: 38px;
+  text-align: right;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.sm__volume-hint {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  line-height: 1.4;
+}
+
 /* Personality */
 
 .sm__personality-list {

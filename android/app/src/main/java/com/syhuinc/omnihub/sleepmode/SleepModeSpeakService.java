@@ -32,13 +32,11 @@ import java.util.Set;
  * brief foreground service (required to reliably play audio from a background-triggered
  * receiver), then stops itself.
  *
- * The real, automatic nightly nag plays on USAGE_NOTIFICATION_EVENT rather than USAGE_ALARM:
- * it's a nudge, not an emergency wake-up, so it respects the phone's notification volume and Do
- * Not Disturb like any other notification sound would. EXTRA_FORCE_AUDIBLE is the one exception -
- * the settings screen's "Hear a sample" button sets it so a reminder you explicitly asked to hear
- * right now, while looking at the app, always plays on the media stream instead. Otherwise a
- * muted notification channel or DND would make the preview silently do nothing, which looks like
- * a bug rather than the DND-respecting behavior working as intended.
+ * Always plays on USAGE_ALARM — the same audio stream alarm clock apps use — rather than
+ * USAGE_NOTIFICATION_EVENT: Sleep Mode has its own volume (SleepModeData.volumePercent, set in
+ * the app, applied directly to the player below) instead of depending on whatever the phone's
+ * notification/media volume or ringer/silent/DND state happens to be. A reminder you set up is
+ * one you want to actually hear, not one that silently depends on unrelated phone state.
  *
  * When EXTRA_AUDIO_RES_ID is set (a real recorded line exists for this personality/tier/index -
  * see SleepModeClipBank), plays that clip via MediaPlayer instead of synthesizing speech, falling
@@ -46,7 +44,6 @@ import java.util.Set;
  */
 public class SleepModeSpeakService extends Service {
     public static final String EXTRA_TEXT = "text";
-    public static final String EXTRA_FORCE_AUDIBLE = "forceAudible";
     public static final String EXTRA_AUDIO_RES_ID = "audioResId";
     public static final String EXTRA_PERSONALITY = "personality";
 
@@ -91,13 +88,15 @@ public class SleepModeSpeakService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         String text = intent != null ? intent.getStringExtra(EXTRA_TEXT) : null;
-        boolean forceAudible = intent != null && intent.getBooleanExtra(EXTRA_FORCE_AUDIBLE, false);
         int audioResId = intent != null ? intent.getIntExtra(EXTRA_AUDIO_RES_ID, 0) : 0;
         String personality = intent != null ? intent.getStringExtra(EXTRA_PERSONALITY) : null;
         if (text == null || text.isEmpty()) {
             stopSelf();
             return START_NOT_STICKY;
         }
+
+        int volumePercent = SleepModeStore.load(this).volumePercent;
+        float volume = Math.max(0f, Math.min(100f, volumePercent)) / 100f;
 
         try {
             startForegroundWithNotification(text, personality);
@@ -109,8 +108,8 @@ public class SleepModeSpeakService extends Service {
         }
 
         try {
-            if (audioResId == 0 || !playClip(audioResId, forceAudible)) {
-                speak(text, forceAudible);
+            if (audioResId == 0 || !playClip(audioResId, volume)) {
+                speak(text, volume);
             }
         } catch (Throwable t) {
             // Whatever this is, the notification is already up -- never let a problem in audio
@@ -141,14 +140,15 @@ public class SleepModeSpeakService extends Service {
 
     /** Returns false (nothing started) if the clip couldn't be created/played, so the caller can
      *  fall back to on-device TTS instead of the nag silently doing nothing. */
-    private boolean playClip(int resId, boolean forceAudible) {
+    private boolean playClip(int resId, float volume) {
         try {
             mediaPlayer = MediaPlayer.create(this, resId);
             if (mediaPlayer == null) return false;
             mediaPlayer.setAudioAttributes(new AudioAttributes.Builder()
-                    .setUsage(forceAudible ? AudioAttributes.USAGE_MEDIA : AudioAttributes.USAGE_NOTIFICATION_EVENT)
+                    .setUsage(AudioAttributes.USAGE_ALARM)
                     .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
                     .build());
+            mediaPlayer.setVolume(volume, volume);
             mediaPlayer.setOnCompletionListener(mp -> stopSelf());
             mediaPlayer.setOnErrorListener((mp, what, extra) -> {
                 stopSelf();
@@ -172,7 +172,7 @@ public class SleepModeSpeakService extends Service {
         mediaPlayer = null;
     }
 
-    private void speak(String text, boolean forceAudible) {
+    private void speak(String text, float volume) {
         tts = new TextToSpeech(this, status -> {
             if (status != TextToSpeech.SUCCESS || tts == null) {
                 Log.w(TAG, "TextToSpeech init failed (status=" + status + ")");
@@ -201,7 +201,7 @@ public class SleepModeSpeakService extends Service {
             tts.setSpeechRate(0.92f);
 
             tts.setAudioAttributes(new AudioAttributes.Builder()
-                    .setUsage(forceAudible ? AudioAttributes.USAGE_MEDIA : AudioAttributes.USAGE_NOTIFICATION_EVENT)
+                    .setUsage(AudioAttributes.USAGE_ALARM)
                     .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
                     .build());
             tts.setOnUtteranceProgressListener(new UtteranceProgressListener() {
@@ -224,6 +224,7 @@ public class SleepModeSpeakService extends Service {
                 }
             });
             Bundle params = new Bundle();
+            params.putFloat(TextToSpeech.Engine.KEY_PARAM_VOLUME, volume);
             tts.speak(text, TextToSpeech.QUEUE_FLUSH, params, UTTERANCE_ID);
         });
     }
