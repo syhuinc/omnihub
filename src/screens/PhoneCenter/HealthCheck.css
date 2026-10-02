@@ -27,6 +27,12 @@
   color: var(--text-secondary);
 }
 
+.hc__ring-text span.hc__ring-untested {
+  font-size: 9px;
+  font-weight: 500;
+  color: var(--text-tertiary);
+}
+
 .hc__summary {
   text-align: center;
   font-size: 14px;

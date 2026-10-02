@@ -40,6 +40,16 @@ export const REPEAT_LABELS: Record<RepeatMode, string> = {
   weekdays: 'Weekdays',
 };
 
+/** REPEAT_LABELS['today'] is only accurate if that hour/minute hasn't already passed today --
+ *  e.g. picking 7:00 AM at 9 PM actually rings tomorrow. Every place that shows a one-time
+ *  alarm's schedule label should call this instead of indexing REPEAT_LABELS directly. */
+export function repeatLabelFor(mode: RepeatMode, hour: number, minute: number): string {
+  if (mode !== 'today') return REPEAT_LABELS[mode];
+  const now = new Date();
+  const ringsTomorrow = hour * 60 + minute <= now.getHours() * 60 + now.getMinutes();
+  return ringsTomorrow ? 'Tomorrow' : 'Today';
+}
+
 export function formatTime(hour: number, minute: number): string {
   const period = hour >= 12 ? 'PM' : 'AM';
   const h12 = hour % 12 === 0 ? 12 : hour % 12;

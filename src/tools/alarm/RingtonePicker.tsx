@@ -4,7 +4,7 @@ import { Icon } from '../../components/Icon';
 import { useBackHandler } from '../../app/useBackHandler';
 import { AlarmPlugin, type AlarmRecord, type RingtoneEntry } from '../../alarm/plugin';
 import { scheduleAlarmSynced } from '../../cloud/alarmSync';
-import { formatTime, REPEAT_LABELS, type TimeCategory } from '../../alarm/types';
+import { formatTime, repeatLabelFor, type TimeCategory } from '../../alarm/types';
 import {
   loadFavoriteUris,
   toggleFavorite,
@@ -181,7 +181,7 @@ export function RingtonePicker({ mode = 'select', category, excludeAlarmId, alar
                     <span className="ringtone-picker__bulk-row-time">{formatTime(a.hour, a.minute)}</span>
                     <span className="ringtone-picker__bulk-row-meta">
                       {a.label ? `${a.label} · ` : ''}
-                      {REPEAT_LABELS[a.repeatMode]}
+                      {repeatLabelFor(a.repeatMode, a.hour, a.minute)}
                     </span>
                   </span>
                 </button>

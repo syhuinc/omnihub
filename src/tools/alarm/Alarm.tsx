@@ -7,7 +7,7 @@ import { useBackHandler } from '../../app/useBackHandler';
 import { useAuth } from '../../cloud/AuthContext';
 import { startAlarmSync, stopAlarmSync, scheduleAlarmSynced, cancelAlarmSynced } from '../../cloud/alarmSync';
 import { AlarmPlugin, type AlarmRecord } from '../../alarm/plugin';
-import { formatTime, REPEAT_LABELS } from '../../alarm/types';
+import { formatTime, repeatLabelFor } from '../../alarm/types';
 import { hapticSelect, hapticTap, hapticWarning } from '../../haptics';
 import { AlarmEditor, type AlarmEditorInitial } from './AlarmEditor';
 import { CrashLogView } from './CrashLogView';
@@ -296,7 +296,7 @@ export function Alarm() {
                     <span className="alarm__card-time">{formatTime(a.hour, a.minute)}</span>
                     <span className="alarm__card-meta">
                       {a.label ? `${a.label} · ` : ''}
-                      {REPEAT_LABELS[a.repeatMode]}
+                      {repeatLabelFor(a.repeatMode, a.hour, a.minute)}
                       {a.backupEnabled ? ' · Backup' : ''}
                     </span>
                   </button>

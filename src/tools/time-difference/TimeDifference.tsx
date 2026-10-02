@@ -84,24 +84,28 @@ export function TimeDifference() {
       const toAwake = toHour >= WAKING_START && toHour < WAKING_END;
       hours.push({ hour: h, state: fromAwake && toAwake ? 'good' : fromAwake || toAwake ? 'ok' : 'poor' });
     }
-    let bestStart = -1;
-    let bestLen = 0;
+    // Collects every contiguous "good" run, not just the first — with a fixed waking window on
+    // both sides, a large time-zone offset can produce more than one run tied for the longest
+    // length (e.g. a ~12h offset gives two single-hour windows), and the bar already highlights
+    // all of them as green, so the summary text needs to name all of them too rather than
+    // silently reporting only whichever run happened to come first.
+    const runs: { start: number; len: number }[] = [];
     let curStart = -1;
     let curLen = 0;
     for (let i = 0; i < hours.length; i++) {
       if (hours[i].state === 'good') {
         if (curLen === 0) curStart = i;
         curLen++;
-        if (curLen > bestLen) {
-          bestLen = curLen;
-          bestStart = curStart;
-        }
       } else {
+        if (curLen > 0) runs.push({ start: curStart, len: curLen });
         curLen = 0;
       }
     }
+    if (curLen > 0) runs.push({ start: curStart, len: curLen });
+    const bestLen = runs.reduce((max, r) => Math.max(max, r.len), 0);
+    const bestRuns = runs.filter((r) => r.len === bestLen);
     const currentHour = hourInZone(fromCity.timeZone, now);
-    return { hours, bestStart, bestLen, currentHour };
+    return { hours, bestRuns, bestLen, currentHour };
   }, [fromCity, toCity, now]);
 
   const pickList = useMemo(() => {
@@ -248,7 +252,9 @@ export function TimeDifference() {
               {overlap.bestLen > 0 ? (
                 <>
                   <strong>
-                    {formatHour12(overlap.bestStart)} – {formatHour12((overlap.bestStart + overlap.bestLen) % 24)}
+                    {overlap.bestRuns
+                      .map((r) => `${formatHour12(r.start)} – ${formatHour12((r.start + r.len) % 24)}`)
+                      .join(' and ')}
                   </strong>{' '}
                   in {fromCity.name} works well for both of you.
                 </>

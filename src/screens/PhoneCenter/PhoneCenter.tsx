@@ -16,7 +16,10 @@ const QUICK_ACTIONS: { id: string; label: string; icon: IconName; color: string 
 
 function formatGb(bytes: number): string {
   if (!bytes) return '—';
-  return `${Math.round(bytes / 1024 ** 3)} GB`;
+  // One decimal place, not a whole-number round — independently rounding total/used/free to
+  // whole GB can make "used + free" visibly not add up to "total" (e.g. 6 + 2 = 8 when the
+  // real total is 7.4GB rounding down).
+  return `${(bytes / 1024 ** 3).toFixed(1)} GB`;
 }
 
 function statusFor(stats: DeviceStats | null): { tone: 'good' | 'warn'; text: string } {

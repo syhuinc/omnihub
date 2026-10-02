@@ -10,7 +10,7 @@ import {
   MAX_BACKUP_OFFSET_MIN,
 } from '../../alarm/plugin';
 import { scheduleAlarmSynced } from '../../cloud/alarmSync';
-import { formatTime, type RepeatMode, type TimeCategory, REPEAT_LABELS } from '../../alarm/types';
+import { formatTime, type RepeatMode, type TimeCategory, REPEAT_LABELS, repeatLabelFor } from '../../alarm/types';
 import { loadPresets, addPreset, removePreset } from '../../alarm/presets';
 import { loadCategoryDefaults } from '../../alarm/ringtones';
 import { hapticSelect, hapticSuccess, hapticWarning } from '../../haptics';
@@ -344,7 +344,7 @@ export function AlarmEditor({ alarmId, initial, onClose, onDelete }: AlarmEditor
                 setRepeatMode(mode);
               }}
             >
-              {REPEAT_LABELS[mode]}
+              {mode === 'today' ? repeatLabelFor('today', hour, minute) : REPEAT_LABELS[mode]}
             </button>
           ))}
         </div>

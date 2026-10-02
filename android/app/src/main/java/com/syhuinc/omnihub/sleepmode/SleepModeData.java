@@ -11,10 +11,14 @@ import org.json.JSONObject;
  */
 public class SleepModeData {
     public boolean enabled;
-    public int bedtimeHour;
-    public int bedtimeMinute;
-    public int wakeHour;
-    public int wakeMinute;
+    // Field initializers, not just fromJson()'s optInt defaults -- SleepModeStore.load() returns
+    // `new SleepModeData()` directly (bypassing fromJson entirely) when nothing's been saved yet
+    // on a fresh install, so relying on fromJson alone left a fresh install's bedtime/wake time
+    // at Java's raw int default of 0 (12:00 AM) instead of a sensible default.
+    public int bedtimeHour = 22;
+    public int bedtimeMinute = 30;
+    public int wakeHour = 7;
+    public int wakeMinute = 0;
     public int intervalMin = 30;
     /** 0-100. Reminders always play on the alarm audio stream (bypasses ringer/silent/DND, same
      *  as any alarm clock) at this app-controlled level, rather than the phone's current

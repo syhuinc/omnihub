@@ -35,6 +35,61 @@ export const CURRENCIES: CurrencyOption[] = [
 
 export const DEFAULT_CURRENCY = 'USD';
 
+/** ISO region code -> one of CURRENCIES' codes, for picking a sensible first-run default instead
+ *  of always starting new users on USD. Not exhaustive — every currency we support gets its
+ *  primary country/region, plus the handful of Eurozone countries someone's device is most
+ *  likely to report; anything else falls back to DEFAULT_CURRENCY. */
+const REGION_CURRENCY: Record<string, string> = {
+  MY: 'MYR',
+  US: 'USD',
+  GB: 'GBP',
+  JP: 'JPY',
+  CN: 'CNY',
+  SG: 'SGD',
+  ID: 'IDR',
+  IN: 'INR',
+  KR: 'KRW',
+  TH: 'THB',
+  PH: 'PHP',
+  AU: 'AUD',
+  CA: 'CAD',
+  HK: 'HKD',
+  AE: 'AED',
+  SA: 'SAR',
+  CH: 'CHF',
+  NZ: 'NZD',
+  BR: 'BRL',
+  VN: 'VND',
+  BN: 'BND',
+  TR: 'TRY',
+  MX: 'MXN',
+  ZA: 'ZAR',
+  DE: 'EUR',
+  FR: 'EUR',
+  IT: 'EUR',
+  ES: 'EUR',
+  NL: 'EUR',
+  BE: 'EUR',
+  AT: 'EUR',
+  PT: 'EUR',
+  IE: 'EUR',
+  FI: 'EUR',
+  GR: 'EUR',
+};
+
+/** Best-effort guess at the user's local currency from the device's own locale, for picking the
+ *  starting currency on a tool's first run — never throws, always falls back to USD. Only used
+ *  for that first-run default; formatMoney/currencySymbol keep using DEFAULT_CURRENCY as their
+ *  own fallback so a missing/invalid stored code doesn't start re-guessing on every render. */
+export function detectDeviceCurrency(): string {
+  try {
+    const locale = new Intl.Locale(navigator.language).maximize();
+    return REGION_CURRENCY[locale.region ?? ''] ?? DEFAULT_CURRENCY;
+  } catch {
+    return DEFAULT_CURRENCY;
+  }
+}
+
 export function currencyFlag(code: string | undefined): string {
   return CURRENCIES.find((c) => c.code === code)?.flag ?? '💵';
 }

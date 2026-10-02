@@ -113,9 +113,14 @@ export function HealthCheck() {
   }
 
   const passedCount = CHECKS.filter((c) => results[c.id] === 'pass').length;
-  const totalCount = CHECKS.length;
+  const failedCount = CHECKS.filter((c) => results[c.id] === 'fail').length;
+  const untestedCount = CHECKS.filter((c) => results[c.id] === 'untested').length;
+  const testedCount = passedCount + failedCount;
   const stillChecking = CHECKS.some((c) => results[c.id] === 'checking');
-  const ringPct = totalCount > 0 ? passedCount / totalCount : 0;
+  // Ring and headline fraction are out of what's actually been tested, not the full 10 -- an
+  // untested camera/sensor check isn't a failure, so it shouldn't drag the score down or make
+  // "Everything looks good" and "4/10 passed" contradict each other on screen at the same time.
+  const ringPct = testedCount > 0 ? passedCount / testedCount : 0;
 
   const RING_R = 52;
   const RING_C = 2 * Math.PI * RING_R;
@@ -135,7 +140,7 @@ export function HealthCheck() {
               cy="70"
               r={RING_R}
               fill="none"
-              stroke={passedCount === totalCount ? 'var(--green)' : 'var(--blue)'}
+              stroke={failedCount === 0 ? 'var(--green)' : 'var(--blue)'}
               strokeWidth="10"
               strokeLinecap="round"
               strokeDasharray={RING_C}
@@ -145,18 +150,21 @@ export function HealthCheck() {
           </svg>
           <div className="hc__ring-text">
             <strong>
-              {passedCount}/{totalCount}
+              {passedCount}/{testedCount}
             </strong>
             <span>Checks Passed</span>
+            {untestedCount > 0 && <span className="hc__ring-untested">{untestedCount} not tested</span>}
           </div>
         </div>
 
         <p className="hc__summary">
           {stillChecking
             ? 'Checking…'
-            : passedCount === totalCount
+            : failedCount === 0 && untestedCount === 0
               ? "Everything looks good! 🎉"
-              : `${totalCount - passedCount} check${totalCount - passedCount === 1 ? '' : 's'} need attention or haven't been run yet.`}
+              : failedCount === 0
+                ? `No issues found. ${untestedCount} check${untestedCount === 1 ? '' : 's'} haven't been run yet.`
+                : `${failedCount} check${failedCount === 1 ? '' : 's'} need attention${untestedCount > 0 ? `, ${untestedCount} not tested yet` : ''}.`}
         </p>
 
         <div className="hc__list">
