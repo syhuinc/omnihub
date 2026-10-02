@@ -11,9 +11,21 @@
      header's <h1> have no explicit `color` of their own, so they inherit
      the already-computed value from `body` and never re-read these vars.
      Setting `color` here re-establishes a fresh inherited value at this
-     scope so those elements pick it up too. */
+     scope so those elements pick it up too.
+     Surface tokens need the same treatment: the Flash Alerts card and mode
+     chips have their own opaque background (not the dark backdrop color),
+     so in light theme they stayed white while this block forced their text
+     to near-white, making the card's titles invisible. Pinning the surface
+     tokens to their dark-theme values keeps those opaque cards dark too, so
+     the forced light text stays readable against them in either theme. */
   --text-primary: #f5f7fa;
   --text-secondary: #9aa4b6;
+  --text-tertiary: #6b7484;
+  --bg-elevated: #131a27;
+  --bg-elevated-2: #1b2434;
+  --bg-active: #212c40;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.14);
   color: var(--text-primary);
 }
 
