@@ -22,9 +22,16 @@ interface GenerateOptions {
   interests?: string | null;
 }
 
-/** Calls the Cloud Function and returns the raw `{"tiers": [...]}` JSON string, ready to hand
- *  straight to SleepModePlugin.setAiMessages — the native side stores it as-is. */
-export async function generateSleepReminders(options: GenerateOptions): Promise<string> {
+export interface GeneratedReminders {
+  /** Raw `{"tiers": [...]}` JSON string, ready to hand straight to SleepModePlugin.setAiMessages. */
+  tiersJson: string;
+  /** One base64 WAV per tier (tier 0's first line only — see generateSleepReminders in
+   *  functions/src/index.ts), null for any tier synthesis failed for. Hand straight to
+   *  SleepModePlugin.setAiAudioClips. */
+  audioClips: (string | null)[];
+}
+
+export async function generateSleepReminders(options: GenerateOptions): Promise<GeneratedReminders> {
   const { token } = await FirebaseAuthentication.getIdToken();
 
   let res: Response;
@@ -44,7 +51,7 @@ export async function generateSleepReminders(options: GenerateOptions): Promise<
   }
 
   const bodyText = await res.text();
-  let data: { tiers?: unknown; error?: string; code?: string } | null = null;
+  let data: { tiers?: unknown; audioClips?: unknown; error?: string; code?: string } | null = null;
   try {
     data = JSON.parse(bodyText);
   } catch {
@@ -57,5 +64,8 @@ export async function generateSleepReminders(options: GenerateOptions): Promise<
   if (!Array.isArray(data?.tiers)) {
     throw new GenerateRemindersError('Something went wrong. Please try again.');
   }
-  return JSON.stringify({ tiers: data.tiers });
+  const audioClips = Array.isArray(data.audioClips)
+    ? data.audioClips.map((c) => (typeof c === 'string' ? c : null))
+    : [];
+  return { tiersJson: JSON.stringify({ tiers: data.tiers }), audioClips };
 }

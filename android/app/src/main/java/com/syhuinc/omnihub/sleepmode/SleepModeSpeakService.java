@@ -45,6 +45,9 @@ import java.util.Set;
 public class SleepModeSpeakService extends Service {
     public static final String EXTRA_TEXT = "text";
     public static final String EXTRA_AUDIO_RES_ID = "audioResId";
+    /** Absolute path to a downloaded AI-voice clip (see SleepModeAiClipBank) — checked when
+     *  EXTRA_AUDIO_RES_ID isn't set, same priority/fallback rules as the resource-id clip path. */
+    public static final String EXTRA_AUDIO_FILE_PATH = "audioFilePath";
     public static final String EXTRA_PERSONALITY = "personality";
 
     private static final String TAG = "SleepModeSpeak";
@@ -89,6 +92,7 @@ public class SleepModeSpeakService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         String text = intent != null ? intent.getStringExtra(EXTRA_TEXT) : null;
         int audioResId = intent != null ? intent.getIntExtra(EXTRA_AUDIO_RES_ID, 0) : 0;
+        String audioFilePath = intent != null ? intent.getStringExtra(EXTRA_AUDIO_FILE_PATH) : null;
         String personality = intent != null ? intent.getStringExtra(EXTRA_PERSONALITY) : null;
         if (text == null || text.isEmpty()) {
             stopSelf();
@@ -108,9 +112,9 @@ public class SleepModeSpeakService extends Service {
         }
 
         try {
-            if (audioResId == 0 || !playClip(audioResId, volume)) {
-                speak(text, volume);
-            }
+            boolean played = audioResId != 0 && playClip(audioResId, volume);
+            if (!played && audioFilePath != null) played = playClipFile(audioFilePath, volume);
+            if (!played) speak(text, volume);
         } catch (Throwable t) {
             // Whatever this is, the notification is already up -- never let a problem in audio
             // playback take the whole service (and app) down with it. Worst case: a silent nag.
@@ -158,6 +162,32 @@ public class SleepModeSpeakService extends Service {
             return true;
         } catch (Exception e) {
             Log.w(TAG, "Clip playback failed, falling back to TTS", e);
+            releaseMediaPlayer();
+            return false;
+        }
+    }
+
+    /** Same as playClip, but for a downloaded AI-voice clip addressed by file path rather than a
+     *  compiled-in resource id. */
+    private boolean playClipFile(String path, float volume) {
+        try {
+            mediaPlayer = new MediaPlayer();
+            mediaPlayer.setAudioAttributes(new AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_ALARM)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+                    .build());
+            mediaPlayer.setDataSource(path);
+            mediaPlayer.setVolume(volume, volume);
+            mediaPlayer.setOnCompletionListener(mp -> stopSelf());
+            mediaPlayer.setOnErrorListener((mp, what, extra) -> {
+                stopSelf();
+                return true;
+            });
+            mediaPlayer.prepare();
+            mediaPlayer.start();
+            return true;
+        } catch (Exception e) {
+            Log.w(TAG, "AI clip playback failed, falling back to TTS", e);
             releaseMediaPlayer();
             return false;
         }

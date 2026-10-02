@@ -13,6 +13,7 @@ const geminiApiKey = defineSecret('GEMINI_API_KEY');
 const DAILY_GENERATION_CAP = 10;
 const LINES_PER_TIER = 8;
 const MODEL = 'gemini-3.1-flash-lite';
+const TTS_MODEL = 'gemini-2.5-flash-preview-tts';
 
 type Personality = 'gentle' | 'friendly';
 
@@ -20,6 +21,23 @@ const PERSONALITY_VOICE: Record<Personality, string> = {
   gentle: 'Soft, warm, caring — like a close friend gently checking in. Never harsh, never guilt-trippy.',
   friendly: 'Casual, upbeat, a little playful — like a buddy texting you, not a parent lecturing you.',
 };
+
+/** Same voice used for this personality's hand-recorded preview samples (src/assets/sleep-mode) —
+ *  keeps the AI-generated lines sounding like the same "character" the user already heard. */
+const TTS_VOICE: Record<Personality, string> = {
+  gentle: 'Vindemiatrix',
+  friendly: 'Vindemiatrix',
+};
+
+/** Validated by ear against a plain style-only prompt — explicitly asking for human imperfection
+ *  (breath, pause, non-performance delivery) reads as meaningfully more natural than tone alone. */
+function ttsStyleFor(personality: Personality): string {
+  return `${PERSONALITY_VOICE[personality]} Deliver it exactly the way a real person would say it out ` +
+    'loud to someone they care about, late at night. Natural, unscripted conversational pacing -- not ' +
+    'a performance, not a narrator reading a line. Let it have the small imperfections of real speech: ' +
+    'a soft breath, natural pauses, genuine warmth. Sound like a real human who just thought of this ' +
+    'and said it, not a produced voiceover.';
+}
 
 const TIER_GUIDANCE = [
   'Tier 0 (right at bedtime): a light, first nudge. Calm, no urgency yet.',
@@ -41,6 +59,53 @@ function isPersonality(value: unknown): value is Personality {
 
 function todayKey(): string {
   return new Date().toISOString().slice(0, 10);
+}
+
+/** Gemini TTS returns raw 16-bit/24kHz/mono PCM with no container -- MediaPlayer (native Android)
+ *  needs an actual file format, so wrap it in a minimal WAV header before handing it back. Same
+ *  approach the offline preview-sample generation scripts use. */
+function pcmToWav(pcm: Buffer): Buffer {
+  const sampleRate = 24000;
+  const numChannels = 1;
+  const bitsPerSample = 16;
+  const byteRate = (sampleRate * numChannels * bitsPerSample) / 8;
+  const blockAlign = (numChannels * bitsPerSample) / 8;
+  const header = Buffer.alloc(44);
+  header.write('RIFF', 0, 'ascii');
+  header.writeUInt32LE(36 + pcm.length, 4);
+  header.write('WAVE', 8, 'ascii');
+  header.write('fmt ', 12, 'ascii');
+  header.writeUInt32LE(16, 16);
+  header.writeUInt16LE(1, 20);
+  header.writeUInt16LE(numChannels, 22);
+  header.writeUInt32LE(sampleRate, 24);
+  header.writeUInt32LE(byteRate, 28);
+  header.writeUInt16LE(blockAlign, 32);
+  header.writeUInt16LE(bitsPerSample, 34);
+  header.write('data', 36, 'ascii');
+  header.writeUInt32LE(pcm.length, 40);
+  return Buffer.concat([header, pcm]);
+}
+
+/** Synthesizes one line of speech, returning base64 WAV, or null on any failure -- audio is a
+ *  best-effort enhancement layered on top of the text, never allowed to fail the whole request. */
+async function synthesizeLine(ai: GoogleGenAI, personality: Personality, text: string): Promise<string | null> {
+  try {
+    const response = await ai.models.generateContent({
+      model: TTS_MODEL,
+      contents: [{ role: 'user', parts: [{ text: `${ttsStyleFor(personality)} ${text}` }] }],
+      config: {
+        responseModalities: ['AUDIO'],
+        speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: TTS_VOICE[personality] } } },
+      },
+    });
+    const b64 = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+    if (!b64) return null;
+    return pcmToWav(Buffer.from(b64, 'base64')).toString('base64');
+  } catch (err) {
+    logger.warn('TTS synthesis failed for one line', err);
+    return null;
+  }
 }
 
 export const generateSleepReminders = onRequest(
@@ -187,6 +252,12 @@ Rules for every line:
       return;
     }
 
-    res.status(200).json({ tiers, generatedAt: Date.now() });
+    // One real-voice clip per tier (the tier's first line), not all 32 -- enough that the nightly
+    // nag sometimes plays genuine Gemini TTS instead of the on-device voice, without a multi-minute
+    // background job. Best-effort: any failure here still ships the text-only response below, same
+    // as every other audio path in Sleep Mode falling back to on-device TTS.
+    const audioClips = await Promise.all(tiers.map((tier) => synthesizeLine(ai, personality, tier[0])));
+
+    res.status(200).json({ tiers, audioClips, generatedAt: Date.now() });
   },
 );

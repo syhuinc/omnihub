@@ -103,13 +103,16 @@ export function SleepMode() {
     try {
       const info = await SleepModePlugin.getAiMessagesInfo({ personality: next.personality });
       if (Date.now() - info.generatedAt < AI_POOL_MAX_AGE_MS) return;
-      const tiersJson = await generateSleepReminders({
+      const { tiersJson, audioClips } = await generateSleepReminders({
         personality: next.personality,
         displayName: next.callName,
         workSchoolRoutine: next.workSchoolRoutine,
         interests: next.interests,
       });
       await SleepModePlugin.setAiMessages({ personality: next.personality, tiersJson });
+      if (audioClips.length) {
+        await SleepModePlugin.setAiAudioClips({ personality: next.personality, clips: audioClips });
+      }
     } catch {
       // network hiccup, rate limit, or unsupported platform — fine, try again next edit
     }

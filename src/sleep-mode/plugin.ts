@@ -67,6 +67,9 @@ export interface SleepModePluginInterface {
   setAiMessages(options: { personality: SleepPersonality; tiersJson: string }): Promise<void>;
   /** 0 if no AI pool is cached for this personality yet. */
   getAiMessagesInfo(options: { personality: SleepPersonality }): Promise<{ generatedAt: number }>;
+  /** Caches the real-voice (Gemini TTS) clips generated alongside the AI pool — one base64 WAV
+   *  per tier (null for any tier synthesis failed for), index-aligned with the tiers array. */
+  setAiAudioClips(options: { personality: SleepPersonality; clips: (string | null)[] }): Promise<void>;
 }
 
 export const DEFAULT_SLEEP_MODE_CONFIG: SleepModeConfig = {
@@ -190,6 +193,10 @@ class SleepModePluginWeb extends WebPlugin implements SleepModePluginInterface {
 
   async getAiMessagesInfo(): Promise<{ generatedAt: number }> {
     return { generatedAt: 0 };
+  }
+
+  async setAiAudioClips(): Promise<void> {
+    // no-op in the web preview — same as setAiMessages, only the native nag path consumes this
   }
 }
 

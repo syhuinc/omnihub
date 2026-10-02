@@ -109,12 +109,15 @@ public class SleepModeReceiver extends BroadcastReceiver {
         );
 
         int clipResId = SleepModeClipBank.resIdFor(context, pick.key);
+        String aiClipPath = clipResId == 0 ? SleepModeAiClipBank.filePathFor(context, pick.key) : null;
 
         Intent serviceIntent = new Intent(context, SleepModeSpeakService.class);
         serviceIntent.putExtra(SleepModeSpeakService.EXTRA_TEXT, pick.text);
         serviceIntent.putExtra(SleepModeSpeakService.EXTRA_PERSONALITY, data.personality);
         if (clipResId != 0) {
             serviceIntent.putExtra(SleepModeSpeakService.EXTRA_AUDIO_RES_ID, clipResId);
+        } else if (aiClipPath != null) {
+            serviceIntent.putExtra(SleepModeSpeakService.EXTRA_AUDIO_FILE_PATH, aiClipPath);
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             context.startForegroundService(serviceIntent);

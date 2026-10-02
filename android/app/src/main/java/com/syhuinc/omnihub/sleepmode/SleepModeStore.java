@@ -122,4 +122,22 @@ public class SleepModeStore {
     private static String aiMessagesKey(String personality) {
         return "ai_messages_" + personality;
     }
+
+    /**
+     * Writes one real-voice (Gemini TTS) WAV clip for a personality/tier's AI-pool line 0 — the
+     * only line in the pool actually synthesized server-side (see generateSleepReminders).
+     * Overwrites any previous clip for this personality/tier. Internal app storage, not res/raw,
+     * since this is downloaded at runtime rather than baked into the APK — see
+     * SleepModeAiClipBank for the read side.
+     */
+    public static synchronized void saveAiAudioClip(Context ctx, String personality, int tier, byte[] wavBytes) {
+        java.io.File dir = new java.io.File(ctx.getFilesDir(), "sleep_ai_audio");
+        if (!dir.exists() && !dir.mkdirs()) return;
+        java.io.File out = new java.io.File(dir, personality + "_tier" + tier + ".wav");
+        try (java.io.FileOutputStream fos = new java.io.FileOutputStream(out)) {
+            fos.write(wavBytes);
+        } catch (java.io.IOException ignored) {
+            // best-effort — a missing clip just means this tier falls back to on-device TTS
+        }
+    }
 }

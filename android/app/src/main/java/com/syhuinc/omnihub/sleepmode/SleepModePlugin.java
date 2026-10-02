@@ -116,6 +116,33 @@ public class SleepModePlugin extends Plugin {
         }
     }
 
+    /**
+     * Caches the real-voice (Gemini TTS) clips generated alongside the AI reminder pool — one
+     * WAV, base64-encoded, per tier (null for any tier synthesis failed for; see
+     * generateSleepReminders). Stored via SleepModeStore.saveAiAudioClip, read back by
+     * SleepModeAiClipBank when the nightly nag happens to pick that tier's line 0.
+     */
+    @PluginMethod
+    public void setAiAudioClips(PluginCall call) {
+        String personality = call.getString("personality");
+        com.getcapacitor.JSArray clips = call.getArray("clips");
+        if (personality == null || clips == null) {
+            call.reject("personality and clips are required");
+            return;
+        }
+        for (int tier = 0; tier < clips.length(); tier++) {
+            try {
+                String b64 = clips.getString(tier);
+                if (b64 == null || b64.isEmpty()) continue;
+                byte[] wavBytes = android.util.Base64.decode(b64, android.util.Base64.DEFAULT);
+                SleepModeStore.saveAiAudioClip(getContext(), personality, tier, wavBytes);
+            } catch (JSONException ignored) {
+                // a malformed entry just means that tier keeps falling back to on-device TTS
+            }
+        }
+        call.resolve();
+    }
+
     /** How old the cached AI pool for this personality is, so the JS side can decide whether to refresh it. */
     @PluginMethod
     public void getAiMessagesInfo(PluginCall call) {
