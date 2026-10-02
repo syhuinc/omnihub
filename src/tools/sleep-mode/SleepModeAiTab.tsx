@@ -102,8 +102,8 @@ export function SleepModeAiTab({ onBack }: SleepModeAiTabProps) {
         onBack={onBack}
         action={
           <span className={`sm__ai2-pro-badge${isPro ? ' sm__ai2-pro-badge--active' : ''}`}>
-            <Icon name={isPro ? 'check' : 'crown'} size={12} />
-            {isPro ? 'ACTIVE' : 'PRO'}
+            <Icon name={isPro ? 'check' : 'clock'} size={12} />
+            {isPro ? 'ACTIVE' : 'SOON'}
           </span>
         }
       />
@@ -126,13 +126,13 @@ export function SleepModeAiTab({ onBack }: SleepModeAiTabProps) {
               <strong>Sleep Mode AI</strong>
               {!isPro && (
                 <span className="sm__ai2-pro-chip">
-                  <Icon name="lock" size={10} />
-                  PRO FEATURE
+                  <Icon name="clock" size={10} />
+                  COMING SOON
                 </span>
               )}
             </span>
             <span className="sm__ai2-toggle-desc">
-              {isPro ? `Active for your ${AI_ENABLED_LABEL} reminders.` : 'Upgrade to Pro to activate your AI companion.'}
+              {isPro ? `Active for your ${AI_ENABLED_LABEL} reminders.` : "We're putting the finishing touches on your AI companion."}
             </span>
           </span>
           <span className={`sm__ai2-toggle-switch${isPro ? ' sm__ai2-toggle-switch--active' : ''}`}>
@@ -218,7 +218,7 @@ export function SleepModeAiTab({ onBack }: SleepModeAiTabProps) {
         )}
 
         <div className="sm__ai2-section-head">
-          <h2>{isPro ? 'What You Get with Pro' : 'What You’ll Get with Pro'}</h2>
+          <h2>{isPro ? 'What You Get with Pro' : "What's Coming"}</h2>
         </div>
 
         <div className="sm__ai2-perks-grid">
@@ -234,11 +234,11 @@ export function SleepModeAiTab({ onBack }: SleepModeAiTabProps) {
         </div>
 
         {!isPro && (
-          <button type="button" className="smp__upgrade-btn">
-            <Icon name="crown" size={16} />
-            Upgrade to Pro
-            <Icon name="chevron-right" size={14} />
-          </button>
+          <div className="smp__coming-soon">
+            <Icon name="clock" size={28} className="smp__coming-soon-icon" />
+            <h3>Coming Soon</h3>
+            <p>Sleep Mode AI is still in the oven. We&rsquo;ll let you know the moment it&rsquo;s ready.</p>
+          </div>
         )}
       </div>
     </div>

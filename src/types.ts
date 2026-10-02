@@ -1,6 +1,6 @@
 import type { IconName } from './components/Icon';
 
-export type ToolCategory = 'essentials' | 'productivity' | 'finance' | 'more';
+export type ToolCategory = 'essentials' | 'productivity' | 'finance' | 'more' | 'coming-soon';
 
 /**
  * How a tool opens: 'sheet' slides up from the bottom over a dimmed

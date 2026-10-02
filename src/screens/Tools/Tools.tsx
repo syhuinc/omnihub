@@ -18,8 +18,8 @@ import './Tools.css';
 type CategoryFilter = 'all' | ToolCategory;
 type SortMode = 'default' | 'alpha' | 'category';
 
-const CATEGORIES: CategoryFilter[] = ['all', 'essentials', 'productivity', 'finance', 'more'];
-const CATEGORY_ORDER: ToolCategory[] = ['essentials', 'productivity', 'finance', 'more'];
+const CATEGORIES: CategoryFilter[] = ['all', 'essentials', 'productivity', 'finance', 'more', 'coming-soon'];
+const CATEGORY_ORDER: ToolCategory[] = ['essentials', 'productivity', 'finance', 'more', 'coming-soon'];
 const SORT_CYCLE: SortMode[] = ['default', 'alpha', 'category'];
 const SORT_LABELS: Record<SortMode, string> = { default: 'Sort', alpha: 'A–Z', category: 'By Category' };
 
