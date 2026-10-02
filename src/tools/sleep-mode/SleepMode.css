@@ -1610,6 +1610,11 @@
   letter-spacing: 0.02em;
 }
 
+.sm__ai2-pro-badge--active {
+  background: linear-gradient(135deg, var(--green), color-mix(in srgb, var(--green) 70%, black));
+  color: #fff;
+}
+
 .sm__ai2-body {
   gap: 20px;
   display: flex;
@@ -1718,6 +1723,12 @@
   align-items: center;
   justify-content: center;
   color: var(--text-secondary);
+}
+
+.sm__ai2-toggle-switch--active {
+  background: var(--green);
+  border-color: transparent;
+  color: #fff;
 }
 
 .sm__ai2-section-head {

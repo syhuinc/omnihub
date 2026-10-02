@@ -2,9 +2,17 @@ import { useRef, useState, type CSSProperties, type TouchEvent } from 'react';
 import { ScreenHeader } from '../../components/ScreenHeader';
 import { Icon, type IconName } from '../../components/Icon';
 import { hapticTap, hapticSelect } from '../../haptics';
+import { useAuth } from '../../cloud/AuthContext';
 import { PERSONALITY_META } from './types';
 import { PREVIEW_SAMPLES, heroBanner, type PreviewPhase } from '../../assets/sleep-mode';
 import './SleepMode.css';
+
+/** Only these two actually get AI-generated lines/voice (see AI_ENABLED_PERSONALITIES in
+ *  SleepMode.tsx and generateSleepReminders) — the rest stay hand-written-only even on Pro. */
+const AI_ENABLED = new Set(['gentle', 'friendly']);
+const AI_ENABLED_LABEL = PERSONALITY_META.filter((p) => AI_ENABLED.has(p.id))
+  .map((p) => p.label)
+  .join(' and ');
 
 const PHASE_LABEL: Record<PreviewPhase, string> = {
   bedtime: 'Bedtime',
@@ -26,6 +34,7 @@ interface SleepModeAiTabProps {
 }
 
 export function SleepModeAiTab({ onBack }: SleepModeAiTabProps) {
+  const { isPro } = useAuth();
   const [activeId, setActiveId] = useState<string | null>(null);
   const [sampleIndex, setSampleIndex] = useState(0);
   const [playing, setPlaying] = useState(false);
@@ -92,9 +101,9 @@ export function SleepModeAiTab({ onBack }: SleepModeAiTabProps) {
         subtitle="Your personal bedtime companion"
         onBack={onBack}
         action={
-          <span className="sm__ai2-pro-badge">
-            <Icon name="crown" size={12} />
-            PRO
+          <span className={`sm__ai2-pro-badge${isPro ? ' sm__ai2-pro-badge--active' : ''}`}>
+            <Icon name={isPro ? 'check' : 'crown'} size={12} />
+            {isPro ? 'ACTIVE' : 'PRO'}
           </span>
         }
       />
@@ -115,15 +124,19 @@ export function SleepModeAiTab({ onBack }: SleepModeAiTabProps) {
           <span className="sm__ai2-toggle-text">
             <span className="sm__ai2-toggle-title-row">
               <strong>Sleep Mode AI</strong>
-              <span className="sm__ai2-pro-chip">
-                <Icon name="lock" size={10} />
-                PRO FEATURE
-              </span>
+              {!isPro && (
+                <span className="sm__ai2-pro-chip">
+                  <Icon name="lock" size={10} />
+                  PRO FEATURE
+                </span>
+              )}
             </span>
-            <span className="sm__ai2-toggle-desc">Upgrade to Pro to activate your AI companion.</span>
+            <span className="sm__ai2-toggle-desc">
+              {isPro ? `Active for your ${AI_ENABLED_LABEL} reminders.` : 'Upgrade to Pro to activate your AI companion.'}
+            </span>
           </span>
-          <span className="sm__ai2-toggle-switch">
-            <Icon name="lock" size={12} />
+          <span className={`sm__ai2-toggle-switch${isPro ? ' sm__ai2-toggle-switch--active' : ''}`}>
+            <Icon name={isPro ? 'check' : 'lock'} size={12} />
           </span>
         </div>
 
@@ -143,9 +156,11 @@ export function SleepModeAiTab({ onBack }: SleepModeAiTabProps) {
             >
               <span className="sm__ai2-avatar-img" style={{ '--emoji-color': p.color } as CSSProperties}>
                 {p.image ? <img src={p.image} alt="" /> : <Icon name={(p.icon ?? 'user') as IconName} size={20} />}
-                <span className="sm__ai2-avatar-lock">
-                  <Icon name="lock" size={9} />
-                </span>
+                {!isPro && (
+                  <span className="sm__ai2-avatar-lock">
+                    <Icon name="lock" size={9} />
+                  </span>
+                )}
               </span>
               <span className="sm__ai2-avatar-label">{p.label}</span>
             </button>
@@ -203,7 +218,7 @@ export function SleepModeAiTab({ onBack }: SleepModeAiTabProps) {
         )}
 
         <div className="sm__ai2-section-head">
-          <h2>What You&rsquo;ll Get with Pro</h2>
+          <h2>{isPro ? 'What You Get with Pro' : 'What You’ll Get with Pro'}</h2>
         </div>
 
         <div className="sm__ai2-perks-grid">
@@ -218,11 +233,13 @@ export function SleepModeAiTab({ onBack }: SleepModeAiTabProps) {
           ))}
         </div>
 
-        <button type="button" className="smp__upgrade-btn">
-          <Icon name="crown" size={16} />
-          Upgrade to Pro
-          <Icon name="chevron-right" size={14} />
-        </button>
+        {!isPro && (
+          <button type="button" className="smp__upgrade-btn">
+            <Icon name="crown" size={16} />
+            Upgrade to Pro
+            <Icon name="chevron-right" size={14} />
+          </button>
+        )}
       </div>
     </div>
   );
