@@ -113,10 +113,10 @@ export function NumberScanner({ onUseResult, onClose }: NumberScannerProps) {
     ctx.drawImage(video, 0, 0);
     const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
     const base64 = dataUrl.split(',')[1];
-    const filename = `number-scan-${Date.now()}.jpg`;
+    const filename = `shared/number-scan-${Date.now()}.jpg`;
 
     try {
-      await Filesystem.writeFile({ path: filename, data: base64, directory: Directory.Cache });
+      await Filesystem.writeFile({ path: filename, data: base64, directory: Directory.Cache, recursive: true });
       const { uri } = await Filesystem.getUri({ path: filename, directory: Directory.Cache });
       const result = await TextRecognition.processImage({ path: uri });
       void Filesystem.deleteFile({ path: filename, directory: Directory.Cache }).catch(() => {});

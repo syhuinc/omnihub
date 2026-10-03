@@ -62,9 +62,10 @@ export function Profile() {
       return;
     }
 
+    const sharedPath = `shared/${filename}`;
     try {
-      await Filesystem.writeFile({ path: filename, data: json, directory: Directory.Cache, encoding: Encoding.UTF8 });
-      const { uri } = await Filesystem.getUri({ path: filename, directory: Directory.Cache });
+      await Filesystem.writeFile({ path: sharedPath, data: json, directory: Directory.Cache, encoding: Encoding.UTF8, recursive: true });
+      const { uri } = await Filesystem.getUri({ path: sharedPath, directory: Directory.Cache });
       await Share.share({ title: 'Omni Hub Backup', url: uri, dialogTitle: 'Save your backup' });
     } catch (err) {
       // Android's Share plugin rejects with "Share canceled" when the user backs out of the

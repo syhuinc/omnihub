@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
   Every file this app shares via FileProvider (number-scanner captures, backup JSON) is written
-  to Directory.Cache; nothing uses external storage. The old external-path entry granted the
-  entire external storage root, which FileProvider never actually needed; removed rather than
-  left in "just in case".
+  to Directory.Cache/shared/, not the cache root; scoping this to that one subfolder (instead
+  of path="." on the whole cache dir) means FileProvider can only ever expose files these two
+  features actually wrote, not whatever else ends up cached (WebView cache, image cache, etc).
+  The old external-path entry granted the entire external storage root, which FileProvider never
+  actually needed; removed rather than left in "just in case".
 -->
 <paths xmlns:android="http://schemas.android.com/apk/res/android">
-    <cache-path name="my_cache_images" path="." />
+    <cache-path name="my_cache_images" path="shared/" />
 </paths>
