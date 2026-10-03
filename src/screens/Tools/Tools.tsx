@@ -24,6 +24,7 @@ const SORT_CYCLE: SortMode[] = ['default', 'alpha', 'category'];
 const SORT_LABELS: Record<SortMode, string> = { default: 'Sort', alpha: 'A–Z', category: 'By Category' };
 
 const FEATURED_TOOL_IDS = ['calculator', 'timer', 'checklist'];
+const COMING_SOON_PREVIEW_IDS = ['voice-changer', 'password-generator', 'journal'];
 
 export function Tools() {
   const { navigate } = useRouter();
@@ -136,27 +137,54 @@ export function Tools() {
       )}
 
       <div className="tools__content">
-        <div className="tools__featured">
-          <div className="tools__featured-glow" />
-          <div className="tools__featured-icons">
-            {FEATURED_TOOL_IDS.map((id, i) => (
-              <img
-                key={id}
-                src={toolIconImages[id]}
-                alt=""
-                className="tools__featured-chip"
-                style={{ '--i': i } as CSSProperties}
-              />
-            ))}
+        {category === 'coming-soon' && sortMode !== 'category' ? (
+          <div className="tools__featured tools__featured--soon">
+            <div className="tools__featured-glow" />
+            <div className="tools__featured-icons">
+              {COMING_SOON_PREVIEW_IDS.map((id, i) => (
+                <img
+                  key={id}
+                  src={toolIconImages[id]}
+                  alt=""
+                  className="tools__featured-chip"
+                  style={{ '--i': i } as CSSProperties}
+                />
+              ))}
+            </div>
+            <span className="tools__featured-badge">
+              <Icon name="clock" size={10} />
+              Coming Soon
+            </span>
+            <h2 className="tools__featured-title">
+              More Tools
+              <br />
+              On The Way.
+            </h2>
+            <p className="tools__featured-text">We&rsquo;re cooking up new tools for Omni Hub.</p>
           </div>
-          <span className="tools__featured-badge">Featured</span>
-          <h2 className="tools__featured-title">
-            Productivity
-            <br />
-            Starts Here.
-          </h2>
-          <p className="tools__featured-text">Tools to make your everyday life easier.</p>
-        </div>
+        ) : (
+          <div className="tools__featured">
+            <div className="tools__featured-glow" />
+            <div className="tools__featured-icons">
+              {FEATURED_TOOL_IDS.map((id, i) => (
+                <img
+                  key={id}
+                  src={toolIconImages[id]}
+                  alt=""
+                  className="tools__featured-chip"
+                  style={{ '--i': i } as CSSProperties}
+                />
+              ))}
+            </div>
+            <span className="tools__featured-badge">Featured</span>
+            <h2 className="tools__featured-title">
+              Productivity
+              <br />
+              Starts Here.
+            </h2>
+            <p className="tools__featured-text">Tools to make your everyday life easier.</p>
+          </div>
+        )}
 
         {sortMode === 'category' ? (
           categorizedGroups && categorizedGroups.length > 0 ? (
@@ -187,7 +215,7 @@ export function Tools() {
         ) : (
           <>
             <div className="tools__section-header">
-              <h2>All Tools</h2>
+              <h2>{category === 'coming-soon' ? 'Coming Soon' : 'All Tools'}</h2>
               <button type="button" className="tools__sort-btn" onClick={toggleSort}>
                 <Icon name="sort" size={14} />
                 {SORT_LABELS[sortMode]}

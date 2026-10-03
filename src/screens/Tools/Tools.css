@@ -48,6 +48,19 @@
   box-shadow: 0 14px 30px -12px rgba(99, 102, 241, 0.55);
 }
 
+/* Same dark-purple family used for the Crafting Station banner and Sleep Mode
+   AI hero, so every "on the way" surface in the app reads as one family. */
+.tools__featured--soon {
+  background: linear-gradient(160deg, #1b1240 0%, #2c1c5c 45%, #191033 100%);
+  box-shadow: 0 14px 30px -12px rgba(44, 28, 92, 0.6);
+}
+
+.tools__featured--soon .tools__featured-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
 .tools__featured-glow {
   position: absolute;
   top: -40%;
