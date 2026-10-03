@@ -45,24 +45,25 @@ export function Craft() {
           <img className="craft__hero-img" src={heroCrafting} alt="Crafting Station" />
         </div>
 
-        <div className="craft__info-card">
-          <div className="craft__coming-soon">
-            <img className="craft__coming-soon-img" src={chefHat} alt="" />
-            <div className="craft__coming-soon-text">
-              <h3>Still Cooking&hellip;</h3>
-              <p>We&rsquo;re working hard to bring the Crafting Station to Omni Hub.</p>
-            </div>
-          </div>
+        <div className="craft__headline">
+          <span className="craft__headline-label">
+            <img className="craft__headline-chef" src={chefHat} alt="" />
+            Crafting Station
+          </span>
+          <h2 className="craft__headline-title">Still Cooking&hellip;</h2>
+          <p className="craft__headline-text">We&rsquo;re working hard to bring the Crafting Station to Omni Hub.</p>
+        </div>
 
-          <div className="craft__features">
-            {FEATURES.map((f) => (
-              <div key={f.title} className="craft__feature">
+        <div className="craft__features">
+          {FEATURES.map((f) => (
+            <div key={f.title} className="craft__feature">
+              <span className="craft__feature-icon-wrap">
                 <img className="craft__feature-icon" src={f.icon} alt="" />
-                <strong>{f.title}</strong>
-                <span>{f.desc}</span>
-              </div>
-            ))}
-          </div>
+              </span>
+              <strong>{f.title}</strong>
+              <span>{f.desc}</span>
+            </div>
+          ))}
         </div>
 
         <div className="craft__section-head">
@@ -84,6 +85,16 @@ export function Craft() {
               <span className="craft__recipe-soon">Coming Soon</span>
             </div>
           ))}
+        </div>
+
+        <div className="craft__thanks">
+          <span className="craft__thanks-bar" />
+          <h2>
+            Better things
+            <br />
+            <span className="craft__thanks-accent">are coming.</span>
+          </h2>
+          <p>Thanks for being an early Omni Hub user.</p>
         </div>
       </div>
     </div>
