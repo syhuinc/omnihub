@@ -13,6 +13,8 @@ export const StorageKeys = {
   homeMyPhonePosition: `${PREFIX}home.myPhonePosition`,
   vaultSalt: `${PREFIX}vault.salt`,
   vaultCanary: `${PREFIX}vault.canary`,
+  vaultFailedAttempts: `${PREFIX}vault.failedAttempts`,
+  vaultLockedUntil: `${PREFIX}vault.lockedUntil`,
   vaultNotes: `${PREFIX}vault.notes`,
   alarmPresets: `${PREFIX}alarm.presets`,
   alarmFavoriteSounds: `${PREFIX}alarm.favoriteSounds`,
@@ -50,8 +52,12 @@ export function storageGet<T>(key: string, fallback: T): T {
 export function storageSet<T>(key: string, value: T): void {
   try {
     localStorage.setItem(key, JSON.stringify(value));
-  } catch {
-    // storage full or unavailable — silently ignore, data stays in memory for this session
+  } catch (err) {
+    // Storage full or unavailable. The write is lost and the caller has no return value to
+    // check, so at minimum this needs to be visible somewhere (console now; a real device's
+    // logcat/crash reporting would otherwise have no record a save silently failed) instead of
+    // vanishing without a trace.
+    console.error(`storageSet failed for "${key}":`, err);
   }
 }
 

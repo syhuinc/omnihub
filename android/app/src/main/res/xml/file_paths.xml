@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  Every file this app shares via FileProvider (number-scanner captures, backup JSON) is written
+  to Directory.Cache; nothing uses external storage. The old external-path entry granted the
+  entire external storage root, which FileProvider never actually needed; removed rather than
+  left in "just in case".
+-->
 <paths xmlns:android="http://schemas.android.com/apk/res/android">
-    <external-path name="my_images" path="." />
     <cache-path name="my_cache_images" path="." />
 </paths>

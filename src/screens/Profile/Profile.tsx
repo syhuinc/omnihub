@@ -6,6 +6,7 @@ import { ScreenHeader } from '../../components/ScreenHeader';
 import { Icon } from '../../components/Icon';
 import { useRouter } from '../../app/Router';
 import { storageGet, storageSet, StorageKeys, exportBackup, importBackup, clearAllData } from '../../storage/db';
+import { clearAllFiles } from '../../vault/fileStore';
 import { hapticWarning } from '../../haptics';
 import { useAuth } from '../../cloud/AuthContext';
 import { useSettings } from '../../settings/SettingsContext';
@@ -88,7 +89,12 @@ export function Profile() {
       try {
         const json = JSON.parse(String(reader.result));
         const { imported } = importBackup(json);
-        setImportStatus({ type: 'success', message: `Restored ${imported} item${imported === 1 ? '' : 's'}. Reload to see your data.` });
+        setImportStatus({ type: 'success', message: `Restored ${imported} item${imported === 1 ? '' : 's'}. Reloading…` });
+        // Every screen already read its data into React state before this file was picked, so
+        // without an actual reload the restored data sits in storage but nothing on screen
+        // reflects it -- same as Clear Data and Export, this needs a real reload, not just a
+        // message telling the user to do something the UI never gives them a way to do.
+        setTimeout(() => window.location.reload(), 800);
       } catch (err) {
         setImportStatus({ type: 'error', message: err instanceof Error ? err.message : 'Could not read that file.' });
       }
@@ -97,9 +103,13 @@ export function Profile() {
     e.target.value = '';
   }
 
-  function handleClearData() {
+  async function handleClearData() {
     hapticWarning();
     clearAllData();
+    // clearAllData() only sweeps localStorage -- Vault's file ciphertext lives in IndexedDB and
+    // isn't under the `omnihub:` prefix, so it needs its own clear or "Clear All Data" silently
+    // leaves vault photos/files behind despite the confirm text promising everything's gone.
+    await clearAllFiles();
     window.location.reload();
   }
 
@@ -109,6 +119,7 @@ export function Profile() {
     try {
       await deleteAccount();
       clearAllData();
+      await clearAllFiles();
       window.location.reload();
     } catch (err) {
       setDeleteAccountError(err instanceof Error ? err.message : 'Could not delete your account. Please try again.');
@@ -283,7 +294,7 @@ export function Profile() {
               </span>
               <span className="pf__row-text">
                 <strong>Export Backup</strong>
-                <span>Save all your data as a JSON file</span>
+                <span>Save your tool data as a JSON file (Vault files export separately, from inside Vault)</span>
               </span>
               <Icon name="chevron-right" size={18} className="pf__row-chevron" />
             </button>
@@ -326,7 +337,11 @@ export function Profile() {
               </button>
             ) : (
               <div className="pf__confirm">
-                <p>This will permanently delete all notes, lists, expenses and settings. This can't be undone.</p>
+                <p>
+                  This will permanently delete everything stored on this device — notes, lists,
+                  expenses, alarms, your Vault (including its PIN-locked photos and files), and
+                  settings. This can't be undone.
+                </p>
                 <div className="pf__confirm-actions">
                   <button type="button" onClick={() => setConfirmingClear(false)}>
                     Cancel

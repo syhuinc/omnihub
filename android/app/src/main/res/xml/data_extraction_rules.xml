@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Android 12+ (API 31+) cloud backup / device-transfer rules.
+
+  Capacitor's WebView keeps localStorage and IndexedDB under app_webview/ (not under the app's
+  regular files/ dir), and that's where Vault's PIN salt, canary, note ciphertext, and
+  (IndexedDB) file ciphertext all live. Backup operates on whole files/directories, not
+  individual localStorage keys, so there's no way to back up the rest of app_webview/ (everything
+  else the app stores there) while excluding just the Vault entries; excluding the whole
+  directory is the only option that actually keeps Vault material out of a backup or device
+  transfer. The app's own Export Backup (Profile) and Vault's own file export cover intentional,
+  user-initiated backup/restore instead.
+-->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="root" path="app_webview/" />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="root" path="app_webview/" />
+    </device-transfer>
+</data-extraction-rules>

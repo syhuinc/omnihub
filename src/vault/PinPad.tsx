@@ -9,10 +9,13 @@ interface PinPadProps {
   value: string;
   onChange: (value: string) => void;
   error?: string;
+  /** Disables all key input, e.g. during a post-failed-attempts lockout. */
+  disabled?: boolean;
 }
 
-export function PinPad({ title, subtitle, value, onChange, error }: PinPadProps) {
+export function PinPad({ title, subtitle, value, onChange, error, disabled }: PinPadProps) {
   function press(key: string) {
+    if (disabled) return;
     if (key === 'backspace') {
       onChange(value.slice(0, -1));
     } else if (key && value.length < PIN_LENGTH) {
@@ -46,6 +49,7 @@ export function PinPad({ title, subtitle, value, onChange, error }: PinPadProps)
               type="button"
               className="vault-pin__key"
               onClick={() => press(key)}
+              disabled={disabled}
               aria-label={key === 'backspace' ? 'Backspace' : key}
             >
               {key === 'backspace' ? <Icon name="backspace" size={20} /> : key}

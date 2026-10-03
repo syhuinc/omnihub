@@ -28,6 +28,18 @@ const CANARY_TEXT = 'omni-hub-vault-ok';
 type Status = 'loading' | 'setupPin' | 'confirmPin' | 'locked' | 'unlocked';
 type Tab = 'notes' | 'files';
 
+// A 4-digit PIN is only 10,000 possibilities, and nothing upstream of this screen rate-limits
+// guesses -- so once someone's past the first few mistakes (a genuine typo), escalate the cost
+// of guessing quickly rather than ever letting attempts run unthrottled.
+const LOCKOUT_FREE_ATTEMPTS = 5;
+const LOCKOUT_SCHEDULE_SEC = [30, 60, 120, 300, 600, 1800]; // 30s, 1m, 2m, 5m, 10m, 30m (cap)
+
+function lockoutMsFor(failedAttempts: number): number {
+  if (failedAttempts < LOCKOUT_FREE_ATTEMPTS) return 0;
+  const tier = Math.min(failedAttempts - LOCKOUT_FREE_ATTEMPTS, LOCKOUT_SCHEDULE_SEC.length - 1);
+  return LOCKOUT_SCHEDULE_SEC[tier] * 1000;
+}
+
 function newNote(): VaultNote {
   const now = Date.now();
   return { id: `${now}`, title: '', body: '', createdAt: now, updatedAt: now };
@@ -48,6 +60,8 @@ export function Vault() {
   const [changingPin, setChangingPin] = useState(false);
   const [confirmingReset, setConfirmingReset] = useState(false);
   const [tab, setTab] = useState<Tab>('notes');
+  const [lockedUntil, setLockedUntil] = useState(() => storageGet(StorageKeys.vaultLockedUntil, 0));
+  const [nowTick, setNowTick] = useState(() => Date.now());
 
   // Only the already-PIN-encrypted records ever leave the device — the key itself never does.
   // Kept alongside `notes` (decrypted, for the UI) since that's what actually gets synced.
@@ -116,6 +130,13 @@ export function Vault() {
     setStatus(salt ? 'locked' : 'setupPin');
   }, []);
 
+  // Only ticks while an active lockout needs a live countdown -- otherwise idle.
+  useEffect(() => {
+    if (lockedUntil <= Date.now()) return;
+    const id = setInterval(() => setNowTick(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, [lockedUntil]);
+
   useEffect(() => {
     if (pinInput.length < PIN_LENGTH) return;
     if (status === 'setupPin') {
@@ -163,6 +184,15 @@ export function Vault() {
   }
 
   async function attemptUnlock(pin: string) {
+    // Re-check against storage, not the `lockedUntil` state, in case the lockout was set in a
+    // different tab/reload of this screen -- the PIN pad being disabled should already prevent
+    // reaching here while locked, but don't rely solely on that.
+    const activeLockUntil = storageGet(StorageKeys.vaultLockedUntil, 0);
+    if (activeLockUntil > Date.now()) {
+      setPinInput('');
+      return;
+    }
+
     const salt = storageGet<string | null>(StorageKeys.vaultSalt, null);
     const canary = storageGet<EncryptedPayload | null>(StorageKeys.vaultCanary, null);
     if (!salt || !canary) return;
@@ -172,11 +202,28 @@ export function Vault() {
       const plain = await decryptText(derivedKey, canary);
       if (plain !== CANARY_TEXT) throw new Error('mismatch');
     } catch {
-      setError('Incorrect PIN');
+      const failedAttempts = storageGet(StorageKeys.vaultFailedAttempts, 0) + 1;
+      storageSet(StorageKeys.vaultFailedAttempts, failedAttempts);
+      const lockoutMs = lockoutMsFor(failedAttempts);
+      if (lockoutMs > 0) {
+        const until = Date.now() + lockoutMs;
+        storageSet(StorageKeys.vaultLockedUntil, until);
+        setLockedUntil(until);
+        // The PinPad subtitle takes over with a live countdown while locked out (see the
+        // `status === 'locked'` render below) -- leaving this unset means there's nothing stale
+        // left in `error` to flash once the lockout naturally expires.
+        setError('');
+      } else {
+        setError('Incorrect PIN');
+      }
       hapticWarning();
       setPinInput('');
       return;
     }
+
+    storageSet(StorageKeys.vaultFailedAttempts, 0);
+    storageRemove(StorageKeys.vaultLockedUntil);
+    setLockedUntil(0);
 
     const records = storageGet<VaultNoteRecord[]>(StorageKeys.vaultNotes, []);
     encryptedRecordsRef.current = records;
@@ -317,6 +364,8 @@ export function Vault() {
     storageRemove(StorageKeys.vaultSalt);
     storageRemove(StorageKeys.vaultCanary);
     storageRemove(StorageKeys.vaultNotes);
+    storageRemove(StorageKeys.vaultFailedAttempts);
+    storageRemove(StorageKeys.vaultLockedUntil);
     void clearAllFiles();
     setKey(null);
     setNotes([]);
@@ -324,6 +373,7 @@ export function Vault() {
     setEditingId(null);
     setSettingsOpen(false);
     setConfirmingReset(false);
+    setLockedUntil(0);
     setPinInput('');
     setPendingPin('');
     setError('');
@@ -375,10 +425,22 @@ export function Vault() {
   }
 
   if (status === 'locked') {
+    const lockRemainingMs = lockedUntil - nowTick;
+    const isLockedOut = lockRemainingMs > 0;
+    const remainingLabel = isLockedOut
+      ? `${Math.floor(lockRemainingMs / 60000)}:${String(Math.ceil((lockRemainingMs % 60000) / 1000)).padStart(2, '0')}`
+      : '';
     return (
       <div className="screen">
         <ScreenHeader title="Vault" onBack={back} />
-        <PinPad title="Enter PIN" subtitle="Unlock your private notes" value={pinInput} onChange={setPinInput} error={error} />
+        <PinPad
+          title="Enter PIN"
+          subtitle={isLockedOut ? `Too many attempts. Try again in ${remainingLabel}` : 'Unlock your private notes'}
+          value={pinInput}
+          onChange={setPinInput}
+          error={isLockedOut ? undefined : error}
+          disabled={isLockedOut}
+        />
       </div>
     );
   }

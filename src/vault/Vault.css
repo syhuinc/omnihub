@@ -98,6 +98,10 @@
   justify-content: center;
 }
 
+.vault-pin__key:disabled {
+  opacity: 0.4;
+}
+
 /* Settings panel */
 
 .vault__settings {

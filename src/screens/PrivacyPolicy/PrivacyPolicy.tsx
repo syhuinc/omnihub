@@ -225,11 +225,29 @@ export function PrivacyPolicy() {
         </section>
 
         <section className="pp__section">
+          <h2>Sleep Mode AI</h2>
+          <p>
+            Sleep Mode AI is a Pro feature, and only active for the Gentle and Friendly
+            personalities. When it generates your personalized reminders, it sends your Sleep
+            Mode settings to Omni Hub's own Cloud Function, which forwards them to Google's
+            Gemini API to write the reminder text (and, for those two personalities, a voice
+            clip) and returns the result. If you've filled them in, this includes what you've
+            asked Sleep Mode AI to call you, your work/school routine, and your interests — along
+            with your chosen personality and bedtime/wake settings. Nothing from this request is
+            stored by Omni Hub beyond the generated reminders already described for Sleep Mode
+            above; it isn't used to train any model. Every other Sleep Mode personality, and
+            Sleep Mode itself for everyone not on Pro, runs entirely from reminders bundled with
+            the app — nothing about those is ever sent anywhere.
+          </p>
+        </section>
+
+        <section className="pp__section">
           <h2>Third-party services</h2>
           <p>
             Signing in and syncing uses Google's Firebase platform (Firebase Authentication and
-            Cloud Firestore). Google's own privacy policy governs how Google handles data on their
-            servers:{' '}
+            Cloud Firestore). Sleep Mode AI (Pro, Gentle/Friendly only — see above) additionally
+            uses a Cloud Function, also on Firebase, which calls Google's Gemini API. Google's own
+            privacy policy governs how Google handles data on their servers:{' '}
             <a
               href="https://policies.google.com/privacy"
               onClick={(e) => {

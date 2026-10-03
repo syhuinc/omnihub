@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Legacy Auto Backup rules, used on API 24-30 (android:dataExtractionRules, in
+  data_extraction_rules.xml, covers API 31+). Same exclusion and the same reason: Vault's salt,
+  canary, note ciphertext and file ciphertext all live under app_webview/ alongside every other
+  tool's data, and backup can only exclude whole directories, not individual localStorage keys.
+-->
+<full-backup-content>
+    <exclude domain="root" path="app_webview/" />
+</full-backup-content>
