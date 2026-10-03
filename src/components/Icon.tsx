@@ -106,7 +106,9 @@ export type IconName =
   | 'gamepad'
   | 'wrench'
   | 'layers'
-  | 'chef-hat';
+  | 'chef-hat'
+  | 'flask'
+  | 'archive';
 
 interface IconProps {
   name: IconName;
@@ -386,6 +388,12 @@ const paths: Record<IconName, React.ReactNode> = {
   ),
   'chef-hat': (
     <path d="M6 18h12v3H6Z M8.5 18v-5.5 M15.5 18v-5.5 M6 12.5a4 4 0 0 1 1-7.8 4.5 4.5 0 0 1 8.7-1.6A4 4 0 0 1 18 12.5Z" />
+  ),
+  flask: (
+    <path d="M10 2v7.53a2 2 0 0 1-.21.9L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45L14.21 10.42a2 2 0 0 1-.21-.9V2 M8.5 2h7 M7 16h10" />
+  ),
+  archive: (
+    <path d="M3 4a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1Z M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8 M10 12h4" />
   ),
 };
 

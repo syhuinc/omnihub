@@ -16,8 +16,8 @@ const TABS: Tab[] = [
   { path: '/', label: 'Home', icon: 'home' },
   { path: '/tools', label: 'Hub', icon: 'grid' },
   { path: '/ai', label: '', brand: true },
-  { path: '/craft', label: 'Craft', icon: 'wrench' },
-  { path: '/profile', label: 'Desk', icon: 'user' },
+  { path: '/craft', label: 'Craft', icon: 'flask' },
+  { path: '/profile', label: 'Desk', icon: 'archive' },
 ];
 
 export function BottomNav() {
