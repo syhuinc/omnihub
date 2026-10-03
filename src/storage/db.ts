@@ -34,6 +34,7 @@ export const StorageKeys = {
   subscriptionDefaultCurrency: `${PREFIX}subscription.defaultCurrency`,
   expenseDefaultCurrency: `${PREFIX}expense.defaultCurrency`,
   budgetDefaultCurrency: `${PREFIX}budget.defaultCurrency`,
+  nav3dIconEnabled: `${PREFIX}nav.3dIconEnabled`,
 } as const;
 
 export function storageGet<T>(key: string, fallback: T): T {

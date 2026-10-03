@@ -8,6 +8,7 @@ import { useRouter } from '../../app/Router';
 import { storageGet, storageSet, StorageKeys, exportBackup, importBackup, clearAllData } from '../../storage/db';
 import { hapticWarning } from '../../haptics';
 import { useAuth } from '../../cloud/AuthContext';
+import { useSettings } from '../../settings/SettingsContext';
 import './Profile.css';
 
 type Theme = 'dark' | 'light';
@@ -24,6 +25,7 @@ export function Profile() {
     signOut,
     deleteAccount,
   } = useAuth();
+  const { nav3dIconEnabled, setNav3dIconEnabled } = useSettings();
   const [theme, setTheme] = useState<Theme>(() => storageGet(StorageKeys.theme, 'dark'));
   const [importStatus, setImportStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [confirmingClear, setConfirmingClear] = useState(false);
@@ -250,6 +252,25 @@ export function Profile() {
               <Icon name="sun" size={18} />
               Light
             </button>
+          </div>
+          <div className="pf__card">
+            <div className="pf__row">
+              <span className="pf__row-icon pf__row-icon--purple">
+                <Icon name="zap" size={18} />
+              </span>
+              <span className="pf__row-text">
+                <strong>3D Nav Icon</strong>
+                <span>Swipeable 3D icon for the AI tab. Turn off to save battery.</span>
+              </span>
+              <button
+                type="button"
+                className={`pf__switch${nav3dIconEnabled ? ' pf__switch--on' : ''}`}
+                onClick={() => setNav3dIconEnabled(!nav3dIconEnabled)}
+                aria-label="Toggle 3D nav icon"
+              >
+                <span className="pf__switch-knob" />
+              </button>
+            </div>
           </div>
         </section>
 

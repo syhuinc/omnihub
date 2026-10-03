@@ -1,7 +1,9 @@
 import { useEffect, useRef, type MouseEvent, type PointerEvent } from 'react';
 import { Icon, type IconName } from '../components/Icon';
 import { useRouter } from './Router';
+import { useSettings } from '../settings/SettingsContext';
 import markModel from '../assets/syxdi-ai/mark.glb?url';
+import navIconStatic from '../assets/syxdi-ai/nav-icon-static.webp';
 import './BottomNav.css';
 
 // A browser still fires a click after pointerup regardless of how far the
@@ -30,6 +32,7 @@ const TABS: Tab[] = [
 
 export function BottomNav() {
   const { path, navigate } = useRouter();
+  const { nav3dIconEnabled } = useSettings();
   const dragStartRef = useRef<{ x: number; y: number } | null>(null);
   const draggedRef = useRef(false);
 
@@ -54,13 +57,15 @@ export function BottomNav() {
   }
 
   useEffect(() => {
+    if (!nav3dIconEnabled) return;
     // Dynamic import so the ~1MB model-viewer library is only fetched once
-    // someone's actually on a screen with the bottom nav, not bundled into
-    // the app's main chunk. Re-mounting the nav (leaving/returning to a top
-    // -level tab) re-triggers this, but the module import is cached by the
-    // browser so it's a no-op after the first load.
+    // someone's actually on a screen with the bottom nav AND has the 3D icon
+    // on, not bundled into the app's main chunk. Re-mounting the nav
+    // (leaving/returning to a top-level tab) re-triggers this, but the
+    // module import is cached by the browser so it's a no-op after the
+    // first load.
     import('@google/model-viewer');
-  }, []);
+  }, [nav3dIconEnabled]);
 
   return (
     <nav className="bottom-nav">
@@ -72,26 +77,30 @@ export function BottomNav() {
             type="button"
             className={`bottom-nav__item${active ? ' bottom-nav__item--active' : ''}${tab.brand ? ' bottom-nav__item--brand' : ''}`}
             onClick={() => navigate(tab.path)}
-            onPointerDown={tab.brand ? handleBrandPointerDown : undefined}
-            onPointerMove={tab.brand ? handleBrandPointerMove : undefined}
-            onClickCapture={tab.brand ? handleBrandClickCapture : undefined}
+            onPointerDown={tab.brand && nav3dIconEnabled ? handleBrandPointerDown : undefined}
+            onPointerMove={tab.brand && nav3dIconEnabled ? handleBrandPointerMove : undefined}
+            onClickCapture={tab.brand && nav3dIconEnabled ? handleBrandClickCapture : undefined}
             aria-current={active ? 'page' : undefined}
             aria-label={tab.brand ? 'SYXDI AI' : undefined}
           >
             <span className="bottom-nav__icon-wrap">
               {tab.brand ? (
-                <model-viewer
-                  className="bottom-nav__brand-icon"
-                  src={markModel}
-                  alt=""
-                  camera-controls
-                  disable-zoom
-                  environment-image="neutral"
-                  exposure="1.1"
-                  shadow-intensity="0"
-                  camera-orbit="0deg 78deg 110%"
-                  field-of-view="28deg"
-                />
+                nav3dIconEnabled ? (
+                  <model-viewer
+                    className="bottom-nav__brand-icon"
+                    src={markModel}
+                    alt=""
+                    camera-controls
+                    disable-zoom
+                    environment-image="neutral"
+                    exposure="1.1"
+                    shadow-intensity="0"
+                    camera-orbit="0deg 78deg 110%"
+                    field-of-view="28deg"
+                  />
+                ) : (
+                  <img src={navIconStatic} alt="" className="bottom-nav__brand-icon" />
+                )
               ) : (
                 <Icon name={tab.icon!} size={22} />
               )}

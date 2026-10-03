@@ -17,6 +17,7 @@ import { PrivacyPolicy } from '../screens/PrivacyPolicy/PrivacyPolicy';
 import { storageGet, StorageKeys } from '../storage/db';
 import { hapticTap } from '../haptics';
 import { AuthProvider } from '../cloud/AuthContext';
+import { SettingsProvider } from '../settings/SettingsContext';
 import { useIsLightTheme } from '../theme/useTheme';
 import { setStatusBarStyle, initStatusBarOverlay } from '../theme/statusBar';
 import './App.css';
@@ -96,11 +97,13 @@ function App() {
   }, []);
 
   return (
-    <AuthProvider>
-      <RouterProvider>
-        <Shell />
-      </RouterProvider>
-    </AuthProvider>
+    <SettingsProvider>
+      <AuthProvider>
+        <RouterProvider>
+          <Shell />
+        </RouterProvider>
+      </AuthProvider>
+    </SettingsProvider>
   );
 }
 
