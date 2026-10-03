@@ -48,9 +48,6 @@ const TIER_GUIDANCE = [
 
 interface GenerateRequestBody {
   personality?: unknown;
-  displayName?: unknown;
-  workSchoolRoutine?: unknown;
-  interests?: unknown;
 }
 
 function isPersonality(value: unknown): value is Personality {
@@ -139,25 +136,8 @@ export const generateSleepReminders = onRequest(
       return;
     }
     const personality = body.personality;
-    const displayName = typeof body.displayName === 'string' ? body.displayName.trim().slice(0, 60) : '';
-    const workSchoolRoutine = typeof body.workSchoolRoutine === 'string' ? body.workSchoolRoutine.trim().slice(0, 200) : '';
-    const interests = typeof body.interests === 'string' ? body.interests.trim().slice(0, 200) : '';
 
     const db = getFirestore();
-
-    // Sleep Mode AI is a Pro feature. isPro is never client-writable (see firestore.rules) —
-    // this is the authoritative check; the client also checks it to avoid a wasted round trip.
-    try {
-      const userSnap = await db.doc(`users/${uid}`).get();
-      if (userSnap.data()?.isPro !== true) {
-        res.status(403).json({ error: 'Sleep Mode AI is a Pro feature.', code: 'pro_required' });
-        return;
-      }
-    } catch (err) {
-      logger.error('Pro status check failed', err);
-      res.status(500).json({ error: 'Something went wrong. Please try again.' });
-      return;
-    }
 
     const usageRef = db.doc(`users/${uid}/sleepAiMeta/generationUsage`);
 
@@ -185,23 +165,12 @@ export const generateSleepReminders = onRequest(
       return;
     }
 
-    const personalization: string[] = [];
-    if (displayName) {
-      personalization.push(`Their name is "${displayName}" — you may address them by name in some (not all) lines, naturally.`);
-    }
-    if (workSchoolRoutine) {
-      personalization.push(`They have this routine tomorrow: "${workSchoolRoutine}" — you may reference it in a couple of lines for tier 1+.`);
-    }
-    if (interests) {
-      personalization.push(`They're into: "${interests}" — you may reference it playfully in a couple of lines for tier 1+.`);
-    }
-
     const prompt = `Write bedtime reminder lines for the "${personality}" personality of Sleep Mode, a
 feature that nudges someone to stop using their phone and go to sleep.
 
 Voice: ${PERSONALITY_VOICE[personality]}
 
-${personalization.length ? personalization.join('\n') : 'No personal details are available — keep every line generic (no name, no specific references).'}
+Keep every line generic — no name, no specific personal references.
 
 Write exactly ${LINES_PER_TIER} distinct lines for EACH of these 4 escalation tiers:
 ${TIER_GUIDANCE.join('\n')}

@@ -12,6 +12,14 @@
         android:theme="@style/AppTheme">
         <meta-data android:name="com.google.mlkit.vision.DEPENDENCIES" android:value="barcode_ui" />
 
+        <!-- Firebase's own SDKs (Auth, Firestore, and the Installations service they both pull
+             in) initialize automatically on process start via FirebaseInitProvider, before any
+             app code runs, regardless of whether the user has signed in. This flag turns off
+             their automatic background data collection (Installations ID auto-registration
+             included) by default; signing in (which calls Firebase Auth explicitly) still works
+             normally, since that's an explicit call, not automatic collection. -->
+        <meta-data android:name="firebase_data_collection_default_enabled" android:value="false" />
+
         <activity
             android:configChanges="keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode|navigation|density"
             android:name=".MainActivity"
@@ -106,7 +114,10 @@
     </application>
 
     <!--
-      Omni Hub is otherwise fully offline. These are for the Alarm and Sleep Mode features only,
+      Every tool in Omni Hub itself works fully on-device, with no tool data ever sent anywhere,
+      whether or not you're signed in — the only network activity the app initiates is Cloud
+      Sync (if you turn it on) and Sleep Mode AI's reminder generation (while signed in). These
+      permissions are for the Alarm and Sleep Mode features only,
       so their reminders fire even when the app is closed:
       - RECEIVE_BOOT_COMPLETED / WAKE_LOCK / FOREGROUND_SERVICE(_MEDIA_PLAYBACK): re-arm alarms
         and Sleep Mode's nightly check-ins after reboot, and keep the device awake long enough to

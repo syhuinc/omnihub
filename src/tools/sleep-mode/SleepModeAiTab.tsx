@@ -7,8 +7,8 @@ import { PERSONALITY_META } from './types';
 import { PREVIEW_SAMPLES, heroBanner, type PreviewPhase } from '../../assets/sleep-mode';
 import './SleepMode.css';
 
-/** Only these two actually get AI-generated lines/voice (see AI_ENABLED_PERSONALITIES in
- *  SleepMode.tsx and generateSleepReminders) — the rest stay hand-written-only even on Pro. */
+/** Only these two actually get AI-generated lines/voice (see isAiPersonality in SleepMode.tsx
+ *  and generateSleepReminders) — the rest stay hand-written-only even when signed in. */
 const AI_ENABLED = new Set(['gentle', 'friendly']);
 const AI_ENABLED_LABEL = PERSONALITY_META.filter((p) => AI_ENABLED.has(p.id))
   .map((p) => p.label)
@@ -34,7 +34,8 @@ interface SleepModeAiTabProps {
 }
 
 export function SleepModeAiTab({ onBack }: SleepModeAiTabProps) {
-  const { isPro } = useAuth();
+  const { user } = useAuth();
+  const isActive = !!user;
   const [activeId, setActiveId] = useState<string | null>(null);
   const [sampleIndex, setSampleIndex] = useState(0);
   const [playing, setPlaying] = useState(false);
@@ -101,9 +102,9 @@ export function SleepModeAiTab({ onBack }: SleepModeAiTabProps) {
         subtitle="Your personal bedtime companion"
         onBack={onBack}
         action={
-          <span className={`sm__ai2-pro-badge${isPro ? ' sm__ai2-pro-badge--active' : ''}`}>
-            <Icon name={isPro ? 'check' : 'clock'} size={12} />
-            {isPro ? 'ACTIVE' : 'SOON'}
+          <span className={`sm__ai2-pro-badge${isActive ? ' sm__ai2-pro-badge--active' : ''}`}>
+            <Icon name={isActive ? 'check' : 'lock'} size={12} />
+            {isActive ? 'ACTIVE' : 'SIGN IN'}
           </span>
         }
       />
@@ -124,19 +125,19 @@ export function SleepModeAiTab({ onBack }: SleepModeAiTabProps) {
           <span className="sm__ai2-toggle-text">
             <span className="sm__ai2-toggle-title-row">
               <strong>Sleep Mode AI</strong>
-              {!isPro && (
+              {!isActive && (
                 <span className="sm__ai2-pro-chip">
-                  <Icon name="clock" size={10} />
-                  COMING SOON
+                  <Icon name="lock" size={10} />
+                  SIGN IN TO ACTIVATE
                 </span>
               )}
             </span>
             <span className="sm__ai2-toggle-desc">
-              {isPro ? `Active for your ${AI_ENABLED_LABEL} reminders.` : "We're putting the finishing touches on your AI companion."}
+              {isActive ? `Active for your ${AI_ENABLED_LABEL} reminders.` : 'Sign in to activate your AI companion.'}
             </span>
           </span>
-          <span className={`sm__ai2-toggle-switch${isPro ? ' sm__ai2-toggle-switch--active' : ''}`}>
-            <Icon name={isPro ? 'check' : 'lock'} size={12} />
+          <span className={`sm__ai2-toggle-switch${isActive ? ' sm__ai2-toggle-switch--active' : ''}`}>
+            <Icon name={isActive ? 'check' : 'lock'} size={12} />
           </span>
         </div>
 
@@ -156,7 +157,7 @@ export function SleepModeAiTab({ onBack }: SleepModeAiTabProps) {
             >
               <span className="sm__ai2-avatar-img" style={{ '--emoji-color': p.color } as CSSProperties}>
                 {p.image ? <img src={p.image} alt="" /> : <Icon name={(p.icon ?? 'user') as IconName} size={20} />}
-                {!isPro && (
+                {!isActive && (
                   <span className="sm__ai2-avatar-lock">
                     <Icon name="lock" size={9} />
                   </span>
@@ -218,7 +219,7 @@ export function SleepModeAiTab({ onBack }: SleepModeAiTabProps) {
         )}
 
         <div className="sm__ai2-section-head">
-          <h2>{isPro ? 'What You Get with Pro' : "What's Coming"}</h2>
+          <h2>{isActive ? 'What You Get' : "What You'll Get"}</h2>
         </div>
 
         <div className="sm__ai2-perks-grid">
@@ -233,11 +234,11 @@ export function SleepModeAiTab({ onBack }: SleepModeAiTabProps) {
           ))}
         </div>
 
-        {!isPro && (
+        {!isActive && (
           <div className="smp__coming-soon">
-            <Icon name="clock" size={28} className="smp__coming-soon-icon" />
-            <h3>Coming Soon</h3>
-            <p>Sleep Mode AI is still in the oven. We&rsquo;ll let you know the moment it&rsquo;s ready.</p>
+            <Icon name="lock" size={28} className="smp__coming-soon-icon" />
+            <h3>Sign In Required</h3>
+            <p>Sleep Mode AI is ready to go — sign in from your Desk to turn it on.</p>
           </div>
         )}
       </div>

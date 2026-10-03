@@ -1,3 +1,5 @@
+import { notifyStorageError } from './storageErrorBus';
+
 const PREFIX = 'omnihub:';
 
 export const StorageKeys = {
@@ -54,10 +56,11 @@ export function storageSet<T>(key: string, value: T): void {
     localStorage.setItem(key, JSON.stringify(value));
   } catch (err) {
     // Storage full or unavailable. The write is lost and the caller has no return value to
-    // check, so at minimum this needs to be visible somewhere (console now; a real device's
-    // logcat/crash reporting would otherwise have no record a save silently failed) instead of
-    // vanishing without a trace.
+    // check, so this needs to be visible — console for a device's logcat/crash reporting, and a
+    // toast (see storageErrorBus/StorageErrorToast) since the UI otherwise has no idea a save
+    // just silently failed.
     console.error(`storageSet failed for "${key}":`, err);
+    notifyStorageError("Couldn't save — your device may be out of storage space.");
   }
 }
 

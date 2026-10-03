@@ -15,6 +15,7 @@ import { StorageDetails } from '../screens/PhoneCenter/StorageDetails';
 import { HealthCheck } from '../screens/PhoneCenter/HealthCheck';
 import { PrivacyPolicy } from '../screens/PrivacyPolicy/PrivacyPolicy';
 import { storageGet, StorageKeys } from '../storage/db';
+import { StorageErrorToast } from '../storage/StorageErrorToast';
 import { hapticTap } from '../haptics';
 import { AuthProvider } from '../cloud/AuthContext';
 import { SettingsProvider } from '../settings/SettingsContext';
@@ -69,6 +70,7 @@ function Shell() {
         <Screen />
       </div>
       {showNav && <BottomNav />}
+      <StorageErrorToast />
     </div>
   );
 }

@@ -17,9 +17,6 @@ export class GenerateRemindersError extends Error {
 
 interface GenerateOptions {
   personality: SleepAiPersonality;
-  displayName?: string | null;
-  workSchoolRoutine?: string | null;
-  interests?: string | null;
 }
 
 export interface GeneratedReminders {
@@ -39,12 +36,7 @@ export async function generateSleepReminders(options: GenerateOptions): Promise<
     res = await fetch(GENERATE_REMINDERS_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-      body: JSON.stringify({
-        personality: options.personality,
-        displayName: options.displayName ?? undefined,
-        workSchoolRoutine: options.workSchoolRoutine ?? undefined,
-        interests: options.interests ?? undefined,
-      }),
+      body: JSON.stringify({ personality: options.personality }),
     });
   } catch {
     throw new GenerateRemindersError("Couldn't reach Sleep Mode AI. Check your connection and try again.");

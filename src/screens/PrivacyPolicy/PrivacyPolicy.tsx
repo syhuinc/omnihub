@@ -19,9 +19,14 @@ export function PrivacyPolicy() {
         <section className="pp__section">
           <h2>What we collect</h2>
           <p>
-            <strong>If you never sign in:</strong> nothing. Omni Hub makes no network requests,
-            uses no analytics, tracking, or advertising SDKs, and never transmits anything,
-            because it never leaves your device.
+            <strong>If you never sign in:</strong> nothing. Every tool's data (notes, alarms,
+            Vault, and everything else) stays on your device and is never sent anywhere. Omni Hub
+            itself uses no analytics, tracking, or advertising SDKs. The Google libraries we use
+            for optional sign-in are built into the app and may make minimal automatic
+            device-identification calls in the background on their own, as any app using Google's
+            Firebase does — we turn their automatic data collection off by default (see Third-party
+            services below), but that's Google's library behavior, not something Omni Hub reads,
+            controls, or can fully guarantee.
           </p>
           <p>
             <strong>If you choose to sign in with Google</strong> (Profile ▸ Cloud Sync), to sync
@@ -227,17 +232,17 @@ export function PrivacyPolicy() {
         <section className="pp__section">
           <h2>Sleep Mode AI</h2>
           <p>
-            Sleep Mode AI is a Pro feature, and only active for the Gentle and Friendly
-            personalities. When it generates your personalized reminders, it sends your Sleep
-            Mode settings to Omni Hub's own Cloud Function, which forwards them to Google's
-            Gemini API to write the reminder text (and, for those two personalities, a voice
-            clip) and returns the result. If you've filled them in, this includes what you've
-            asked Sleep Mode AI to call you, your work/school routine, and your interests — along
-            with your chosen personality and bedtime/wake settings. Nothing from this request is
-            stored by Omni Hub beyond the generated reminders already described for Sleep Mode
-            above; it isn't used to train any model. Every other Sleep Mode personality, and
-            Sleep Mode itself for everyone not on Pro, runs entirely from reminders bundled with
-            the app — nothing about those is ever sent anywhere.
+            Sleep Mode AI is available to anyone signed in, for the Gentle and Friendly
+            personalities. When it generates your reminders, it sends only your chosen
+            personality to Omni Hub's own Cloud Function (which requires your sign-in to call, so
+            usage can be rate-limited), and the Cloud Function forwards that to Google's Gemini
+            API to write the reminder text and a voice clip. Your name, work/school routine, and
+            interests are never sent — Sleep Mode's "Personal" mode uses those only to fill in
+            reminders on your own device, and they never leave it. Nothing from the Cloud
+            Function request is stored by Omni Hub beyond the generated reminders already
+            described for Sleep Mode above; it isn't used to train any model. Every other Sleep
+            Mode personality, and Sleep Mode for anyone not signed in, runs entirely from
+            reminders bundled with the app — nothing about those is ever sent anywhere.
           </p>
         </section>
 
@@ -245,8 +250,11 @@ export function PrivacyPolicy() {
           <h2>Third-party services</h2>
           <p>
             Signing in and syncing uses Google's Firebase platform (Firebase Authentication and
-            Cloud Firestore). Sleep Mode AI (Pro, Gentle/Friendly only — see above) additionally
-            uses a Cloud Function, also on Firebase, which calls Google's Gemini API. Google's own
+            Cloud Firestore). Sleep Mode AI (Gentle/Friendly, signed-in users — see above)
+            additionally uses a Cloud Function, also on Firebase, which calls Google's Gemini API.
+            We set Firebase's own flag to disable its automatic background data collection by
+            default, so these libraries only act when a feature here actually calls them (signing
+            in, syncing, or generating a Sleep Mode AI reminder) — never automatically. Google's own
             privacy policy governs how Google handles data on their servers:{' '}
             <a
               href="https://policies.google.com/privacy"

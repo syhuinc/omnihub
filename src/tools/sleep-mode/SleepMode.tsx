@@ -43,7 +43,7 @@ function isAiPersonality(p: string): p is SleepAiPersonality {
 
 export function SleepMode() {
   const { back } = useRouter();
-  const { user, isPro } = useAuth();
+  const { user } = useAuth();
   const [config, setConfig] = useState<SleepModeStatus>({ ...DEFAULT_SLEEP_MODE_CONFIG, sessionStartMillis: 0, nagCount: 0, mutedUntilMillis: 0 });
   const [timeSheet, setTimeSheet] = useState<TimeField | null>(null);
   const [needsExactAlarmPermission, setNeedsExactAlarmPermission] = useState(false);
@@ -95,20 +95,14 @@ export function SleepMode() {
 
   /** Best-effort background refresh of the cached AI reminder pool. Never surfaces an error or
    *  blocks Sleep Mode — the hand-written MessageBank pool is always there as a fallback.
-   *  Sleep Mode AI is a Pro feature — free users stay on the hand-written pool only, with zero
-   *  network calls. The Cloud Function enforces this too; this check just avoids a wasted
-   *  round trip (and a guaranteed 403) for anyone who isn't Pro. */
+   *  Requires sign-in (the Cloud Function needs an ID token and rate-limits per account) but no
+   *  longer requires Pro — Sleep Mode AI is available to anyone signed in. */
   async function maybeRefreshAiReminders(next: SleepModeConfig) {
-    if (!user || !isPro || !isAiPersonality(next.personality)) return;
+    if (!user || !isAiPersonality(next.personality)) return;
     try {
       const info = await SleepModePlugin.getAiMessagesInfo({ personality: next.personality });
       if (Date.now() - info.generatedAt < AI_POOL_MAX_AGE_MS) return;
-      const { tiersJson, audioClips } = await generateSleepReminders({
-        personality: next.personality,
-        displayName: next.callName,
-        workSchoolRoutine: next.workSchoolRoutine,
-        interests: next.interests,
-      });
+      const { tiersJson, audioClips } = await generateSleepReminders({ personality: next.personality });
       await SleepModePlugin.setAiMessages({ personality: next.personality, tiersJson });
       if (audioClips.length) {
         await SleepModePlugin.setAiAudioClips({ personality: next.personality, clips: audioClips });
