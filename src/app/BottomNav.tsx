@@ -16,10 +16,10 @@ interface Tab {
 
 const TABS: Tab[] = [
   { path: '/', label: 'Home', icon: 'home' },
-  { path: '/tools', label: 'Tools', icon: 'grid' },
+  { path: '/tools', label: 'Hub', icon: 'grid' },
   { path: '/ai', label: '', brand: true },
   { path: '/craft', label: 'Craft', icon: 'wrench' },
-  { path: '/profile', label: 'Profile', icon: 'user' },
+  { path: '/profile', label: 'Desk', icon: 'user' },
 ];
 
 export function BottomNav() {
