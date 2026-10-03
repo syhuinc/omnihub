@@ -1,13 +1,17 @@
 import { ScreenHeader } from '../../components/ScreenHeader';
-import { Icon, type IconName } from '../../components/Icon';
-import heroImg from '../../assets/syxdi-ai/hero.webp';
+import heroScene from '../../assets/syxdi-ai/hero-scene.webp';
+import closingScene from '../../assets/syxdi-ai/closing-scene.webp';
+import iconChat from '../../assets/syxdi-ai/icon-chat.webp';
+import iconUser from '../../assets/syxdi-ai/icon-user.webp';
+import iconFeed from '../../assets/syxdi-ai/icon-feed.webp';
+import iconBulb from '../../assets/syxdi-ai/icon-bulb.webp';
 import './SyxdiAi.css';
 
-const FEATURES: { icon: IconName; title: string; desc: string }[] = [
-  { icon: 'chat', title: 'Natural Conversations', desc: 'Talk naturally, anytime.' },
-  { icon: 'user', title: 'Understands You', desc: 'Learns your preferences.' },
-  { icon: 'file', title: 'Personal News Feed', desc: 'Updates that matter to you.' },
-  { icon: 'lightbulb', title: 'Smart Insights', desc: 'Helpful suggestions for a better day.' },
+const FEATURES: { icon: string; title: string; desc: string }[] = [
+  { icon: iconChat, title: 'Natural Conversations', desc: 'Talk naturally, anytime.' },
+  { icon: iconUser, title: 'Understands You', desc: 'Learns your preferences.' },
+  { icon: iconFeed, title: 'Personal News Feed', desc: 'Updates that matter to you.' },
+  { icon: iconBulb, title: 'Smart Insights', desc: 'Helpful suggestions for a better day.' },
 ];
 
 export function SyxdiAi() {
@@ -24,44 +28,37 @@ export function SyxdiAi() {
 
       <div className="syxdi__body">
         <div className="syxdi__hero">
-          <img className="syxdi__hero-img" src={heroImg} alt="SYXDI AI — Your AI Companion, powered by SYHU" />
+          <img className="syxdi__hero-img" src={heroScene} alt="" />
         </div>
 
         <div className="syxdi__headline">
-          <span className="syxdi__headline-badge">
-            <Icon name="clock" size={10} />
-            Coming Soon
-          </span>
-          <h2 className="syxdi__headline-title">
-            A Smarter Companion
-            <br />
-            Is On The Way.
-          </h2>
+          <span className="syxdi__headline-eyebrow">SYXDI AI</span>
+          <h2 className="syxdi__headline-title">COMING SOON</h2>
           <p className="syxdi__headline-text">
-            A smarter, more personal AI experience is coming to Omni Hub.
+            A smarter, more personal AI experience is on the way.
           </p>
         </div>
 
         <div className="syxdi__features">
           {FEATURES.map((f) => (
             <div key={f.title} className="syxdi__feature">
-              <span className="syxdi__feature-icon-wrap">
-                <Icon name={f.icon} size={18} />
-              </span>
+              <img className="syxdi__feature-icon" src={f.icon} alt="" />
               <strong>{f.title}</strong>
               <span>{f.desc}</span>
             </div>
           ))}
         </div>
 
-        <div className="syxdi__thanks">
-          <span className="syxdi__thanks-bar" />
-          <h2>
-            Better days
-            <br />
-            <span className="syxdi__thanks-accent">are coming.</span>
-          </h2>
-          <p>Thank you for your support.</p>
+        <div className="syxdi__thanks" style={{ backgroundImage: `url(${closingScene})` }}>
+          <div className="syxdi__thanks-overlay">
+            <span className="syxdi__thanks-bar" />
+            <h2>
+              Better days
+              <br />
+              <span className="syxdi__thanks-accent">are coming.</span>
+            </h2>
+            <p>Thank you for your support.</p>
+          </div>
         </div>
       </div>
     </div>

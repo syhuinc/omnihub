@@ -33,23 +33,16 @@
   text-align: center;
 }
 
-.syxdi__headline-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 10px;
-  border-radius: var(--radius-pill);
-  background: color-mix(in srgb, var(--purple) 16%, transparent);
-  border: 1px solid color-mix(in srgb, var(--purple) 30%, transparent);
-  color: var(--purple);
-  font-size: 10px;
+.syxdi__headline-eyebrow {
+  font-size: 11px;
   font-weight: 700;
+  color: var(--text-secondary);
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.3em;
 }
 
 .syxdi__headline-title {
-  font-size: 24px;
+  font-size: 30px;
   font-weight: 900;
   letter-spacing: -0.01em;
   line-height: 1.2;
@@ -96,29 +89,32 @@
   line-height: 1.35;
 }
 
-.syxdi__feature-icon-wrap {
+.syxdi__feature-icon {
   width: 40px;
   height: 40px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--purple);
-  background: linear-gradient(
-    135deg,
-    color-mix(in srgb, #4d7cfe 18%, transparent),
-    color-mix(in srgb, var(--purple) 18%, transparent)
-  );
+  object-fit: contain;
 }
 
 .syxdi__thanks {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background-size: cover;
+  background-position: center;
+  border: 1px solid color-mix(in srgb, var(--purple) 30%, transparent);
+}
+
+.syxdi__thanks-overlay {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 6px;
   padding: 22px 18px;
-  border-radius: var(--radius-lg);
-  background: linear-gradient(160deg, #1b1240 0%, #2c1c5c 45%, #191033 100%);
-  border: 1px solid color-mix(in srgb, var(--purple) 30%, transparent);
+  /* Left-to-right fade keeps the headline legible over whatever part of the
+     photo lands behind it, without flattening the image on the right. */
+  background: linear-gradient(90deg, rgba(10, 8, 30, 0.88) 45%, rgba(10, 8, 30, 0.15) 100%);
 }
 
 .syxdi__thanks-bar {
