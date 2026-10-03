@@ -13,15 +13,36 @@
 }
 
 .syxdi__hero {
+  position: relative;
   border-radius: var(--radius-lg);
   overflow: hidden;
   box-shadow: var(--shadow-sm);
+  background: radial-gradient(circle at 50% 42%, #2c1c5c, #191033 70%, #0f0a22 100%);
 }
 
-.syxdi__hero-img {
+.syxdi__hero-model {
   display: block;
   width: 100%;
-  height: auto;
+  height: 280px;
+  /* Model loads async -- a transparent canvas before then would show the
+     page background through the hero card, so paint the card's own
+     gradient underneath until the model appears. */
+  background: transparent;
+}
+
+.syxdi__hero-hint {
+  position: absolute;
+  left: 50%;
+  bottom: 12px;
+  transform: translateX(-50%);
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  background: rgba(10, 8, 30, 0.55);
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  pointer-events: none;
 }
 
 .syxdi__headline {
