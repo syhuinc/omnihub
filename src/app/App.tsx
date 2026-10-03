@@ -6,6 +6,7 @@ import { runTopBackHandler } from './useBackHandler';
 import { Home } from '../screens/Home/Home';
 import { Tools } from '../screens/Tools/Tools';
 import { Craft } from '../screens/Craft/Craft';
+import { SyxdiAi } from '../screens/SyxdiAi/SyxdiAi';
 import { Profile } from '../screens/Profile/Profile';
 import { ToolRoute } from '../tools/ToolRoute';
 import { PhoneCenter } from '../screens/PhoneCenter/PhoneCenter';
@@ -20,13 +21,14 @@ import { useIsLightTheme } from '../theme/useTheme';
 import { setStatusBarStyle, initStatusBarOverlay } from '../theme/statusBar';
 import './App.css';
 
-const TOP_LEVEL_PATHS = new Set(['/', '/tools', '/craft', '/profile']);
+const TOP_LEVEL_PATHS = new Set(['/', '/tools', '/ai', '/craft', '/profile']);
 
 function Screen() {
   const { path } = useRouter();
 
   if (path === '/') return <Home />;
   if (path === '/tools') return <Tools />;
+  if (path === '/ai') return <SyxdiAi />;
   if (path === '/craft') return <Craft />;
   if (path === '/profile') return <Profile />;
   if (path === '/phone-center') return <PhoneCenter />;
