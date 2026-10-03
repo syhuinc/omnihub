@@ -1,8 +1,6 @@
 import { Icon, type IconName } from '../components/Icon';
 import { useRouter } from './Router';
-import { useIsLightTheme } from '../theme/useTheme';
-import navIconDark from '../assets/syxdi-ai/nav-icon-dark.webp';
-import navIconLight from '../assets/syxdi-ai/nav-icon-light.webp';
+import navIcon from '../assets/syxdi-ai/nav-icon.webp';
 import './BottomNav.css';
 
 interface Tab {
@@ -24,7 +22,6 @@ const TABS: Tab[] = [
 
 export function BottomNav() {
   const { path, navigate } = useRouter();
-  const isLight = useIsLightTheme();
 
   return (
     <nav className="bottom-nav">
@@ -41,11 +38,7 @@ export function BottomNav() {
           >
             <span className="bottom-nav__icon-wrap">
               {tab.brand ? (
-                <img
-                  src={isLight ? navIconLight : navIconDark}
-                  alt=""
-                  className="bottom-nav__brand-icon"
-                />
+                <img src={navIcon} alt="" className="bottom-nav__brand-icon" />
               ) : (
                 <Icon name={tab.icon!} size={22} />
               )}
