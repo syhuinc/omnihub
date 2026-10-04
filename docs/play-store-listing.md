@@ -79,7 +79,7 @@ https://syhuinc.github.io/omnihub/
 
 This is only for the Play Console field itself (Google requires a public URL there, reachable before someone installs the app). Served via GitHub Pages from `docs/index.html` in this repo — enable Pages under Settings ▸ Pages ▸ Source: Deploy from a branch ▸ `main` ▸ `/docs`, then it's live at that URL with no further upkeep.
 
-In-app, Profile ▸ Privacy ▸ Privacy Policy shows the same content natively (no external link, no network request) — that's the copy real users will read.
+In-app, Desk ▸ Privacy ▸ Privacy Policy shows the same content natively (no external link, no network request) — that's the copy real users will read.
 
 ## Delete Account URL
 
@@ -87,7 +87,7 @@ In-app, Profile ▸ Privacy ▸ Privacy Policy shows the same content natively (
 https://syhuinc.github.io/omnihub/delete-account.html
 ```
 
-For Play Console's App content ▸ Data safety ▸ "Delete account URL" field. Served the same way as the privacy policy, from `docs/delete-account.html`. Describes the in-app "Delete My Account" flow (Profile ▸ Cloud Sync) plus an email fallback for users without the app installed.
+For Play Console's App content ▸ Data safety ▸ "Delete account URL" field. Served the same way as the privacy policy, from `docs/delete-account.html`. Describes the in-app "Delete My Account" flow (Desk ▸ Cloud Sync) plus an email fallback for users without the app installed.
 
 ## Category
 

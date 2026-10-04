@@ -115,7 +115,7 @@ export function Tools() {
 
   return (
     <div className="screen">
-      <ScreenHeader title="Tools" subtitle="All tools in one place." />
+      <ScreenHeader title="Hub" subtitle="All tools in one place." />
 
       <div className="tools__search">
         <SearchBar value={query} onChange={setQuery} placeholder="Search tools..." />

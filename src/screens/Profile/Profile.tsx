@@ -129,7 +129,7 @@ export function Profile() {
 
   return (
     <div className="screen">
-      <ScreenHeader title="Profile" subtitle="Manage your app and data." />
+      <ScreenHeader title="Desk" subtitle="Manage your app and data." />
 
       <div className="pf__body">
         <section className="pf__section">
