@@ -9,10 +9,10 @@ service cloud.firestore {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
 
-    // Pro entitlement lives on the user's root doc (a different path depth than the
-    // wildcard rule above, so it never inherits that rule's write access). The owner
-    // may read their own status; only server-side code (Admin SDK, which bypasses
-    // rules entirely) may ever set isPro — the client can never grant itself Pro.
+    // The user's root doc (a different path depth than the wildcard rule above, so it
+    // never inherits that rule's write access) is reserved for fields only server-side
+    // code should ever set (Admin SDK, which bypasses rules entirely) — nothing here
+    // today, but the client can never write to it regardless.
     match /users/{userId} {
       allow read: if request.auth != null && request.auth.uid == userId;
       allow write: if false;

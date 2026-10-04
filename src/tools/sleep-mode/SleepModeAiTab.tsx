@@ -102,7 +102,7 @@ export function SleepModeAiTab({ onBack }: SleepModeAiTabProps) {
         subtitle="Your personal bedtime companion"
         onBack={onBack}
         action={
-          <span className={`sm__ai2-pro-badge${isActive ? ' sm__ai2-pro-badge--active' : ''}`}>
+          <span className={`sm__ai2-status-badge${isActive ? ' sm__ai2-status-badge--active' : ''}`}>
             <Icon name={isActive ? 'check' : 'lock'} size={12} />
             {isActive ? 'ACTIVE' : 'SIGN IN'}
           </span>
@@ -126,7 +126,7 @@ export function SleepModeAiTab({ onBack }: SleepModeAiTabProps) {
             <span className="sm__ai2-toggle-title-row">
               <strong>Sleep Mode AI</strong>
               {!isActive && (
-                <span className="sm__ai2-pro-chip">
+                <span className="sm__ai2-status-chip">
                   <Icon name="lock" size={10} />
                   SIGN IN TO ACTIVATE
                 </span>

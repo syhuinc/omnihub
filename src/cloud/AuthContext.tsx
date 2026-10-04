@@ -1,6 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import { FirebaseAuthentication, type User } from '@capacitor-firebase/authentication';
-import { FirebaseFirestore } from '@capacitor-firebase/firestore';
 import { deleteAccountAndData } from './deleteAccount';
 
 export type { User };
@@ -11,9 +10,6 @@ interface AuthContextValue {
   signingIn: boolean;
   deletingAccount: boolean;
   error: string | null;
-  /** Pro entitlement, read live from the user's Firestore doc (server-write-only — see
-   *  firestore.rules). False while signed out or before the first snapshot arrives. */
-  isPro: boolean;
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
   /** Permanently deletes the signed-in user's synced data and their account. Throws on failure. */
@@ -28,7 +24,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [signingIn, setSigningIn] = useState(false);
   const [deletingAccount, setDeletingAccount] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isPro, setIsPro] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -53,35 +48,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       listenerPromise.then((l) => l.remove());
     };
   }, []);
-
-  // Live Pro-status listener, re-attached whenever the signed-in user changes. The doc is
-  // server-write-only (see firestore.rules), so this only ever reflects what the backend set.
-  useEffect(() => {
-    if (!user) {
-      setIsPro(false);
-      return;
-    }
-    let mounted = true;
-    let callbackId: string | null = null;
-
-    FirebaseFirestore.addDocumentSnapshotListener<{ isPro?: boolean }>(
-      { reference: `users/${user.uid}` },
-      (event) => {
-        if (mounted) setIsPro(event?.snapshot.data?.isPro === true);
-      },
-    )
-      .then((id) => {
-        callbackId = id;
-      })
-      .catch(() => {
-        // web fallback / plugin unavailable — stay non-Pro rather than block the app
-      });
-
-    return () => {
-      mounted = false;
-      if (callbackId) FirebaseFirestore.removeSnapshotListener({ callbackId });
-    };
-  }, [user]);
 
   async function signInWithGoogle() {
     setError(null);
@@ -128,7 +94,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, loading, signingIn, deletingAccount, error, isPro, signInWithGoogle, signOut, deleteAccount }}
+      value={{ user, loading, signingIn, deletingAccount, error, signInWithGoogle, signOut, deleteAccount }}
     >
       {children}
     </AuthContext.Provider>

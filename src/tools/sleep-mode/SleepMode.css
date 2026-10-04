@@ -1597,7 +1597,7 @@
   color: transparent;
 }
 
-.sm__ai2-pro-badge {
+.sm__ai2-status-badge {
   display: flex;
   align-items: center;
   gap: 4px;
@@ -1610,7 +1610,7 @@
   letter-spacing: 0.02em;
 }
 
-.sm__ai2-pro-badge--active {
+.sm__ai2-status-badge--active {
   background: linear-gradient(135deg, var(--green), color-mix(in srgb, var(--green) 70%, black));
   color: #fff;
 }
@@ -1694,7 +1694,7 @@
   color: var(--text-primary);
 }
 
-.sm__ai2-pro-chip {
+.sm__ai2-status-chip {
   display: flex;
   align-items: center;
   gap: 3px;
