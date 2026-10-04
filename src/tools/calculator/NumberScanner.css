@@ -127,6 +127,8 @@
   display: flex;
   gap: 8px;
   overflow-x: auto;
+  mask-image: linear-gradient(to right, black calc(100% - 32px), transparent);
+  -webkit-mask-image: linear-gradient(to right, black calc(100% - 32px), transparent);
   padding: 0 16px;
 }
 

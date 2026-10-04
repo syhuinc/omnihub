@@ -8,6 +8,8 @@
   gap: 8px;
   padding: 0 20px 16px;
   overflow-x: auto;
+  mask-image: linear-gradient(to right, black calc(100% - 32px), transparent);
+  -webkit-mask-image: linear-gradient(to right, black calc(100% - 32px), transparent);
   scrollbar-width: none;
 }
 
