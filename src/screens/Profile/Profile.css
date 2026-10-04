@@ -67,7 +67,10 @@
 .pf__nav-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: 22px 14px;
+  perspective: 600px;
+  perspective-origin: 50% -30%;
+  padding-bottom: 10px;
 }
 
 .pf__nav-tile {
@@ -80,13 +83,30 @@
   background: var(--bg-elevated);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-sm), 0 20px 22px -14px rgba(0, 0, 0, 0.55);
   position: relative;
   overflow: hidden;
+  transform: rotateX(18deg);
+  transform-origin: 50% 100%;
+  transition: transform 0.15s ease;
 }
 
 .pf__nav-tile--wide {
   grid-column: span 2;
+  transform: rotateX(13deg);
+}
+
+.pf__nav-tile:nth-child(2) { transform: rotateX(18deg) rotateY(-3deg); }
+.pf__nav-tile:nth-child(3) { transform: rotateX(18deg) rotateY(3deg); }
+.pf__nav-tile:nth-child(4) { transform: rotateX(18deg) rotateY(-3deg); }
+.pf__nav-tile:nth-child(5) { transform: rotateX(18deg) rotateY(3deg); }
+
+.pf__nav-tile:active:not(:disabled) {
+  transform: rotateX(18deg) scale(0.97);
+}
+
+.pf__nav-tile--wide:active:not(:disabled) {
+  transform: rotateX(13deg) scale(0.97);
 }
 
 .pf__nav-tile::before {
