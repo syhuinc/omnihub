@@ -14,15 +14,17 @@ interface NavItem {
   icon: string;
   title: string;
   subtitle: string;
+  wide?: boolean;
+  accent: 'blue' | 'purple' | 'teal' | 'green' | 'yellow';
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { path: '/profile/account', icon: iconProfile, title: 'Profile', subtitle: 'Your account, devices and personal settings.' },
-  { path: '/profile/settings', icon: iconGear, title: 'Settings', subtitle: 'App preferences and behavior.' },
-  { path: '/profile/appearance', icon: iconPalette, title: 'Appearance', subtitle: 'Theme, colors, and visual style.' },
-  { path: '/profile/data-sync', icon: iconCloud, title: 'Data & Sync', subtitle: 'Cloud sync, backup, and data management.' },
-  { path: '/profile/privacy', icon: iconShield, title: 'Privacy & Security', subtitle: 'Permissions, data controls and security options.' },
-  { path: '/profile/about', icon: iconInfo, title: 'About Omni Hub', subtitle: 'Version, support and credits.' },
+  { path: '/profile/account', icon: iconProfile, title: 'Profile', subtitle: 'Your account, devices and personal settings.', wide: true, accent: 'blue' },
+  { path: '/profile/settings', icon: iconGear, title: 'Settings', subtitle: 'App preferences.', accent: 'blue' },
+  { path: '/profile/appearance', icon: iconPalette, title: 'Appearance', subtitle: 'Theme and style.', accent: 'purple' },
+  { path: '/profile/data-sync', icon: iconCloud, title: 'Data & Sync', subtitle: 'Backup and storage.', accent: 'teal' },
+  { path: '/profile/privacy', icon: iconShield, title: 'Privacy', subtitle: 'Permissions and security.', accent: 'green' },
+  { path: '/profile/about', icon: iconInfo, title: 'About Omni Hub', subtitle: 'Version, support and credits.', wide: true, accent: 'yellow' },
 ];
 
 export function Profile() {
@@ -46,15 +48,22 @@ export function Profile() {
       </div>
 
       <div className="pf__body pf__body--nav">
-        <nav className="pf__nav-list">
+        <nav className="pf__nav-grid">
           {NAV_ITEMS.map((item) => (
-            <button key={item.path} type="button" className="pf__nav-row" onClick={() => navigate(item.path)}>
-              <img src={item.icon} alt="" className="pf__nav-icon" />
-              <span className="pf__nav-text">
+            <button
+              key={item.path}
+              type="button"
+              className={`pf__nav-tile pf__nav-tile--${item.accent}${item.wide ? ' pf__nav-tile--wide' : ''}`}
+              onClick={() => navigate(item.path)}
+            >
+              <span className="pf__nav-tile-icon">
+                <img src={item.icon} alt="" />
+              </span>
+              <span className="pf__nav-tile-text">
                 <strong>{item.title}</strong>
                 <span>{item.subtitle}</span>
               </span>
-              <Icon name="chevron-right" size={18} className="pf__row-chevron" />
+              <Icon name="chevron-right" size={16} className="pf__nav-tile-chevron" />
             </button>
           ))}
         </nav>
