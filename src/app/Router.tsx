@@ -25,7 +25,8 @@ function parentPath(path: string): string {
   if (path === '/storage-details') return '/phone-center';
   if (path === '/health-check') return '/phone-center';
   if (path === '/phone-center') return '/';
-  if (path === '/privacy-policy') return '/profile';
+  if (path === '/privacy-policy') return '/profile/privacy';
+  if (path.startsWith('/profile/')) return '/profile';
   return '/';
 }
 

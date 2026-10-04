@@ -8,6 +8,14 @@ import { Tools } from '../screens/Tools/Tools';
 import { Craft } from '../screens/Craft/Craft';
 import { SyxdiAi } from '../screens/SyxdiAi/SyxdiAi';
 import { Profile } from '../screens/Profile/Profile';
+import {
+  ProfileAccount,
+  ProfileSettings,
+  ProfileAppearance,
+  ProfileDataSync,
+  ProfilePrivacy,
+  ProfileAbout,
+} from '../screens/Profile/ProfileSections';
 import { ToolRoute } from '../tools/ToolRoute';
 import { PhoneCenter } from '../screens/PhoneCenter/PhoneCenter';
 import { DeviceInfo } from '../screens/PhoneCenter/DeviceInfo';
@@ -33,6 +41,12 @@ function Screen() {
   if (path === '/ai') return <SyxdiAi />;
   if (path === '/craft') return <Craft />;
   if (path === '/profile') return <Profile />;
+  if (path === '/profile/account') return <ProfileAccount />;
+  if (path === '/profile/settings') return <ProfileSettings />;
+  if (path === '/profile/appearance') return <ProfileAppearance />;
+  if (path === '/profile/data-sync') return <ProfileDataSync />;
+  if (path === '/profile/privacy') return <ProfilePrivacy />;
+  if (path === '/profile/about') return <ProfileAbout />;
   if (path === '/phone-center') return <PhoneCenter />;
   if (path === '/device-info') return <DeviceInfo />;
   if (path === '/storage-details') return <StorageDetails />;
