@@ -1050,6 +1050,21 @@
   text-align: center;
 }
 
+.ac__empty-icon {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle, color-mix(in srgb, var(--accent) 18%, transparent), transparent 70%);
+  box-shadow: 0 0 32px -6px color-mix(in srgb, var(--accent) 55%, transparent);
+}
+
+.ac__empty .ac__empty-icon svg {
+  color: var(--accent);
+}
+
 .ac__empty svg {
   color: var(--text-tertiary);
 }

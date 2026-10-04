@@ -268,7 +268,18 @@
   border-radius: var(--radius-lg);
 }
 
-.sc__empty svg {
+.sc__empty-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle, color-mix(in srgb, var(--purple) 18%, transparent), transparent 70%);
+  box-shadow: 0 0 32px -6px color-mix(in srgb, var(--purple) 55%, transparent);
+}
+
+.sc__empty-icon svg {
   color: var(--purple);
 }
 

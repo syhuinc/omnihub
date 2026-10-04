@@ -252,7 +252,9 @@ export function SubscriptionCalculator() {
 
         {subs.length === 0 ? (
           <div className="sc__empty">
-            <Icon name="package" size={40} />
+            <span className="sc__empty-icon">
+              <Icon name="package" size={40} />
+            </span>
             <strong>No subscriptions yet</strong>
             <span>Add your first subscription to start tracking your monthly and yearly costs.</span>
             <button type="button" className="sc__empty-btn" onClick={focusAddForm}>

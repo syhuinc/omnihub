@@ -134,7 +134,9 @@ export function AgeCalculator() {
         <div className="ac__body">
           {!me ? (
             <div className="ac__empty">
-              <Icon name="cake" size={40} />
+              <span className="ac__empty-icon">
+                <Icon name="cake" size={40} />
+              </span>
               <strong>Set your birth date</strong>
               <span>Tap below to calculate your exact age and next birthday.</span>
               <button type="button" className="ad__calculate" onClick={() => setEditingId('new')}>
