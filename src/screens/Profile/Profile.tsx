@@ -1,30 +1,28 @@
 import { useRouter } from '../../app/Router';
 import { Icon } from '../../components/Icon';
 import heroDesk from '../../assets/profile/hero-desk.webp';
-import iconProfile from '../../assets/profile/icon-profile.webp';
-import iconGear from '../../assets/profile/icon-gear.webp';
-import iconPalette from '../../assets/profile/icon-palette.webp';
-import iconCloud from '../../assets/profile/icon-cloud.webp';
-import iconShield from '../../assets/profile/icon-shield.webp';
-import iconInfo from '../../assets/profile/icon-info.webp';
+import bannerProfile from '../../assets/profile/banner-profile.webp';
+import bannerSettings from '../../assets/profile/banner-settings.webp';
+import bannerAppearance from '../../assets/profile/banner-appearance.webp';
+import bannerDataSync from '../../assets/profile/banner-datasync.webp';
+import bannerPrivacy from '../../assets/profile/banner-privacy.webp';
+import bannerAbout from '../../assets/profile/banner-about.webp';
 import './Profile.css';
 
 interface NavItem {
   path: string;
-  icon: string;
+  banner: string;
   title: string;
   subtitle: string;
-  wide?: boolean;
-  accent: 'blue' | 'purple' | 'teal' | 'green' | 'yellow';
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { path: '/profile/account', icon: iconProfile, title: 'Profile', subtitle: 'Your account, devices and personal settings.', wide: true, accent: 'blue' },
-  { path: '/profile/settings', icon: iconGear, title: 'Settings', subtitle: 'App preferences.', accent: 'blue' },
-  { path: '/profile/appearance', icon: iconPalette, title: 'Appearance', subtitle: 'Theme and style.', accent: 'purple' },
-  { path: '/profile/data-sync', icon: iconCloud, title: 'Data & Sync', subtitle: 'Backup and storage.', accent: 'teal' },
-  { path: '/profile/privacy', icon: iconShield, title: 'Privacy', subtitle: 'Permissions and security.', accent: 'green' },
-  { path: '/profile/about', icon: iconInfo, title: 'About Omni Hub', subtitle: 'Version, support and credits.', wide: true, accent: 'yellow' },
+  { path: '/profile/account', banner: bannerProfile, title: 'Profile', subtitle: 'Your account, devices and personal settings.' },
+  { path: '/profile/settings', banner: bannerSettings, title: 'Settings', subtitle: 'App preferences and behavior.' },
+  { path: '/profile/appearance', banner: bannerAppearance, title: 'Appearance', subtitle: 'Theme, colors, and visual style.' },
+  { path: '/profile/data-sync', banner: bannerDataSync, title: 'Data & Sync', subtitle: 'Cloud sync, backup, and data management.' },
+  { path: '/profile/privacy', banner: bannerPrivacy, title: 'Privacy & Security', subtitle: 'Permissions, data controls and security options.' },
+  { path: '/profile/about', banner: bannerAbout, title: 'About Omni Hub', subtitle: 'Version, support and credits.' },
 ];
 
 export function Profile() {
@@ -48,22 +46,15 @@ export function Profile() {
       </div>
 
       <div className="pf__body pf__body--nav">
-        <nav className="pf__nav-grid">
+        <nav className="pf__nav-list">
           {NAV_ITEMS.map((item) => (
-            <button
-              key={item.path}
-              type="button"
-              className={`pf__nav-tile pf__nav-tile--${item.accent}${item.wide ? ' pf__nav-tile--wide' : ''}`}
-              onClick={() => navigate(item.path)}
-            >
-              <span className="pf__nav-tile-icon">
-                <img src={item.icon} alt="" />
-              </span>
-              <span className="pf__nav-tile-text">
+            <button key={item.path} type="button" className="pf__nav-banner" onClick={() => navigate(item.path)}>
+              <img src={item.banner} alt="" className="pf__nav-banner-img" />
+              <span className="pf__nav-banner-text">
                 <strong>{item.title}</strong>
                 <span>{item.subtitle}</span>
               </span>
-              <Icon name="chevron-right" size={16} className="pf__nav-tile-chevron" />
+              <Icon name="chevron-right" size={18} className="pf__nav-banner-chevron" />
             </button>
           ))}
         </nav>
