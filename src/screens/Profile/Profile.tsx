@@ -14,15 +14,16 @@ interface NavItem {
   banner: string;
   title: string;
   subtitle: string;
+  wide?: boolean;
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { path: '/profile/account', banner: bannerProfile, title: 'Profile', subtitle: 'Your account, devices and personal settings.' },
-  { path: '/profile/settings', banner: bannerSettings, title: 'Settings', subtitle: 'App preferences and behavior.' },
-  { path: '/profile/appearance', banner: bannerAppearance, title: 'Appearance', subtitle: 'Theme, colors, and visual style.' },
-  { path: '/profile/data-sync', banner: bannerDataSync, title: 'Data & Sync', subtitle: 'Cloud sync, backup, and data management.' },
-  { path: '/profile/privacy', banner: bannerPrivacy, title: 'Privacy & Security', subtitle: 'Permissions, data controls and security options.' },
-  { path: '/profile/about', banner: bannerAbout, title: 'About Omni Hub', subtitle: 'Version, support and credits.' },
+  { path: '/profile/account', banner: bannerProfile, title: 'Profile', subtitle: 'Your account, devices and personal settings.', wide: true },
+  { path: '/profile/settings', banner: bannerSettings, title: 'Settings', subtitle: 'App preferences.' },
+  { path: '/profile/appearance', banner: bannerAppearance, title: 'Appearance', subtitle: 'Theme and style.' },
+  { path: '/profile/data-sync', banner: bannerDataSync, title: 'Data & Sync', subtitle: 'Backup and storage.' },
+  { path: '/profile/privacy', banner: bannerPrivacy, title: 'Privacy', subtitle: 'Permissions & security.' },
+  { path: '/profile/about', banner: bannerAbout, title: 'About Omni Hub', subtitle: 'Version, support and credits.', wide: true },
 ];
 
 export function Profile() {
@@ -46,10 +47,15 @@ export function Profile() {
       </div>
 
       <div className="pf__body pf__body--nav">
-        <nav className="pf__nav-list">
+        <nav className="pf__nav-grid">
           {NAV_ITEMS.map((item) => (
-            <button key={item.path} type="button" className="pf__nav-banner" onClick={() => navigate(item.path)}>
-              <img src={item.banner} alt="" className="pf__nav-banner-img" />
+            <button
+              key={item.path}
+              type="button"
+              className={`pf__nav-banner${item.wide ? ' pf__nav-banner--wide' : ''}`}
+              style={{ backgroundImage: `url(${item.banner})` }}
+              onClick={() => navigate(item.path)}
+            >
               <span className="pf__nav-banner-text">
                 <strong>{item.title}</strong>
                 <span>{item.subtitle}</span>
