@@ -6,7 +6,7 @@ Omni Hub doesn't require an account. Signing in with Google is entirely optional
 
 ## What we collect
 
-**If you never sign in:** nothing. Omni Hub makes no network requests, uses no analytics, tracking, or advertising SDKs, and never transmits anything, because it never leaves your device.
+**If you never sign in:** nothing. Every tool's data (notes, alarms, Vault, and everything else) stays on your device and is never sent anywhere. Omni Hub itself uses no analytics, tracking, or advertising SDKs. The Google libraries we use for optional sign-in are built into the app and may make minimal automatic device-identification calls in the background on their own, as any app using Google's Firebase does — we turn their automatic data collection off by default (see [Third-party services](#third-party-services) below), but that's Google's library behavior, not something Omni Hub reads, controls, or can fully guarantee.
 
 **If you choose to sign in with Google** (Profile ▸ Cloud Sync), to sync your data across your own devices:
 
@@ -33,11 +33,13 @@ Notes, photos, and files you save in the **Vault** are additionally encrypted on
 
 Your PIN is never stored anywhere, on-device or in the cloud — only used to derive that key each time you unlock — so if you forget it, Vault content cannot be recovered and the Vault must be reset. Opening or saving a Vault photo/file decrypts a temporary copy for that action (e.g. to view an image or save it to your Downloads folder); that copy is no longer encrypted once it leaves the Vault. Vault photos and files are not included in the main **Profile ▸ Export Backup** file; use **Vault ▸ Photos & Files ▸ Export** instead, which decrypts them into a plain `.zip` file on your device — that zip is unencrypted, since it needs to be readable outside the app, so store or share it with the same care you'd give the original photos/files. Use **Vault ▸ Photos & Files ▸ Import** to bring that zip back in (e.g. after reinstalling), which re-encrypts everything as it's added.
 
+After 5 wrong PIN attempts, Vault locks itself out with an escalating delay (30s, then 1m, 2m, 5m, 10m, and 30m for every attempt after that) before you can try again — this never clears or wipes any Vault data, it only slows down guessing.
+
 ## Permissions
 
 Omni Hub does not access your contacts. It requests these permissions, all used only to make features work (or reserved for a locked feature not yet available to use), never to collect or transmit data beyond what's described above:
 
-- **Internet / network access** — required only for the optional Google Sign-In and cloud sync described above. Unused unless you sign in. Omni Hub separately checks (but does not use to connect anywhere) whether you currently have a Wi-Fi or mobile connection, to show connection status on the "My Phone" card and Phone Health Check.
+- **Internet / network access** — required only for the optional Google Sign-In and cloud sync described above, and for Sleep Mode AI (see below). Unused unless you sign in. Omni Hub separately checks (but does not use to connect anywhere) whether you currently have a Wi-Fi or mobile connection, to show connection status on the "My Phone" card and Phone Health Check.
 - **Vibrate** — haptic feedback (tap and completion vibrations).
 - **Alarms, notifications, and background wake permissions** (schedule alarms, post notifications, run in the foreground briefly while an alarm rings, keep the device awake for that, show the ringing screen over the lock screen, and restart alarms after the device reboots) — all used solely by the **Alarm** feature, so an alarm you set still rings even if Omni Hub is closed. None of this involves any network access.
 - **Display over other apps** — used only by **Sleep Mode**'s on-screen reminder card, so it can appear on top of whatever you're doing when a reminder fires, but only while your phone is unlocked and in active use. Without this permission granted, the same reminder still shows as a normal notification.
@@ -55,9 +57,13 @@ Two more things Phone Center and Phone Health Check read, neither of which needs
 
 Alarms you create are stored on your device (both in the app's own storage and, separately, in Android's system alarm scheduler so they still fire when the app isn't open) and are used only to ring at the time you set. If you're signed in, an alarm's time, label, repeat setting, chosen sound, and backup-ring settings sync the same way as the other tools listed above, so an alarm you set on one device also rings on your other signed-in devices; alarms don't sync at all if you're not signed in. If you pick a custom ringtone, Omni Hub only stores a reference to the sound file already on that device — it doesn't copy or transmit the audio itself, so a synced alarm using a custom sound falls back to the default alarm sound on a device that doesn't have that same file.
 
+## Sleep Mode AI
+
+Sleep Mode AI is available to anyone signed in, for the Gentle and Friendly personalities. When it generates your reminders, it sends only your chosen personality to Omni Hub's own Cloud Function (which requires your sign-in to call, so usage can be rate-limited), and the Cloud Function forwards that to Google's Gemini API to write the reminder text and a voice clip. Your name, work/school routine, and interests are never sent — Sleep Mode's "Personal" mode uses those only to fill in reminders on your own device, and they never leave it. Nothing from the Cloud Function request is stored by Omni Hub beyond the generated reminders already described for Sleep Mode above; it isn't used to train any model. Every other Sleep Mode personality, and Sleep Mode for anyone not signed in, runs entirely from reminders bundled with the app — nothing about those is ever sent anywhere.
+
 ## Third-party services
 
-Signing in and syncing uses Google's Firebase platform (Firebase Authentication and Cloud Firestore). Google's own privacy policy governs how Google handles data on their servers: <https://policies.google.com/privacy>.
+Signing in and syncing uses Google's Firebase platform (Firebase Authentication and Cloud Firestore). Sleep Mode AI (Gentle/Friendly, signed-in users — see above) additionally uses a Cloud Function, also on Firebase, which calls Google's Gemini API. We set Firebase's own flag to disable its automatic background data collection by default, so these libraries only act when a feature here actually calls them (signing in, syncing, or generating a Sleep Mode AI reminder) — never automatically. Google's own privacy policy governs how Google handles data on their servers: <https://policies.google.com/privacy>.
 
 ## Children's privacy
 
