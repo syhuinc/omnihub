@@ -47,6 +47,7 @@ export function Profile() {
       </div>
 
       <div className="pf__body pf__body--nav">
+        <div className="pf__nav-bg" style={{ backgroundImage: `url(${heroDesk})` }} />
         <nav className="pf__nav-grid">
           {NAV_ITEMS.map((item) => (
             <button
