@@ -10,19 +10,19 @@
   padding-top: calc(28px + var(--safe-top));
   padding-bottom: 28px;
   padding-inline: 20px;
-  aspect-ratio: 941 / 1672;
+  aspect-ratio: 941 / 1350;
   display: flex;
   align-items: flex-start;
   background-size: cover;
   background-position: center top;
   background-color: var(--bg-elevated);
-  margin-bottom: -72px;
+  margin-bottom: -452px;
 }
 
 .pf__hero-scrim {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(5, 8, 16, 0.6) 0%, rgba(5, 8, 16, 0.12) 22%, rgba(5, 8, 16, 0.08) 70%, var(--bg) 100%);
+  background: linear-gradient(180deg, rgba(5, 8, 16, 0.6) 0%, rgba(5, 8, 16, 0.12) 22%, rgba(5, 8, 16, 0.08) 48%, rgba(5, 8, 16, 0.45) 100%);
 }
 
 .pf__hero-text {
@@ -58,22 +58,17 @@
 }
 
 .pf__body--nav {
-  flex: 1;
   position: relative;
   z-index: 1;
   padding-top: 0;
   gap: 12px;
-  overflow: hidden;
 }
 
-.pf__nav-bg {
-  position: absolute;
-  inset: -80px 0 0 0;
+.pf__footer-photo {
+  width: 100%;
+  aspect-ratio: 941 / 322;
   background-size: cover;
-  background-position: center 18%;
-  filter: blur(3px) brightness(0.32) saturate(1.15);
-  transform: scale(1.08);
-  z-index: 0;
+  background-position: center;
 }
 
 .pf__nav-grid {
@@ -107,7 +102,7 @@
     0 10px 24px -10px rgba(0, 0, 0, 0.6),
     inset 0 1px 0 rgba(255, 255, 255, 0.4),
     inset 0 0 0 1px rgba(255, 255, 255, 0.06);
-  transform: rotateX(10deg);
+  transform: rotateX(6deg);
   transform-origin: 50% 100%;
   transition: transform 0.15s ease;
 }
@@ -132,7 +127,7 @@
 }
 
 .pf__nav-card:active:not(:disabled) {
-  transform: rotateX(10deg) scale(0.97);
+  transform: rotateX(6deg) scale(0.97);
 }
 
 .pf__nav-card-icon {

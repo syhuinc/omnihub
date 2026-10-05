@@ -1,6 +1,7 @@
 import { useRouter } from '../../app/Router';
 import { Icon } from '../../components/Icon';
-import heroDesk from '../../assets/profile/hero-desk.webp';
+import heroDeskTop from '../../assets/profile/hero-desk-top.webp';
+import heroDeskBottom from '../../assets/profile/hero-desk-bottom.webp';
 import iconProfile from '../../assets/profile/icon-profile.webp';
 import iconSettings from '../../assets/profile/icon-settings.webp';
 import iconAppearance from '../../assets/profile/icon-appearance.webp';
@@ -31,15 +32,13 @@ export function Profile() {
 
   return (
     <div className="screen">
-      <div className="pf__hero" style={{ backgroundImage: `url(${heroDesk})` }}>
+      <div className="pf__hero" style={{ backgroundImage: `url(${heroDeskTop})` }}>
         <div className="pf__hero-scrim" />
         <div className="pf__hero-text">
           <span className="pf__hero-eyebrow">OMNI HUB</span>
           <h1 className="pf__hero-title">Desk</h1>
           <p className="pf__hero-subtitle">
-            Your space.
-            <br />
-            Your settings.
+            Your space, your settings.
             <br />
             Your data.
           </p>
@@ -47,7 +46,6 @@ export function Profile() {
       </div>
 
       <div className="pf__body pf__body--nav">
-        <div className="pf__nav-bg" style={{ backgroundImage: `url(${heroDesk})` }} />
         <nav className="pf__nav-grid">
           {NAV_ITEMS.map((item) => (
             <button
@@ -68,6 +66,8 @@ export function Profile() {
           ))}
         </nav>
       </div>
+
+      <div className="pf__footer-photo" style={{ backgroundImage: `url(${heroDeskBottom})` }} />
     </div>
   );
 }
