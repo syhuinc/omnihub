@@ -95,7 +95,8 @@
   padding: 0;
   text-align: left;
   background-color: rgba(10, 15, 26, 0.46);
-  background-size: cover;
+  background-size: contain;
+  background-repeat: no-repeat;
   background-position: left center;
   background-blend-mode: screen;
   backdrop-filter: blur(14px) saturate(140%);
