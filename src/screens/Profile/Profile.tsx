@@ -1,7 +1,6 @@
 import { useRouter } from '../../app/Router';
 import { Icon } from '../../components/Icon';
-import heroDeskTop from '../../assets/profile/hero-desk-top.webp';
-import heroDeskBottom from '../../assets/profile/hero-desk-bottom.webp';
+import heroDesk from '../../assets/profile/hero-desk.webp';
 import iconProfile from '../../assets/profile/icon-profile.webp';
 import iconSettings from '../../assets/profile/icon-settings.webp';
 import iconAppearance from '../../assets/profile/icon-appearance.webp';
@@ -32,7 +31,7 @@ export function Profile() {
 
   return (
     <div className="screen">
-      <div className="pf__hero" style={{ backgroundImage: `url(${heroDeskTop})` }}>
+      <div className="pf__hero" style={{ backgroundImage: `url(${heroDesk})` }}>
         <div className="pf__hero-scrim" />
         <div className="pf__hero-text">
           <span className="pf__hero-eyebrow">OMNI HUB</span>
@@ -66,8 +65,6 @@ export function Profile() {
           ))}
         </nav>
       </div>
-
-      <div className="pf__footer-photo" style={{ backgroundImage: `url(${heroDeskBottom})` }} />
     </div>
   );
 }

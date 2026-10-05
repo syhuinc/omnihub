@@ -10,19 +10,19 @@
   padding-top: calc(28px + var(--safe-top));
   padding-bottom: 28px;
   padding-inline: 20px;
-  aspect-ratio: 941 / 1350;
+  aspect-ratio: 941 / 1672;
   display: flex;
   align-items: flex-start;
   background-size: cover;
   background-position: center top;
   background-color: var(--bg-elevated);
-  margin-bottom: -452px;
+  margin-bottom: -593px;
 }
 
 .pf__hero-scrim {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(5, 8, 16, 0.6) 0%, rgba(5, 8, 16, 0.12) 22%, rgba(5, 8, 16, 0.08) 48%, rgba(5, 8, 16, 0.45) 100%);
+  background: linear-gradient(180deg, rgba(5, 8, 16, 0.6) 0%, rgba(5, 8, 16, 0.1) 18%, rgba(5, 8, 16, 0.08) 100%);
 }
 
 .pf__hero-text {
@@ -62,13 +62,6 @@
   z-index: 1;
   padding-top: 0;
   gap: 12px;
-}
-
-.pf__footer-photo {
-  width: 100%;
-  aspect-ratio: 941 / 322;
-  background-size: cover;
-  background-position: center;
 }
 
 .pf__nav-grid {
