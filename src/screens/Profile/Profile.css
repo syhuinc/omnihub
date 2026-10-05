@@ -8,13 +8,13 @@
 .pf__hero {
   position: relative;
   padding-top: calc(28px + var(--safe-top));
-  padding-bottom: 100px;
+  padding-bottom: 28px;
   padding-inline: 20px;
-  min-height: 300px;
+  aspect-ratio: 941 / 1672;
   display: flex;
-  align-items: flex-end;
+  align-items: flex-start;
   background-size: cover;
-  background-position: center 18%;
+  background-position: center top;
   background-color: var(--bg-elevated);
   margin-bottom: -72px;
 }
@@ -22,7 +22,7 @@
 .pf__hero-scrim {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(5, 8, 16, 0.5) 0%, rgba(5, 8, 16, 0.22) 35%, var(--bg) 100%);
+  background: linear-gradient(180deg, rgba(5, 8, 16, 0.6) 0%, rgba(5, 8, 16, 0.12) 22%, rgba(5, 8, 16, 0.08) 70%, var(--bg) 100%);
 }
 
 .pf__hero-text {
@@ -97,15 +97,34 @@
   min-width: 0;
   padding: 12px;
   text-align: left;
+  overflow: hidden;
   background-color: rgba(10, 15, 26, 0.46);
   backdrop-filter: blur(14px) saturate(140%);
   -webkit-backdrop-filter: blur(14px) saturate(140%);
-  border: 1px solid rgba(140, 170, 255, 0.22);
+  border: 1px solid rgba(170, 195, 255, 0.3);
   border-radius: var(--radius-lg);
-  box-shadow: 0 10px 24px -10px rgba(0, 0, 0, 0.6);
+  box-shadow:
+    0 10px 24px -10px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06);
   transform: rotateX(10deg);
   transform-origin: 50% 100%;
   transition: transform 0.15s ease;
+}
+
+.pf__nav-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.28) 0%,
+    rgba(255, 255, 255, 0.1) 18%,
+    rgba(255, 255, 255, 0) 42%,
+    rgba(255, 255, 255, 0) 70%,
+    rgba(255, 255, 255, 0.06) 100%
+  );
+  pointer-events: none;
 }
 
 .pf__nav-card--wide {
