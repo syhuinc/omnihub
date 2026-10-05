@@ -1,29 +1,29 @@
 import { useRouter } from '../../app/Router';
 import { Icon } from '../../components/Icon';
 import heroDesk from '../../assets/profile/hero-desk.webp';
-import bannerProfile from '../../assets/profile/banner-profile.webp';
-import bannerSettings from '../../assets/profile/banner-settings.webp';
-import bannerAppearance from '../../assets/profile/banner-appearance.webp';
-import bannerDataSync from '../../assets/profile/banner-datasync.webp';
-import bannerPrivacy from '../../assets/profile/banner-privacy.webp';
-import bannerAbout from '../../assets/profile/banner-about.webp';
+import iconProfile from '../../assets/profile/icon-profile.webp';
+import iconSettings from '../../assets/profile/icon-settings.webp';
+import iconAppearance from '../../assets/profile/icon-appearance.webp';
+import iconDataSync from '../../assets/profile/icon-datasync.webp';
+import iconPrivacy from '../../assets/profile/icon-privacy.webp';
+import iconAbout from '../../assets/profile/icon-about.webp';
 import './Profile.css';
 
 interface NavItem {
   path: string;
-  banner: string;
+  icon: string;
   title: string;
   subtitle: string;
   wide?: boolean;
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { path: '/profile/account', banner: bannerProfile, title: 'Profile', subtitle: 'Your account, devices and personal settings.', wide: true },
-  { path: '/profile/settings', banner: bannerSettings, title: 'Settings', subtitle: 'App preferences.' },
-  { path: '/profile/appearance', banner: bannerAppearance, title: 'Appearance', subtitle: 'Theme and style.' },
-  { path: '/profile/data-sync', banner: bannerDataSync, title: 'Data & Sync', subtitle: 'Backup and storage.' },
-  { path: '/profile/privacy', banner: bannerPrivacy, title: 'Privacy', subtitle: 'Permissions & security.' },
-  { path: '/profile/about', banner: bannerAbout, title: 'About Omni Hub', subtitle: 'Version, support and credits.', wide: true },
+  { path: '/profile/account', icon: iconProfile, title: 'Profile', subtitle: 'Your account, devices and personal settings.', wide: true },
+  { path: '/profile/settings', icon: iconSettings, title: 'Settings', subtitle: 'App preferences and behavior.' },
+  { path: '/profile/appearance', icon: iconAppearance, title: 'Appearance', subtitle: 'Theme, colors, and visual style.' },
+  { path: '/profile/data-sync', icon: iconDataSync, title: 'Data & Sync', subtitle: 'Cloud sync, backup and storage.' },
+  { path: '/profile/privacy', icon: iconPrivacy, title: 'Privacy & Security', subtitle: 'Permissions and security options.' },
+  { path: '/profile/about', icon: iconAbout, title: 'About Omni Hub', subtitle: 'Version, support and credits.', wide: true },
 ];
 
 export function Profile() {
@@ -53,15 +53,17 @@ export function Profile() {
             <button
               key={item.path}
               type="button"
-              className={`pf__nav-banner${item.wide ? ' pf__nav-banner--wide' : ''}`}
-              style={{ backgroundImage: `url(${item.banner})` }}
+              className={`pf__nav-card${item.wide ? ' pf__nav-card--wide' : ''}`}
               onClick={() => navigate(item.path)}
             >
-              <span className="pf__nav-banner-text">
+              <img className="pf__nav-card-icon" src={item.icon} alt="" />
+              <span className="pf__nav-card-text">
                 <strong>{item.title}</strong>
                 <span>{item.subtitle}</span>
               </span>
-              <Icon name="chevron-right" size={18} className="pf__nav-banner-chevron" />
+              <span className="pf__nav-card-chevron">
+                <Icon name="chevron-right" size={14} />
+              </span>
             </button>
           ))}
         </nav>
