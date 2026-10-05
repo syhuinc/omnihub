@@ -6,6 +6,7 @@
 }
 
 .craft__body {
+  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -205,6 +206,7 @@
 }
 
 .craft__thanks {
+  margin-top: auto;
   display: flex;
   flex-direction: column;
   gap: 6px;

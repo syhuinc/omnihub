@@ -6,6 +6,7 @@
 }
 
 .syxdi__body {
+  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -117,6 +118,7 @@
 }
 
 .syxdi__thanks {
+  margin-top: auto;
   position: relative;
   display: flex;
   flex-direction: column;
