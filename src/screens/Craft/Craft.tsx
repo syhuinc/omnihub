@@ -1,4 +1,3 @@
-import { ScreenHeader } from '../../components/ScreenHeader';
 import { Icon, type IconName } from '../../components/Icon';
 import { useIsLightTheme } from '../../theme/useTheme';
 import heroNight from '../../assets/craft/hero-night.webp';
@@ -30,16 +29,16 @@ export function Craft() {
 
   return (
     <div className="screen">
-      <ScreenHeader
-        title={
-          <>
+      <div className="craft__hero" style={{ backgroundImage: `url(${isLight ? heroDay : heroNight})` }}>
+        <div className="craft__hero-scrim" />
+        <div className="craft__hero-text">
+          <span className="craft__hero-eyebrow">OMNI HUB</span>
+          <h1 className="craft__hero-title">
             <span className="craft__title-accent">Crafting</span> Station
-          </>
-        }
-        subtitle="Combine your favorite tools to create more powerful tools."
-      />
-
-      <div className="craft__hero" style={{ backgroundImage: `url(${isLight ? heroDay : heroNight})` }} />
+          </h1>
+          <p className="craft__hero-subtitle">Combine your favorite tools to create more powerful tools.</p>
+        </div>
+      </div>
 
       <div className="craft__body">
         <div className="craft__features">

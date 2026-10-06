@@ -17,11 +17,55 @@
 
 .craft__hero {
   position: relative;
+  padding-top: calc(28px + var(--safe-top));
+  padding-bottom: 28px;
+  padding-inline: 20px;
   aspect-ratio: 841 / 1870;
   margin-bottom: -138.06%;
+  display: flex;
+  align-items: flex-start;
   background-size: cover;
   background-position: center top;
   background-color: #191033;
+}
+
+.craft__hero-scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(5, 8, 16, 0.6) 0%, rgba(5, 8, 16, 0.1) 15%, rgba(5, 8, 16, 0) 40%);
+}
+
+.craft__hero-text {
+  position: relative;
+  z-index: 1;
+}
+
+.craft__hero-eyebrow {
+  display: block;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  text-shadow: 0 0 12px color-mix(in srgb, var(--accent) 70%, transparent);
+  margin-bottom: 2px;
+}
+
+.craft__hero-title {
+  font-size: 32px;
+  font-weight: 900;
+  color: #fff;
+  line-height: 1.1;
+  margin-bottom: 8px;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.6);
+}
+
+.craft__hero-subtitle {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.5;
+  max-width: 280px;
+  color: rgba(255, 255, 255, 0.82);
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.6);
 }
 
 .craft__features {
