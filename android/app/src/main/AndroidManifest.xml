@@ -48,20 +48,18 @@
             android:excludeFromRecents="true"
             android:launchMode="singleInstance"
             android:screenOrientation="portrait"
-            android:theme="@style/AlarmRingingTheme" />
+            android:theme="@style/AlarmRingingTheme"
+        />
 
         <service
             android:name=".alarm.AlarmRingService"
             android:exported="false"
-            android:foregroundServiceType="mediaPlayback" />
+            android:foregroundServiceType="mediaPlayback"
+        />
 
-        <receiver
-            android:name=".alarm.AlarmReceiver"
-            android:exported="false" />
+        <receiver android:name=".alarm.AlarmReceiver" android:exported="false" />
 
-        <receiver
-            android:name=".alarm.BootReceiver"
-            android:exported="false">
+        <receiver android:name=".alarm.BootReceiver" android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.QUICKBOOT_POWERON" />
@@ -78,9 +76,7 @@
             </intent-filter>
         </service>
 
-        <receiver
-            android:name=".flashalert.PhoneStateReceiver"
-            android:exported="false">
+        <receiver android:name=".flashalert.PhoneStateReceiver" android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.PHONE_STATE" />
             </intent-filter>
@@ -89,7 +85,8 @@
         <service
             android:name=".sleepmode.SleepModeSpeakService"
             android:exported="false"
-            android:foregroundServiceType="mediaPlayback" />
+            android:foregroundServiceType="mediaPlayback"
+        />
 
         <activity
             android:name=".sleepmode.SleepNagActivity"
@@ -97,15 +94,12 @@
             android:excludeFromRecents="true"
             android:launchMode="singleInstance"
             android:screenOrientation="portrait"
-            android:theme="@style/SleepNagTheme" />
+            android:theme="@style/SleepNagTheme"
+        />
 
-        <receiver
-            android:name=".sleepmode.SleepModeReceiver"
-            android:exported="false" />
+        <receiver android:name=".sleepmode.SleepModeReceiver" android:exported="false" />
 
-        <receiver
-            android:name=".sleepmode.SleepModeBootReceiver"
-            android:exported="false">
+        <receiver android:name=".sleepmode.SleepModeBootReceiver" android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.QUICKBOOT_POWERON" />
