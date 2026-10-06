@@ -1,6 +1,8 @@
 import { useRouter } from '../../app/Router';
+import { useIsLightTheme } from '../../theme/useTheme';
 import { Icon } from '../../components/Icon';
 import heroDesk from '../../assets/profile/hero-desk.webp';
+import heroDeskLight from '../../assets/profile/hero-desk-light.webp';
 import iconProfile from '../../assets/profile/icon-profile.webp';
 import iconSettings from '../../assets/profile/icon-settings.webp';
 import iconAppearance from '../../assets/profile/icon-appearance.webp';
@@ -28,10 +30,11 @@ const NAV_ITEMS: NavItem[] = [
 
 export function Profile() {
   const { navigate } = useRouter();
+  const isLight = useIsLightTheme();
 
   return (
     <div className="screen">
-      <div className="pf__hero" style={{ backgroundImage: `url(${heroDesk})` }}>
+      <div className="pf__hero" style={{ backgroundImage: `url(${isLight ? heroDeskLight : heroDesk})` }}>
         <div className="pf__hero-scrim" />
         <div className="pf__hero-text">
           <span className="pf__hero-eyebrow">OMNI HUB</span>
