@@ -69,7 +69,7 @@
   z-index: 1;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  gap: 8px;
   perspective: 900px;
   perspective-origin: 50% 0%;
   padding-bottom: 8px;
@@ -132,6 +132,8 @@
 
 .pf__nav-card--wide {
   grid-column: span 2;
+  gap: 16px;
+  padding-inline: 16px;
 }
 
 .pf__nav-card:active:not(:disabled) {
@@ -147,8 +149,8 @@
 }
 
 .pf__nav-card--wide .pf__nav-card-icon {
-  width: 64px;
-  height: 64px;
+  width: 66px;
+  height: 66px;
 }
 
 .pf__nav-card-text {
@@ -168,7 +170,7 @@
 }
 
 .pf__nav-card--wide .pf__nav-card-text strong {
-  font-size: 15.5px;
+  font-size: 18px;
 }
 
 .pf__nav-card-text span {
@@ -180,7 +182,7 @@
 }
 
 .pf__nav-card--wide .pf__nav-card-text span {
-  font-size: 11.5px;
+  font-size: 13px;
 }
 
 .pf__nav-card-chevron {
@@ -193,6 +195,11 @@
   align-items: center;
   justify-content: center;
   color: rgba(255, 255, 255, 0.9);
+}
+
+.pf__nav-card--wide .pf__nav-card-chevron {
+  width: 32px;
+  height: 32px;
 }
 
 .pf__section-title {
