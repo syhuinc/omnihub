@@ -1,6 +1,5 @@
-import { useEffect } from 'react';
 import { ScreenHeader } from '../../components/ScreenHeader';
-import markModel from '../../assets/syxdi-ai/mark.glb?url';
+import heroScene from '../../assets/syxdi-ai/hero.webp';
 import closingScene from '../../assets/syxdi-ai/closing-scene.webp';
 import iconChat from '../../assets/syxdi-ai/icon-chat.webp';
 import iconUser from '../../assets/syxdi-ai/icon-user.webp';
@@ -16,12 +15,6 @@ const FEATURES: { icon: string; title: string; desc: string }[] = [
 ];
 
 export function SyxdiAi() {
-  useEffect(() => {
-    // Dynamically imported so the ~1MB model-viewer library only loads for
-    // someone who actually opens this tab, instead of bloating every screen.
-    import('@google/model-viewer');
-  }, []);
-
   return (
     <div className="screen">
       <ScreenHeader
@@ -34,23 +27,7 @@ export function SyxdiAi() {
       />
 
       <div className="syxdi__body">
-        <div className="syxdi__hero">
-          <model-viewer
-            className="syxdi__hero-model"
-            src={markModel}
-            alt="The SYXDI AI mark — swipe to rotate"
-            camera-controls
-            disable-zoom
-            auto-rotate
-            rotation-per-second="18deg"
-            environment-image="neutral"
-            exposure="1.1"
-            shadow-intensity="0"
-            camera-orbit="0deg 78deg 110%"
-            field-of-view="28deg"
-          />
-          <span className="syxdi__hero-hint">Swipe to rotate</span>
-        </div>
+        <div className="syxdi__hero" style={{ backgroundImage: `url(${heroScene})` }} />
 
         <div className="syxdi__headline">
           <span className="syxdi__headline-eyebrow">SYXDI AI</span>

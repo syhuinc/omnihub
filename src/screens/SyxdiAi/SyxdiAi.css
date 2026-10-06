@@ -18,32 +18,10 @@
   border-radius: var(--radius-lg);
   overflow: hidden;
   box-shadow: var(--shadow-sm);
-  background: radial-gradient(circle at 50% 42%, #2c1c5c, #191033 70%, #0f0a22 100%);
-}
-
-.syxdi__hero-model {
-  display: block;
-  width: 100%;
-  height: 280px;
-  /* Model loads async -- a transparent canvas before then would show the
-     page background through the hero card, so paint the card's own
-     gradient underneath until the model appears. */
-  background: transparent;
-}
-
-.syxdi__hero-hint {
-  position: absolute;
-  left: 50%;
-  bottom: 12px;
-  transform: translateX(-50%);
-  padding: 4px 10px;
-  border-radius: var(--radius-pill);
-  background: rgba(10, 8, 30, 0.55);
-  color: rgba(255, 255, 255, 0.75);
-  font-size: 10.5px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  pointer-events: none;
+  aspect-ratio: 864 / 600;
+  background-size: cover;
+  background-position: center;
+  background-color: #191033;
 }
 
 .syxdi__headline {
@@ -112,8 +90,8 @@
 }
 
 .syxdi__feature-icon {
-  width: 40px;
-  height: 40px;
+  width: 52px;
+  height: 52px;
   object-fit: contain;
 }
 
