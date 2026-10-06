@@ -19,10 +19,10 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   { path: '/profile/account', icon: iconProfile, title: 'Profile', subtitle: 'Your account, devices and personal settings.', wide: true },
-  { path: '/profile/settings', icon: iconSettings, title: 'Settings', subtitle: 'App preferences and behavior.' },
-  { path: '/profile/appearance', icon: iconAppearance, title: 'Appearance', subtitle: 'Theme, colors, and visual style.' },
-  { path: '/profile/data-sync', icon: iconDataSync, title: 'Data & Sync', subtitle: 'Cloud sync, backup and storage.' },
-  { path: '/profile/privacy', icon: iconPrivacy, title: 'Privacy & Security', subtitle: 'Permissions and security options.' },
+  { path: '/profile/settings', icon: iconSettings, title: 'Settings', subtitle: 'App preferences.' },
+  { path: '/profile/appearance', icon: iconAppearance, title: 'Appearance', subtitle: 'Theme & visual style.' },
+  { path: '/profile/data-sync', icon: iconDataSync, title: 'Data & Sync', subtitle: 'Backup & cloud storage.' },
+  { path: '/profile/privacy', icon: iconPrivacy, title: 'Privacy & Security', subtitle: 'Permissions & security.' },
   { path: '/profile/about', icon: iconAbout, title: 'About Omni Hub', subtitle: 'Version, support and credits.', wide: true },
 ];
 
