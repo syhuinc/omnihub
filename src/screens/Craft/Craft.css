@@ -52,11 +52,11 @@
 
 .craft__hero-title {
   font-family: var(--font-display);
-  font-size: 34px;
+  font-size: 36px;
   font-weight: 800;
   color: #fff;
-  line-height: 1.1;
-  margin-bottom: 8px;
+  line-height: 0.92;
+  margin-bottom: 6px;
   text-shadow: 0 2px 16px rgba(0, 0, 0, 0.6);
 }
 

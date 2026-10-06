@@ -34,7 +34,9 @@ export function Craft() {
         <div className="craft__hero-text">
           <span className="craft__hero-eyebrow">OMNI HUB</span>
           <h1 className="craft__hero-title">
-            <span className="craft__title-accent">Crafting</span> Station
+            Crafting
+            <br />
+            <span className="craft__title-accent">Station</span>
           </h1>
           <p className="craft__hero-subtitle">Combine your favorite tools to create more powerful tools.</p>
         </div>
@@ -50,7 +52,9 @@ export function Craft() {
         <img className="craft__banner" src={bannerCooking} alt="Still Cooking — we're working hard to bring the Crafting Station to Omni Hub." />
 
         <div className="craft__section-head">
-          <h2>Featured Recipes</h2>
+          <h2>
+            Featured <span className="craft__title-accent">Recipes</span>
+          </h2>
           <p>A sneak peek of what&rsquo;s coming.</p>
         </div>
 
