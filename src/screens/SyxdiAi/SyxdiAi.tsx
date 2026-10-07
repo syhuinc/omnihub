@@ -1,10 +1,12 @@
 import { ScreenHeader } from '../../components/ScreenHeader';
-import heroScene from '../../assets/syxdi-ai/hero.webp';
+import heroSceneDark from '../../assets/syxdi-ai/hero-dark.webp';
+import heroSceneLight from '../../assets/syxdi-ai/hero-light.webp';
 import closingScene from '../../assets/syxdi-ai/closing-scene.webp';
 import iconChat from '../../assets/syxdi-ai/icon-chat.webp';
 import iconUser from '../../assets/syxdi-ai/icon-user.webp';
 import iconFeed from '../../assets/syxdi-ai/icon-feed.webp';
 import iconBulb from '../../assets/syxdi-ai/icon-bulb.webp';
+import { useIsLightTheme } from '../../theme/useTheme';
 import './SyxdiAi.css';
 
 const FEATURES: { icon: string; title: string; desc: string }[] = [
@@ -15,6 +17,9 @@ const FEATURES: { icon: string; title: string; desc: string }[] = [
 ];
 
 export function SyxdiAi() {
+  const isLight = useIsLightTheme();
+  const heroScene = isLight ? heroSceneLight : heroSceneDark;
+
   return (
     <div className="screen">
       <ScreenHeader
