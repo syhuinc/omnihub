@@ -49,10 +49,8 @@ export function SyxdiAi() {
             {FEATURES.map((f) => (
               <div key={f.title} className="syxdi__feature">
                 <img className="syxdi__feature-icon" src={f.icon} alt="" />
-                <span className="syxdi__feature-text">
-                  <strong>{f.title}</strong>
-                  <span>{f.desc}</span>
-                </span>
+                <strong>{f.title}</strong>
+                <span>{f.desc}</span>
               </div>
             ))}
           </div>
