@@ -108,7 +108,10 @@ export type IconName =
   | 'layers'
   | 'chef-hat'
   | 'flask'
-  | 'archive';
+  | 'archive'
+  | 'text-size'
+  | 'fingerprint'
+  | 'cloud';
 
 interface IconProps {
   name: IconName;
@@ -394,6 +397,15 @@ const paths: Record<IconName, React.ReactNode> = {
   ),
   archive: (
     <path d="M3 4a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1Z M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8 M10 12h4" />
+  ),
+  'text-size': (
+    <path d="M3 18 7 6 11 18 M4.2 14h5.6 M14 18 15.8 12.5 17.6 18 M14.6 16.2h2.4" />
+  ),
+  fingerprint: (
+    <path d="M12 2a7 7 0 0 0-7 7v2c0 3.5-1 6-2 7.5 M12 2a7 7 0 0 1 7 7v2c0 2 .3 4 1 5.5 M8 21c1.2-1.7 2-4.3 2-7v-2a2 2 0 0 1 4 0v2c0 2 .4 4.3 1.5 6 M12 6a5 5 0 0 0-5 5v2c0 2.5-.5 5-1.8 7 M12 6a5 5 0 0 1 5 5v2c0 1.3.2 3 .7 4.5" />
+  ),
+  cloud: (
+    <path d="M7 18h10a4 4 0 0 0 .5-7.97A5.5 5.5 0 0 0 7.1 8.04 4 4 0 0 0 7 18Z" />
   ),
 };
 
