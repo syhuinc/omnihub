@@ -5,45 +5,55 @@
   color: transparent;
 }
 
-.syxdi__hero {
-  position: relative;
-  padding-top: calc(28px + var(--safe-top));
-  padding-bottom: 24px;
-  padding-inline: 20px;
-  aspect-ratio: 841 / 950;
-  display: flex;
-  align-items: flex-start;
+/* Negative z-index would paint this behind .app-shell's own opaque background (it has no
+   stacking context of its own), so instead this sits at z-index 0 and .syxdi__screen is
+   explicitly raised above it. */
+.syxdi__bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  max-width: 560px;
+  margin: 0 auto;
   background-size: cover;
   background-position: center top;
-  background-color: #191033;
+  background-color: #0b0a1a;
 }
 
-.syxdi__hero-scrim {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(5, 8, 16, 0.6) 0%, rgba(5, 8, 16, 0.1) 15%, rgba(5, 8, 16, 0) 40%);
-}
-
-.syxdi__hero-text {
+.syxdi__screen {
   position: relative;
   z-index: 1;
 }
 
-.syxdi__hero-title {
+.syxdi__page-header {
+  padding: calc(20px + var(--safe-top)) 20px 16px;
+}
+
+.syxdi__page-title {
   font-size: 30px;
   font-weight: 800;
   color: #fff;
   line-height: 1.1;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   text-shadow: 0 2px 16px rgba(0, 0, 0, 0.6);
 }
 
-.syxdi__hero-subtitle {
+.syxdi__page-subtitle {
   font-size: 14px;
   font-weight: 500;
   line-height: 1.5;
-  color: rgba(255, 255, 255, 0.82);
+  color: rgba(255, 255, 255, 0.85);
   text-shadow: 0 1px 8px rgba(0, 0, 0, 0.6);
+}
+
+.syxdi__hero-card {
+  position: relative;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  aspect-ratio: 864 / 600;
+  background-size: cover;
+  background-position: center;
+  background-color: #191033;
 }
 
 .syxdi__body {
@@ -51,7 +61,7 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
-  padding: 20px 16px 24px;
+  padding: 0 16px 24px;
 }
 
 .syxdi__headline {
@@ -66,9 +76,10 @@
 .syxdi__headline-eyebrow {
   font-size: 11px;
   font-weight: 700;
-  color: var(--text-secondary);
+  color: rgba(255, 255, 255, 0.75);
   text-transform: uppercase;
   letter-spacing: 0.3em;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
 }
 
 .syxdi__headline-title {
@@ -76,17 +87,19 @@
   font-weight: 900;
   letter-spacing: -0.01em;
   line-height: 1.2;
-  background: linear-gradient(135deg, var(--text-primary), #4d7cfe 55%, var(--purple));
+  background: linear-gradient(135deg, #fff, #4d7cfe 55%, var(--purple));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+  filter: drop-shadow(0 1px 10px rgba(0, 0, 0, 0.45));
 }
 
 .syxdi__headline-text {
   font-size: 13px;
-  color: var(--text-secondary);
+  color: rgba(255, 255, 255, 0.8);
   line-height: 1.5;
   max-width: 300px;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
 }
 
 .syxdi__features {
@@ -102,21 +115,31 @@
   gap: 8px;
   padding: 18px 10px;
   text-align: center;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
+  background-color: rgba(10, 15, 26, 0.38);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  border: 1px solid rgba(200, 220, 255, 0.4);
+  border-bottom-color: rgba(0, 0, 0, 0.35);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
+  box-shadow:
+    0 14px 28px -12px rgba(0, 0, 0, 0.65),
+    0 2px 6px -2px rgba(0, 0, 0, 0.4),
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.55),
+    inset 0 -8px 16px -10px rgba(255, 255, 255, 0.12),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08);
 }
 
 .syxdi__feature strong {
   font-size: 12px;
-  color: var(--text-primary);
+  color: #fff;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.5);
 }
 
 .syxdi__feature span:last-child {
   font-size: 10.5px;
-  color: var(--text-secondary);
+  color: rgba(255, 255, 255, 0.78);
   line-height: 1.35;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
 }
 
 .syxdi__feature-icon {
@@ -128,49 +151,10 @@
 .syxdi__thanks {
   margin-top: auto;
   position: relative;
-  display: flex;
-  flex-direction: column;
+  aspect-ratio: 810 / 265;
   border-radius: var(--radius-lg);
   overflow: hidden;
   background-size: cover;
   background-position: center;
   border: 1px solid color-mix(in srgb, var(--purple) 30%, transparent);
-}
-
-.syxdi__thanks-overlay {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 22px 18px;
-  /* Left-to-right fade keeps the headline legible over whatever part of the
-     photo lands behind it, without flattening the image on the right. */
-  background: linear-gradient(90deg, rgba(10, 8, 30, 0.88) 45%, rgba(10, 8, 30, 0.15) 100%);
-}
-
-.syxdi__thanks-bar {
-  width: 28px;
-  height: 3px;
-  border-radius: 2px;
-  background: linear-gradient(90deg, #4d7cfe, var(--purple));
-  margin-bottom: 4px;
-}
-
-.syxdi__thanks h2 {
-  font-size: 19px;
-  font-weight: 800;
-  line-height: 1.25;
-  color: #fff;
-}
-
-.syxdi__thanks-accent {
-  background: linear-gradient(135deg, #4d7cfe, var(--purple));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-.syxdi__thanks p {
-  font-size: 12.5px;
-  color: rgba(255, 255, 255, 0.65);
 }
