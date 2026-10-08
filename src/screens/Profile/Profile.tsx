@@ -9,12 +9,13 @@ interface NavItem {
   path: string;
   icon: IconName;
   color: string;
+  filled?: boolean;
   title: string;
   subtitle: string;
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { path: '/profile/account', icon: 'user', color: 'blue', title: 'Profile', subtitle: 'Your account, devices and personal settings.' },
+  { path: '/profile/account', icon: 'user', color: 'blue', filled: true, title: 'Profile', subtitle: 'Your account, devices and personal settings.' },
   { path: '/profile/settings', icon: 'settings', color: 'purple', title: 'Settings', subtitle: 'App preferences.' },
   { path: '/profile/appearance', icon: 'palette', color: 'pink', title: 'Appearance', subtitle: 'Theme & visual style.' },
   { path: '/profile/data-sync', icon: 'cloud', color: 'green', title: 'Data & Sync', subtitle: 'Backup & cloud storage.' },
@@ -34,7 +35,9 @@ export function Profile() {
           <span className="pf__hero-eyebrow">OMNI HUB</span>
           <h1 className="pf__hero-title">Desk</h1>
           <p className="pf__hero-subtitle">
-            Your space, your settings.
+            Your space.
+            <br />
+            Your settings.
             <br />
             Your data.
           </p>
@@ -50,15 +53,17 @@ export function Profile() {
               className="pf__nav-row"
               onClick={() => navigate(item.path)}
             >
-              <span className={`pf__nav-row-icon pf__nav-row-icon--${item.color}`}>
-                <Icon name={item.icon} size={22} />
+              <span
+                className={`pf__nav-row-icon pf__nav-row-icon--${item.color}${item.filled ? ' pf__nav-row-icon--filled' : ''}`}
+              >
+                <Icon name={item.icon} size={27.5} strokeWidth={2.3} />
               </span>
               <span className="pf__nav-row-text">
                 <strong>{item.title}</strong>
                 <span>{item.subtitle}</span>
               </span>
               <span className="pf__nav-row-chevron">
-                <Icon name="chevron-right" size={16} />
+                <Icon name="chevron-right" size={16} strokeWidth={3} />
               </span>
             </button>
           ))}

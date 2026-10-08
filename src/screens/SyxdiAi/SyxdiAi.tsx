@@ -1,3 +1,4 @@
+import { ScreenHeader } from '../../components/ScreenHeader';
 import heroScene from '../../assets/syxdi-ai/hero.webp';
 import bgSceneDark from '../../assets/syxdi-ai/hero-dark.webp';
 import bgSceneLight from '../../assets/syxdi-ai/hero-light.webp';
@@ -27,12 +28,14 @@ export function SyxdiAi() {
       <div className="syxdi__bg" style={{ backgroundImage: `url(${bgScene})` }} />
 
       <div className="screen syxdi__screen">
-        <div className="syxdi__page-header">
-          <h1 className="syxdi__page-title">
-            SYXDI <span className="syxdi__title-accent">AI</span>
-          </h1>
-          <p className="syxdi__page-subtitle">Your AI companion for Omni Hub.</p>
-        </div>
+        <ScreenHeader
+          title={
+            <>
+              SYXDI <span className="syxdi__title-accent">AI</span>
+            </>
+          }
+          subtitle="Your AI companion for Omni Hub."
+        />
 
         <div className="syxdi__body">
           <div className="syxdi__hero-card" style={{ backgroundImage: `url(${heroScene})` }} />

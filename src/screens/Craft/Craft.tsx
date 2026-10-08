@@ -38,7 +38,11 @@ export function Craft() {
             <br />
             <span className="craft__title-accent">Station</span>
           </h1>
-          <p className="craft__hero-subtitle">Combine your favorite tools to create more powerful tools.</p>
+          <p className="craft__hero-subtitle">
+            Combine your favorite tools
+            <br />
+            to create more powerful tools.
+          </p>
         </div>
       </div>
 

@@ -103,23 +103,23 @@ export function PhoneStatusCard({ atTop, onHide, onTogglePosition, onOpen }: Pho
       </div>
 
       <div className="phc__stats">
-        <div className="phc__stat">
-          <Icon name="battery" size={15} />
+        <div className="phc__stat phc__stat--battery">
+          <Icon name="battery" size={19} />
           <strong>{stats ? `${stats.batteryPercent}%` : '—'}</strong>
           <span>Battery</span>
         </div>
-        <div className="phc__stat">
-          <Icon name="database" size={15} />
+        <div className="phc__stat phc__stat--storage">
+          <Icon name="database" size={19} />
           <strong>{stats ? formatGb(stats.storageFreeBytes) : '—'}</strong>
           <span>Free / {stats ? formatGb(stats.storageTotalBytes) : '—'}</span>
         </div>
-        <div className="phc__stat">
-          <Icon name="cpu" size={15} />
+        <div className="phc__stat phc__stat--ram">
+          <Icon name="cpu" size={19} />
           <strong>{stats ? formatGb(stats.ramTotalBytes) : '—'}</strong>
           <span>RAM</span>
         </div>
-        <div className="phc__stat">
-          <Icon name="wifi" size={15} />
+        <div className="phc__stat phc__stat--wifi">
+          <Icon name="wifi" size={19} />
           <strong>Wi-Fi</strong>
           <span>{stats?.wifiConnected ? 'Connected' : 'Off'}</span>
         </div>

@@ -1,5 +1,5 @@
 .craft__title-accent {
-  background: linear-gradient(135deg, #4d7cfe, var(--purple));
+  background: linear-gradient(90deg, #00cfff 0%, #0f8cff 35%, #3d6bff 55%, #c146f9 80%, #ec5fff 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -17,11 +17,11 @@
 
 .craft__hero {
   position: relative;
-  padding-top: calc(28px + var(--safe-top));
+  padding-top: calc(26px + var(--safe-top));
   padding-bottom: 28px;
-  padding-inline: 20px;
+  padding-inline: 26px;
   aspect-ratio: 841 / 1870;
-  margin-bottom: -138.06%;
+  margin-bottom: -146.9%;
   display: flex;
   align-items: flex-start;
   background-size: cover;
@@ -42,30 +42,31 @@
 
 .craft__hero-eyebrow {
   display: block;
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  color: var(--accent);
-  text-shadow: 0 0 12px color-mix(in srgb, var(--accent) 70%, transparent);
+  font-size: 8px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.69em;
+  color: #fff;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.6);
   margin-bottom: 2px;
 }
 
 .craft__hero-title {
   font-family: var(--font-display);
-  font-size: 36px;
+  font-size: 42px;
   font-weight: 800;
   color: #fff;
-  line-height: 0.92;
-  margin-bottom: 6px;
+  line-height: 0.73;
+  padding-top: 7px;
+  margin-bottom: -3px;
   text-shadow: 0 2px 16px rgba(0, 0, 0, 0.6);
 }
 
 .craft__hero-subtitle {
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 1.5;
-  max-width: 280px;
-  color: rgba(255, 255, 255, 0.82);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 12.5px;
+  color: #fff;
   text-shadow: 0 1px 8px rgba(0, 0, 0, 0.6);
 }
 
@@ -84,7 +85,6 @@
 
 .craft__banner {
   width: 100%;
-  max-width: 380px;
   height: auto;
   display: block;
   margin: 0 auto;
@@ -99,13 +99,14 @@
 
 .craft__section-head h2 {
   font-family: var(--font-display);
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 800;
+  line-height: 1.1;
   color: var(--text-primary);
 }
 
 .craft__section-head p {
-  font-size: 12px;
+  font-size: 10.5px;
   color: var(--text-secondary);
 }
 
