@@ -115,6 +115,7 @@ export type IconName =
   | 'arrow-left'
   | 'arrow-down'
   | 'dart'
+  | 'more-vertical'
   | 'refresh';
 
 interface IconProps {
@@ -410,6 +411,7 @@ const paths: Record<IconName, React.ReactNode> = {
   ),
   'arrow-left': <path d="M19 12H5M11 18l-6-6 6-6" />,
   'arrow-down': <path d="M12 4v16M6 14l6 6 6-6" />,
+  'more-vertical': <path d="M12 5h.01M12 12h.01M12 19h.01" />,
   dart: (
     <>
       <path d="M19.5 10.5A8.5 8.5 0 1 1 13.5 4.5" />
