@@ -1,21 +1,43 @@
-import { useMemo, useState } from 'react';
-import { ScreenHeader } from '../../components/ScreenHeader';
-import { Icon } from '../../components/Icon';
+import { useMemo, useState, type CSSProperties, type ReactNode } from 'react';
+import { Icon, type IconName } from '../../components/Icon';
 import { useRouter } from '../../app/Router';
 import { useBackHandler } from '../../app/useBackHandler';
 import { storageGet, storageSet, StorageKeys } from '../../storage/db';
 import { hapticTap, hapticWarning } from '../../haptics';
 import { useCloudSync } from '../../cloud/useCloudSync';
-import { EXPENSE_CATEGORIES, getCategory } from '../expense-tracker/categories';
+import { EXPENSE_CATEGORIES, getCategory, type ExpenseCategory } from '../expense-tracker/categories';
 import { currentMonthKey, formatMonthLabel, shiftMonthKey } from '../expense-tracker/month';
-import { CURRENCIES, DEFAULT_CURRENCY, formatMoney } from '../shared/currencies';
+import { DEFAULT_CURRENCY, formatMoney } from '../shared/currencies';
 import type { Expense } from '../expense-tracker/types';
 import type { BudgetLimit } from './types';
 import { SetBudget } from './SetBudget';
+import { ART, CATEGORY_ART, GOAL_ART } from './budgetArt';
+import {
+  formatShortDate,
+  loadEntries,
+  loadGoals,
+  loadPrefs,
+  newId,
+  saveEntries,
+  saveGoals,
+  savePrefs,
+  todayISO,
+  type BudgetPrefs,
+  type SavingsEntry,
+  type SavingsGoal,
+} from './budgetStore';
+import {
+  AddSavingsSheet,
+  AlertsSheet,
+  AmountSheet,
+  ConfirmSheet,
+  CurrencySheet,
+  GoalEditorSheet,
+  GoalSheet,
+  MenuSheet,
+  RolloverSheet,
+} from './BudgetSheets';
 import './Budget.css';
-
-const RING_R = 44;
-const RING_C = 2 * Math.PI * RING_R;
 
 /** Reads budgets, migrating the old `{categoryId: amount}` map shape (pre-sync) into a list on first load. */
 function loadBudgets(): BudgetLimit[] {
@@ -31,64 +53,153 @@ function loadBudgets(): BudgetLimit[] {
   return migrated;
 }
 
+type View = 'main' | 'savings' | 'settings' | 'categories' | 'goals' | 'history';
+type SheetState =
+  | { kind: 'monthly' }
+  | { kind: 'allocation' }
+  | { kind: 'alerts' }
+  | { kind: 'rollover' }
+  | { kind: 'reset' }
+  | { kind: 'delete' }
+  | { kind: 'currency' }
+  | { kind: 'newGoal' }
+  | { kind: 'goal'; goalId: string }
+  | { kind: 'addSavings'; goalId: string | null }
+  | { kind: 'savingsMenu' }
+  | null;
+
+const PARENT: Partial<Record<View, View>> = { savings: 'main', settings: 'main', categories: 'settings', goals: 'savings', history: 'savings' };
+
+const pct = (part: number, whole: number) => (whole > 0 ? Math.min(100, (part / whole) * 100) : 0);
+
+function spentByCategoryIn(expenses: Expense[], monthKey: string) {
+  const totals = new Map<string, number>();
+  for (const e of expenses) {
+    if (e.dateISO.slice(0, 7) !== monthKey) continue;
+    totals.set(e.categoryId, (totals.get(e.categoryId) ?? 0) + e.amount);
+  }
+  return totals;
+}
+
+const sum = (values: Iterable<number>) => [...values].reduce((s, v) => s + v, 0);
+
+function Header({ title, subtitle, onBack, onMore }: { title: string; subtitle?: string; onBack: () => void; onMore?: () => void }) {
+  return (
+    <header className="bd__header">
+      <button type="button" className="bd__square-btn" onClick={onBack} aria-label="Back">
+        <Icon name="arrow-left" size={22} strokeWidth={2.2} />
+      </button>
+      <div className="bd__header-titles">
+        <h1>{title}</h1>
+        {subtitle && <p>{subtitle}</p>}
+      </div>
+      {onMore ? (
+        <button type="button" className="bd__square-btn" onClick={onMore} aria-label="More options">
+          <Icon name="more-dots" size={24} strokeWidth={3} />
+        </button>
+      ) : (
+        <span className="bd__square-spacer" />
+      )}
+    </header>
+  );
+}
+
+function SectionHead({ title, onSeeAll }: { title: string; onSeeAll?: () => void }) {
+  return (
+    <div className="bd__section-head">
+      <h2>{title}</h2>
+      {onSeeAll && (
+        <button type="button" className="bd__see-all" onClick={onSeeAll}>
+          See All
+        </button>
+      )}
+    </div>
+  );
+}
+
+function Bar({ value, color }: { value: number; color: string }) {
+  return (
+    <div className="bd__track">
+      <div className="bd__fill" style={{ width: `${value}%`, background: color }} />
+    </div>
+  );
+}
+
 export function Budget() {
   const { back } = useRouter();
   const [budgets, setBudgets] = useState<BudgetLimit[]>(() => loadBudgets());
   const [expenses] = useState<Expense[]>(() => storageGet(StorageKeys.expenses, []));
-  const [monthKey, setMonthKey] = useState(currentMonthKey());
-  const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
-  const [showMenu, setShowMenu] = useState(false);
-  const [confirmingResetAll, setConfirmingResetAll] = useState(false);
-  const [showCurrencySheet, setShowCurrencySheet] = useState(false);
+  const [prefs, setPrefs] = useState<BudgetPrefs>(() => loadPrefs());
+  const [goals, setGoals] = useState<SavingsGoal[]>(() => loadGoals());
+  const [entries, setEntries] = useState<SavingsEntry[]>(() => loadEntries());
   const [currency, setCurrency] = useState(() => storageGet(StorageKeys.budgetDefaultCurrency, DEFAULT_CURRENCY));
+  const [view, setView] = useState<View>('main');
+  const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
+  const [sheet, setSheet] = useState<SheetState>(null);
 
-  function selectCurrency(code: string) {
-    hapticTap();
-    setCurrency(code);
-    storageSet(StorageKeys.budgetDefaultCurrency, code);
-    setShowCurrencySheet(false);
-  }
-
-  useBackHandler(() => setShowMenu(false), showMenu);
-  useBackHandler(() => setConfirmingResetAll(false), confirmingResetAll);
+  const monthKey = currentMonthKey();
 
   function rawPersist(next: BudgetLimit[]) {
     setBudgets(next);
     storageSet(StorageKeys.budgets, next);
   }
-
   const { persist } = useCloudSync('budgets', budgets, rawPersist);
 
+  function updatePrefs(patch: Partial<BudgetPrefs>) {
+    const next = { ...prefs, ...patch };
+    setPrefs(next);
+    savePrefs(next);
+  }
+  function updateGoals(next: SavingsGoal[]) {
+    setGoals(next);
+    saveGoals(next);
+  }
+  function updateEntries(next: SavingsEntry[]) {
+    setEntries(next);
+    saveEntries(next);
+  }
+
+  const goBack = () => setView(PARENT[view] ?? 'main');
+  useBackHandler(goBack, view !== 'main' && !editingCategoryId);
+
   const budgetMap = useMemo(() => new Map(budgets.map((b) => [b.categoryId, b])), [budgets]);
+  const spentByCategory = useMemo(() => spentByCategoryIn(expenses, monthKey), [expenses, monthKey]);
 
-  const spentByCategory = useMemo(() => {
-    const totals = new Map<string, number>();
-    for (const e of expenses) {
-      if (e.dateISO.slice(0, 7) !== monthKey) continue;
-      totals.set(e.categoryId, (totals.get(e.categoryId) ?? 0) + e.amount);
-    }
-    return totals;
-  }, [expenses, monthKey]);
+  const categoryTotal = sum(budgets.map((b) => b.amount));
+  const monthlyBase = prefs.monthlyBudget > 0 ? prefs.monthlyBudget : categoryTotal;
+  const totalSpent = sum(spentByCategory.values());
 
-  const totalBudget = budgets.reduce((sum, b) => sum + b.amount, 0);
-  const totalSpent = [...spentByCategory.values()].reduce((sum, v) => sum + v, 0);
-  const usedPct = totalBudget > 0 ? Math.min(100, (totalSpent / totalBudget) * 100) : 0;
-  const remaining = Math.max(0, totalBudget - totalSpent);
+  const rolloverAmount = useMemo(() => {
+    if (!prefs.rollover || monthlyBase <= 0) return 0;
+    const prevKey = shiftMonthKey(monthKey, -1);
+    if (!expenses.some((e) => e.dateISO.slice(0, 7) === prevKey)) return 0;
+    return Math.max(0, monthlyBase - sum(spentByCategoryIn(expenses, prevKey).values()));
+  }, [prefs.rollover, monthlyBase, expenses, monthKey]);
 
-  const isCurrentMonth = monthKey === currentMonthKey();
+  const available = monthlyBase + rolloverAmount;
+  const remaining = available - totalSpent;
   const [year, month] = monthKey.split('-').map(Number);
-  const daysInMonth = new Date(year, month, 0).getDate();
-  const dayOfMonth = isCurrentMonth ? new Date().getDate() : daysInMonth;
-  const daysLeft = Math.max(0, daysInMonth - dayOfMonth);
-  const dailyAverage = dayOfMonth > 0 ? totalSpent / dayOfMonth : 0;
+  const daysLeft = Math.max(0, new Date(year, month, 0).getDate() - new Date().getDate());
 
-  function saveBudget(categoryId: string, patch: { amount: number; alertEnabled: boolean; alertThresholdPct: number }) {
-    const withoutCategory = budgets.filter((b) => b.categoryId !== categoryId);
+  const totalSaved = sum(entries.map((e) => e.amount));
+  const savedThisMonth = sum(entries.filter((e) => e.dateISO.slice(0, 7) === monthKey).map((e) => e.amount));
+  const savedForGoal = (id: string) => sum(entries.filter((e) => e.goalId === id).map((e) => e.amount));
+  const goalsOnTrack = goals.filter(
+    (g) => savedForGoal(g.id) >= g.target || entries.some((e) => e.goalId === g.id && e.amount > 0 && e.dateISO.slice(0, 7) === monthKey),
+  ).length;
+  const recent = [...entries].sort((a, b) => b.dateISO.localeCompare(a.dateISO) || b.createdAt - a.createdAt);
+
+  function addEntry(amount: number, goalId: string | null) {
+    updateEntries([...entries, { id: newId(), amount, goalId, dateISO: todayISO(), createdAt: Date.now() }]);
+  }
+
+  function saveCategory(categoryId: string, patch: { amount: number; alertEnabled: boolean; alertThresholdPct: number }) {
+    const without = budgets.filter((b) => b.categoryId !== categoryId);
     const existing = budgetMap.get(categoryId);
-    const next =
+    persist(
       patch.amount > 0
         ? [
-            ...withoutCategory,
+            ...without,
             {
               id: existing?.id ?? categoryId,
               categoryId,
@@ -98,240 +209,424 @@ export function Budget() {
               updatedAt: Date.now(),
             },
           ]
-        : withoutCategory;
-    persist(next);
+        : without,
+    );
     setEditingCategoryId(null);
-  }
-
-  function removeBudget(categoryId: string) {
-    hapticWarning();
-    persist(budgets.filter((b) => b.categoryId !== categoryId));
-    setEditingCategoryId(null);
-  }
-
-  function resetAll() {
-    hapticWarning();
-    persist([]);
-    setConfirmingResetAll(false);
-    setShowMenu(false);
   }
 
   if (editingCategoryId) {
-    const category = getCategory(editingCategoryId);
-    const budget = budgetMap.get(editingCategoryId);
     return (
       <SetBudget
-        category={category}
-        budget={budget}
+        category={getCategory(editingCategoryId)}
+        budget={budgetMap.get(editingCategoryId)}
         currency={currency}
         monthLabel={formatMonthLabel(monthKey)}
         spent={spentByCategory.get(editingCategoryId) ?? 0}
-        onSave={(patch) => saveBudget(editingCategoryId, patch)}
-        onDelete={() => removeBudget(editingCategoryId)}
+        onSave={(patch) => saveCategory(editingCategoryId, patch)}
+        onDelete={() => {
+          hapticWarning();
+          persist(budgets.filter((b) => b.categoryId !== editingCategoryId));
+          setEditingCategoryId(null);
+        }}
         onClose={() => setEditingCategoryId(null)}
       />
     );
   }
 
-  return (
-    <div className="screen">
-      <ScreenHeader
-        title="Budget"
-        subtitle={formatMonthLabel(monthKey)}
-        onBack={back}
-        action={
-          <button
-            type="button"
-            className="bg__header-btn"
-            onClick={() => {
-              hapticTap();
-              setShowMenu(true);
-            }}
-            aria-label="More options"
-          >
-            <Icon name="more-dots" size={20} />
-          </button>
-        }
-      />
+  const close = () => setSheet(null);
 
-      <div className="bg__month-nav">
-        <button type="button" onClick={() => setMonthKey(shiftMonthKey(monthKey, -1))} aria-label="Previous month">
-          <Icon name="chevron-right" size={18} className="bg__prev-icon" />
-        </button>
-        <Icon name="calendar" size={15} />
-        <span>{formatMonthLabel(monthKey)}</span>
-        <button type="button" onClick={() => setMonthKey(shiftMonthKey(monthKey, 1))} aria-label="Next month">
-          <Icon name="chevron-right" size={18} />
-        </button>
+  function categoryRow(cat: ExpenseCategory) {
+    const spent = spentByCategory.get(cat.id) ?? 0;
+    const limit = budgetMap.get(cat.id)?.amount ?? 0;
+    const p = pct(spent, limit);
+    const over = limit > 0 && spent > limit;
+    const warn = !over && prefs.alertsEnabled && limit > 0 && p >= prefs.alertThresholdPct;
+    const art = CATEGORY_ART[cat.id] ?? CATEGORY_ART.other;
+    return (
+      <button key={cat.id} type="button" className="bd__cat" onClick={() => { hapticTap(); setEditingCategoryId(cat.id); }}>
+        <span className="bd__cat-tile" style={{ '--tile': art.tile, '--tile-light': art.tileLight } as CSSProperties}>
+          <img src={art.img} alt="" />
+        </span>
+        <span className="bd__cat-body">
+          <span className="bd__cat-top">
+            <strong>{cat.label}</strong>
+            <small>
+              {formatMoney(spent, currency)} / {formatMoney(limit, currency)}
+            </small>
+          </span>
+          <Bar value={p} color={over ? 'var(--red)' : cat.color} />
+        </span>
+        <span className={`bd__cat-pct${over ? ' bd__cat-pct--over' : warn ? ' bd__cat-pct--warn' : ''}`}>
+          {Math.round(limit > 0 ? (spent / limit) * 100 : 0)}%
+        </span>
+      </button>
+    );
+  }
+
+  function goalRow(g: SavingsGoal, i: number) {
+    const saved = savedForGoal(g.id);
+    const p = pct(saved, g.target);
+    return (
+      <button key={g.id} type="button" className="bd__goal" onClick={() => { hapticTap(); setSheet({ kind: 'goal', goalId: g.id }); }}>
+        <span className="bd__goal-tile">
+          <img src={GOAL_ART[g.icon]} alt="" />
+        </span>
+        <span className="bd__goal-body">
+          <span className="bd__goal-top">
+            <strong>{g.name}</strong>
+            <b>{formatMoney(g.target, currency)}</b>
+          </span>
+          <span className="bd__goal-bar">
+            <Bar value={p} color={i % 2 === 0 ? 'linear-gradient(90deg, #2ddfa3, #31e6ae)' : 'linear-gradient(90deg, #3482fc, #3a8dff)'} />
+            <em>{Math.round(p)}%</em>
+          </span>
+          <span className="bd__goal-bottom">
+            <span>{formatMoney(saved, currency)} saved</span>
+            <span>{formatMoney(Math.max(0, g.target - saved), currency)} left</span>
+          </span>
+        </span>
+        <Icon name="chevron-right" size={17} className="bd__chev" />
+      </button>
+    );
+  }
+
+  function entryRow(e: SavingsEntry) {
+    const goal = e.goalId ? goals.find((g) => g.id === e.goalId) : undefined;
+    const out = e.amount < 0;
+    const icon: IconName = out ? 'upload' : goal ? 'target' : 'download';
+    return (
+      <div key={e.id} className="bd__entry">
+        <span className={`bd__entry-tile${goal ? ' bd__entry-tile--goal' : ''}`}>
+          <Icon name={icon} size={24} strokeWidth={2.4} />
+        </span>
+        <span className="bd__entry-text">
+          <strong>{goal ? goal.name : 'Monthly Savings'}</strong>
+          <span>{out ? 'Withdrawal' : goal ? 'Goal Contribution' : 'To Savings Account'}</span>
+        </span>
+        <span className="bd__entry-right">
+          <strong className={out ? 'bd__neg' : 'bd__pos'}>
+            {out ? '-' : '+'}
+            {formatMoney(Math.abs(e.amount), currency)}
+          </strong>
+          <span>{formatShortDate(e.dateISO)}</span>
+        </span>
       </div>
+    );
+  }
 
-      <div className="bg__overview">
-        <div className="bg__ring-wrap">
-          <svg className="bg__ring" viewBox="0 0 100 100">
-            <circle className="bg__ring-track" cx="50" cy="50" r={RING_R} />
-            <circle
-              className={`bg__ring-progress${usedPct >= 100 ? ' bg__ring-progress--over' : ''}`}
-              cx="50"
-              cy="50"
-              r={RING_R}
-              style={{ strokeDasharray: RING_C, strokeDashoffset: RING_C * (1 - usedPct / 100) }}
-            />
-          </svg>
-          <div className="bg__ring-center">
-            <strong>{Math.round(usedPct)}%</strong>
-            <span>Used</span>
-          </div>
-        </div>
-        <div className="bg__overview-stats">
-          <div className="bg__overview-stat">
-            <span>Total Budget</span>
-            <strong>{formatMoney(totalBudget, currency)}</strong>
-          </div>
-          <div className="bg__overview-stat">
-            <span>Total Spent</span>
-            <strong>{formatMoney(totalSpent, currency)}</strong>
-          </div>
-          <div className={`bg__overview-remaining${remaining === 0 && totalBudget > 0 ? ' bg__overview-remaining--over' : ''}`}>
-            {remaining === 0 && totalBudget > 0 && <Icon name="info" size={14} />}
-            {totalBudget === 0
-              ? 'Set a budget to get started'
-              : remaining === 0
-                ? "You've reached your budget"
-                : `${formatMoney(remaining, currency)} left`}
-          </div>
-        </div>
-      </div>
+  let body: ReactNode;
 
-      {isCurrentMonth && (
-        <div className="bg__mini-stats">
-          <div className="bg__mini-stat">
-            <Icon name="wallet" size={16} />
+  if (view === 'main') {
+    body = (
+      <>
+        <Header title="Budget" subtitle={formatMonthLabel(monthKey)} onBack={back} onMore={() => { hapticTap(); setView('settings'); }} />
+
+        <section className="bd__card bd__overview">
+          <span className="bd__label">Monthly Budget</span>
+          <strong className="bd__big">{formatMoney(available, currency)}</strong>
+          {rolloverAmount > 0 && <span className="bd__rollover">Includes {formatMoney(rolloverAmount, currency)} rolled over</span>}
+          <div className="bd__overview-bar">
+            <Bar value={pct(totalSpent, available)} color={remaining < 0 ? 'var(--red)' : 'linear-gradient(90deg, #2f80ff, #3a8dff)'} />
+            <span>{Math.round(available > 0 ? (totalSpent / available) * 100 : 0)}%</span>
+          </div>
+          <div className="bd__stats">
             <div>
-              <strong>{formatMoney(dailyAverage, currency)}</strong>
-              <span>Daily Average</span>
+              <span>Spent</span>
+              <strong>{formatMoney(totalSpent, currency)}</strong>
             </div>
-          </div>
-          <div className="bg__mini-stat">
-            <Icon name="calendar" size={16} />
             <div>
-              <strong>{daysLeft}</strong>
+              <span>{remaining < 0 ? 'Over by' : 'Remaining'}</span>
+              <strong className={remaining < 0 ? 'bd__neg' : 'bd__pos'}>{formatMoney(Math.abs(remaining), currency)}</strong>
+            </div>
+            <div>
               <span>Days Left</span>
+              <strong>{daysLeft}</strong>
             </div>
           </div>
-        </div>
-      )}
-
-      <div className="bg__list-header">
-        <h2>Category Budgets</h2>
-      </div>
-
-      <ul className="bg__list">
-        {EXPENSE_CATEGORIES.map((cat) => {
-          const spent = spentByCategory.get(cat.id) ?? 0;
-          const budget = budgetMap.get(cat.id);
-          const limit = budget?.amount ?? 0;
-          const hasLimit = limit > 0;
-          const pct = hasLimit ? Math.min(100, (spent / limit) * 100) : 0;
-          const over = hasLimit && spent > limit;
-
-          return (
-            <li key={cat.id}>
-              <button type="button" className="bg__card" onClick={() => setEditingCategoryId(cat.id)}>
-                <div className="bg__card-top">
-                  <span className="bg__card-name">
-                    <Icon name={cat.icon} size={16} style={{ color: cat.color }} />
-                    {cat.label}
-                  </span>
-                  <Icon name="chevron-right" size={16} className="bg__card-chevron" />
-                </div>
-                <div className="bg__track">
-                  <div
-                    className="bg__bar"
-                    style={{ width: `${pct}%`, background: over ? 'var(--red)' : cat.color }}
-                  />
-                </div>
-                <div className="bg__card-bottom">
-                  <span className={over ? 'bg__over' : ''}>
-                    {formatMoney(spent, currency)} / {hasLimit ? formatMoney(limit, currency) : formatMoney(0, currency)}
-                  </span>
-                  <span className={over ? 'bg__over' : ''}>{hasLimit ? `${Math.round(pct)}%` : '0%'}</span>
-                </div>
-              </button>
-            </li>
-          );
-        })}
-      </ul>
-
-      <p className="bg__tip">
-        <Icon name="lightbulb" size={16} />
-        Tip: Set a budget for each category to keep track of your spending and build better habits.
-      </p>
-
-      {showMenu && (
-        <div className="bg__menu-overlay" onClick={() => setShowMenu(false)}>
-          <div className="bg__menu-sheet" onClick={(e) => e.stopPropagation()}>
-            <button
-              type="button"
-              className="bg__menu-item"
-              onClick={() => {
-                setShowMenu(false);
-                setShowCurrencySheet(true);
-              }}
-            >
-              <Icon name="wallet" size={18} />
-              Currency ({currency})
+          {available <= 0 && (
+            <button type="button" className="bd__setup" onClick={() => setSheet({ kind: 'monthly' })}>
+              Set your monthly budget
             </button>
-            <button
-              type="button"
-              className="bg__menu-item bg__menu-item--danger"
-              onClick={() => setConfirmingResetAll(true)}
-            >
-              <Icon name="repeat" size={18} />
-              Reset All Budgets
-            </button>
-            <button type="button" className="bg__menu-cancel" onClick={() => setShowMenu(false)}>
-              Cancel
-            </button>
+          )}
+        </section>
+
+        <button type="button" className="bd__savings" onClick={() => { hapticTap(); setView('savings'); }}>
+          <span className="bd__savings-tile">
+            <img src={ART.piggyGreen} alt="" />
+          </span>
+          <span className="bd__savings-text">
+            <strong>
+              Savings <Icon name="chevron-right" size={15} strokeWidth={2.4} />
+            </strong>
+            <span>{formatMoney(savedThisMonth, currency)} this month</span>
+          </span>
+          <span className="bd__savings-right">
+            <strong>{formatMoney(totalSaved, currency)}</strong>
+            <span>Total Saved</span>
+          </span>
+        </button>
+
+        <SectionHead title="Category Budgets" onSeeAll={() => setView('categories')} />
+        <div className="bd__list">{EXPENSE_CATEGORIES.slice(0, 6).map(categoryRow)}</div>
+      </>
+    );
+  } else if (view === 'categories') {
+    body = (
+      <>
+        <Header title="Category Budgets" onBack={goBack} />
+        <p className="bd__note">Tap a category to set its monthly limit.</p>
+        <div className="bd__list">{EXPENSE_CATEGORIES.map(categoryRow)}</div>
+      </>
+    );
+  } else if (view === 'savings') {
+    body = (
+      <>
+        <Header title="Savings" onBack={goBack} onMore={() => { hapticTap(); setSheet({ kind: 'savingsMenu' }); }} />
+
+        <button type="button" className="bd__total" onClick={() => { hapticTap(); setSheet({ kind: 'addSavings', goalId: null }); }}>
+          <img className="bd__total-piggy" src={ART.piggy} alt="" />
+          <span className="bd__total-text">
+            <span>Total Savings</span>
+            <strong>{formatMoney(totalSaved, currency)}</strong>
+            <em>
+              <i className="bd__tri" /> +{formatMoney(Math.max(0, savedThisMonth), currency)} <span>this month</span>
+            </em>
+          </span>
+        </button>
+
+        <div className="bd__stat-cards">
+          <button type="button" className="bd__stat-card" onClick={() => { hapticTap(); setSheet({ kind: 'allocation' }); }}>
+            <span className="bd__stat-tile bd__stat-tile--red">
+              <img src={ART.target} alt="" />
+            </span>
+            <span className="bd__stat-text">
+              <small>Monthly Allocation</small>
+              <strong>{formatMoney(prefs.savingsAllocation, currency)}</strong>
+              <small>{Math.round(pct(prefs.savingsAllocation, monthlyBase))}% of budget</small>
+            </span>
+          </button>
+          <div className="bd__stat-card">
+            <span className="bd__stat-tile bd__stat-tile--blue">
+              <img src={ART.chart} alt="" />
+            </span>
+            <span className="bd__stat-text">
+              <small>Total Goals</small>
+              <strong>{goals.length}</strong>
+              <small>{goalsOnTrack} on track</small>
+            </span>
           </div>
         </div>
-      )}
 
-      {showCurrencySheet && (
-        <div className="bg__menu-overlay" onClick={() => setShowCurrencySheet(false)}>
-          <div className="bg__menu-sheet" onClick={(e) => e.stopPropagation()}>
-            <div className="bg__currency-grid">
-              {CURRENCIES.map((c) => (
-                <button
-                  key={c.code}
-                  type="button"
-                  className={`bg__currency-chip${currency === c.code ? ' bg__currency-chip--active' : ''}`}
-                  onClick={() => selectCurrency(c.code)}
-                >
-                  <span>{c.flag}</span>
-                  {c.code}
-                </button>
-              ))}
+        <SectionHead title="Savings Goals" onSeeAll={goals.length > 0 ? () => setView('goals') : undefined} />
+        {goals.length > 0 && <div className="bd__list">{goals.slice(0, 2).map(goalRow)}</div>}
+
+        <button type="button" className="bd__add-goal" onClick={() => { hapticTap(); setSheet({ kind: 'newGoal' }); }}>
+          <span className="bd__add-plus">
+            <Icon name="plus" size={17} strokeWidth={3} />
+          </span>
+          Add Savings Goal
+        </button>
+
+        <SectionHead title="Recent Savings" onSeeAll={recent.length > 0 ? () => setView('history') : undefined} />
+        {recent.length === 0 ? (
+          <p className="bd__note">Nothing saved yet. Tap Total Savings to add money.</p>
+        ) : (
+          <div className="bd__entries">{recent.slice(0, 2).map(entryRow)}</div>
+        )}
+      </>
+    );
+  } else if (view === 'goals') {
+    body = (
+      <>
+        <Header title="Savings Goals" onBack={goBack} />
+        <div className="bd__list">{goals.map(goalRow)}</div>
+      </>
+    );
+  } else if (view === 'history') {
+    body = (
+      <>
+        <Header title="Recent Savings" onBack={goBack} />
+        <div className="bd__entries">{recent.map(entryRow)}</div>
+      </>
+    );
+  } else {
+    const savingsAlloc = prefs.savingsAllocation;
+    const unallocated = Math.max(0, monthlyBase - categoryTotal - savingsAlloc);
+    const base = Math.max(monthlyBase, categoryTotal + savingsAlloc) || 1;
+    const rows: { label: string; icon: IconName; img?: string; danger?: boolean; onClick: () => void }[] = [
+      { label: 'Edit Category Budgets', icon: 'sliders', onClick: () => setView('categories') },
+      { label: 'Savings Settings', icon: 'wallet', img: ART.piggyGreen, onClick: () => setSheet({ kind: 'allocation' }) },
+      { label: 'Budget Alerts', icon: 'bell', onClick: () => setSheet({ kind: 'alerts' }) },
+      { label: 'Month Rollover', icon: 'calendar', onClick: () => setSheet({ kind: 'rollover' }) },
+      { label: 'Reset Budget', icon: 'refresh', onClick: () => setSheet({ kind: 'reset' }) },
+      { label: 'Delete Budget', icon: 'trash', danger: true, onClick: () => setSheet({ kind: 'delete' }) },
+    ];
+    const allocRows = [
+      { label: 'Category Budgets', value: categoryTotal, color: '#3889fe' },
+      { label: 'Savings', value: savingsAlloc, color: '#31e0a9' },
+      { label: 'Unallocated', value: unallocated, color: '#9b5cf6' },
+    ];
+    body = (
+      <>
+        <Header title="Budget Settings" onBack={goBack} onMore={() => { hapticTap(); setSheet({ kind: 'currency' }); }} />
+
+        <button type="button" className="bd__card bd__monthly" onClick={() => { hapticTap(); setSheet({ kind: 'monthly' }); }}>
+          <span className="bd__monthly-tile">
+            <img src={ART.wallet} alt="" />
+          </span>
+          <span className="bd__monthly-text">
+            <span>Monthly Budget</span>
+            <strong>{formatMoney(monthlyBase, currency)}</strong>
+          </span>
+          <Icon name="chevron-right" size={20} className="bd__chev" />
+        </button>
+
+        <section className="bd__card bd__alloc">
+          <h2>Monthly Allocation Overview</h2>
+          <div className="bd__alloc-bar">
+            {allocRows.map((r) => (
+              <span key={r.label} style={{ width: `${(r.value / base) * 100}%`, background: r.color }} />
+            ))}
+          </div>
+          {allocRows.map((r) => (
+            <div key={r.label} className="bd__alloc-row">
+              <i style={{ background: r.color }} />
+              <span>{r.label}</span>
+              <b>{formatMoney(r.value, currency)}</b>
+              <em>{Math.round((r.value / base) * 100)}%</em>
             </div>
-            <button type="button" className="bg__menu-cancel" onClick={() => setShowCurrencySheet(false)}>
-              Close
-            </button>
-          </div>
-        </div>
-      )}
+          ))}
+        </section>
 
-      {confirmingResetAll && (
-        <div className="bg__menu-overlay" onClick={() => setConfirmingResetAll(false)}>
-          <div className="bg__menu-sheet" onClick={(e) => e.stopPropagation()}>
-            <p className="bg__confirm-text">Remove all category budgets? This can't be undone.</p>
-            <button type="button" className="bg__menu-item bg__menu-item--danger" onClick={resetAll}>
-              <Icon name="trash" size={18} />
-              Reset All
+        <section className="bd__card bd__menu-card">
+          {rows.map((r) => (
+            <button key={r.label} type="button" className={`bd__menu-row${r.danger ? ' bd__menu-row--danger' : ''}`} onClick={() => { hapticTap(); r.onClick(); }}>
+              {r.img ? (
+                <img className="bd__menu-img" src={r.img} alt="" />
+              ) : (
+                <Icon name={r.icon} size={25} strokeWidth={1.9} className={r.icon === 'bell' ? 'bd__icon-filled' : undefined} />
+              )}
+              <span>{r.label}</span>
+              <Icon name="chevron-right" size={18} className="bd__chev" />
             </button>
-            <button type="button" className="bg__menu-cancel" onClick={() => setConfirmingResetAll(false)}>
-              Cancel
-            </button>
-          </div>
-        </div>
+          ))}
+        </section>
+      </>
+    );
+  }
+
+  const openGoal = sheet?.kind === 'goal' ? goals.find((g) => g.id === sheet.goalId) : undefined;
+
+  return (
+    <div className="screen bd">
+      {body}
+
+      {sheet?.kind === 'monthly' && (
+        <AmountSheet
+          title="Monthly Budget"
+          hint="Your total spending budget for each month. Leave it empty to use the sum of your category budgets."
+          initial={prefs.monthlyBudget}
+          currency={currency}
+          onSave={(v) => { updatePrefs({ monthlyBudget: v }); close(); }}
+          onClose={close}
+        />
+      )}
+      {sheet?.kind === 'allocation' && (
+        <AmountSheet
+          title="Savings Settings"
+          hint="How much you plan to put into savings each month."
+          initial={prefs.savingsAllocation}
+          currency={currency}
+          onSave={(v) => { updatePrefs({ savingsAllocation: v }); close(); }}
+          onClose={close}
+        />
+      )}
+      {sheet?.kind === 'alerts' && (
+        <AlertsSheet
+          enabled={prefs.alertsEnabled}
+          threshold={prefs.alertThresholdPct}
+          onSave={(on, t) => { updatePrefs({ alertsEnabled: on, alertThresholdPct: t }); close(); }}
+          onClose={close}
+        />
+      )}
+      {sheet?.kind === 'rollover' && (
+        <RolloverSheet enabled={prefs.rollover} onSave={(on) => { updatePrefs({ rollover: on }); close(); }} onClose={close} />
+      )}
+      {sheet?.kind === 'reset' && (
+        <ConfirmSheet
+          title="Reset Budget"
+          message="Clears your monthly budget and every category budget. Your savings and expenses are kept."
+          confirmLabel="Reset"
+          onConfirm={() => { hapticWarning(); persist([]); updatePrefs({ monthlyBudget: 0 }); close(); }}
+          onClose={close}
+        />
+      )}
+      {sheet?.kind === 'delete' && (
+        <ConfirmSheet
+          title="Delete Budget"
+          message="Deletes all budgets, savings goals and savings history. Expenses in Expense Tracker are not touched. This can't be undone."
+          confirmLabel="Delete everything"
+          onConfirm={() => {
+            hapticWarning();
+            persist([]);
+            updateGoals([]);
+            updateEntries([]);
+            updatePrefs({ monthlyBudget: 0, savingsAllocation: 0, rollover: false });
+            close();
+            setView('main');
+          }}
+          onClose={close}
+        />
+      )}
+      {sheet?.kind === 'currency' && (
+        <CurrencySheet
+          currency={currency}
+          onSelect={(code) => { hapticTap(); setCurrency(code); storageSet(StorageKeys.budgetDefaultCurrency, code); close(); }}
+          onClose={close}
+        />
+      )}
+      {sheet?.kind === 'newGoal' && (
+        <GoalEditorSheet
+          currency={currency}
+          onSave={(g) => { updateGoals([...goals, { id: newId(), createdAt: Date.now(), ...g }]); close(); }}
+          onClose={close}
+        />
+      )}
+      {openGoal && (
+        <GoalSheet
+          goal={openGoal}
+          saved={savedForGoal(openGoal.id)}
+          currency={currency}
+          onAdd={(v) => { addEntry(v, openGoal.id); close(); }}
+          onWithdraw={(v) => { addEntry(-v, openGoal.id); close(); }}
+          onDelete={() => {
+            hapticWarning();
+            updateGoals(goals.filter((g) => g.id !== openGoal.id));
+            updateEntries(entries.filter((e) => e.goalId !== openGoal.id));
+            close();
+          }}
+          onClose={close}
+        />
+      )}
+      {sheet?.kind === 'addSavings' && (
+        <AddSavingsSheet
+          goals={goals}
+          currency={currency}
+          initialGoalId={sheet.goalId}
+          onSave={(v, goalId) => { addEntry(v, goalId); close(); }}
+          onClose={close}
+        />
+      )}
+      {sheet?.kind === 'savingsMenu' && (
+        <MenuSheet
+          title="Savings"
+          onClose={close}
+          items={[
+            { label: 'Add to savings', icon: 'plus', onClick: () => setSheet({ kind: 'addSavings', goalId: null }) },
+            { label: 'New savings goal', icon: 'target', onClick: () => setSheet({ kind: 'newGoal' }) },
+            { label: 'Savings settings', icon: 'sliders', onClick: () => setSheet({ kind: 'allocation' }) },
+          ]}
+        />
       )}
     </div>
   );
