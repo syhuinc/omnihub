@@ -1,182 +1,486 @@
-.craft__title-accent {
-  background: linear-gradient(90deg, #00cfff 0%, #0f8cff 35%, #3d6bff 55%, #c146f9 80%, #ec5fff 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  src: url('../../assets/fonts/PlusJakartaSans-latin.woff2') format('woff2');
+  font-weight: 200 800;
+  font-display: swap;
 }
 
-.craft__body {
+/* Sizes and offsets are measured from the Crafting Station mockup at the phone's 436px width. */
+.craft2 {
+  --c-page: #07101c;
+  --c-text: #ffffff;
+  --c-muted: rgba(226, 236, 248, 0.86);
+  --c-soft: rgba(206, 216, 232, 0.8);
+  --c-card: #101926;
+  --c-card-border: rgba(130, 160, 205, 0.16);
+  --c-blue: #2f7dfa;
+  --c-link: #2a90fd;
+  --c-track: #1d293a;
+  --c-pill: #142030;
+  --c-pill-text: rgba(222, 232, 245, 0.88);
+  --c-tile: #15212f;
+  /* The mockup has no status bar; on the phone keep the title clear of it. */
+  --craft-top: max(27px, calc(var(--safe-top) + 6px));
+
   position: relative;
-  z-index: 1;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 0 16px 24px;
+  overflow-x: hidden;
+  min-height: 100%;
+  padding-bottom: 32px;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: var(--c-text);
+  background: var(--c-page);
 }
 
-.craft__hero {
-  position: relative;
-  padding-top: calc(26px + var(--safe-top));
-  padding-bottom: 28px;
-  padding-inline: 26px;
-  aspect-ratio: 841 / 1870;
-  margin-bottom: -146.9%;
-  display: flex;
-  align-items: flex-start;
-  background-size: cover;
-  background-position: center top;
-  background-color: #191033;
+:root[data-theme='light'] .craft2 {
+  --c-page: #f7f6f5;
+  --c-text: #11161f;
+  --c-muted: #3a414d;
+  --c-soft: #4b5260;
+  --c-card: #ffffff;
+  --c-card-border: rgba(20, 30, 50, 0.06);
+  --c-blue: #2a76ef;
+  --c-link: #0866e0;
+  --c-track: #e6dfdd;
+  --c-pill: #ebecef;
+  --c-pill-text: #1d2430;
+  --c-tile: #f2f3f4;
+
+  background: linear-gradient(180deg, #e9eaed 0, #f2f2f2 160px, var(--c-page) 260px);
 }
 
-.craft__hero-scrim {
+.craft2 button {
+  font-family: inherit;
+}
+
+/* ---- Hero ---- */
+
+.craft2__hero-img {
   position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(5, 8, 16, 0.6) 0%, rgba(5, 8, 16, 0.1) 15%, rgba(5, 8, 16, 0) 40%);
+  top: 0;
+  right: 0;
+  height: calc(var(--craft-top) + 172px);
+  width: auto;
+  pointer-events: none;
+  -webkit-mask-image:
+    linear-gradient(90deg, transparent 0%, #000 34%),
+    linear-gradient(180deg, #000 76%, transparent 96%);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(90deg, transparent 0%, #000 34%),
+    linear-gradient(180deg, #000 76%, transparent 96%);
+  mask-composite: intersect;
 }
 
-.craft__hero-text {
+.craft2__hero {
   position: relative;
-  z-index: 1;
+  padding: var(--craft-top) 0 0 25px;
+  height: calc(var(--craft-top) + 139.5px);
 }
 
-.craft__hero-eyebrow {
+.craft2__eyebrow {
   display: block;
-  font-size: 8px;
+  font-size: 8.6px;
   font-weight: 700;
   line-height: 1;
-  letter-spacing: 0.69em;
-  color: #fff;
-  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.6);
-  margin-bottom: 2px;
+  letter-spacing: 0.6em;
+  color: var(--c-text);
 }
 
-.craft__hero-title {
-  font-family: var(--font-display);
-  font-size: 42px;
-  font-weight: 800;
-  color: #fff;
-  line-height: 0.73;
-  padding-top: 7px;
-  margin-bottom: -3px;
-  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.6);
-}
-
-.craft__hero-subtitle {
-  font-size: 12px;
-  font-weight: 400;
-  line-height: 12.5px;
-  color: #fff;
-  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.6);
-}
-
-.craft__features {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
-}
-
-.craft__feature {
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  object-fit: contain;
-  display: block;
-}
-
-.craft__banner {
-  width: 100%;
-  height: auto;
-  display: block;
-  margin: 0 auto;
-  border-radius: var(--radius-lg);
-}
-
-.craft__section-head {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.craft__section-head h2 {
-  font-family: var(--font-display);
-  font-size: 16px;
-  font-weight: 800;
-  line-height: 1.1;
-  color: var(--text-primary);
-}
-
-.craft__section-head p {
-  font-size: 10.5px;
-  color: var(--text-secondary);
-}
-
-.craft__recipes {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
-}
-
-.craft__recipe-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-}
-
-.craft__recipe-img {
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  object-fit: contain;
-  display: block;
-}
-
-.craft__recipe-soon {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 3px 8px;
-  border-radius: var(--radius-pill);
-  background: var(--bg-elevated-2);
-  border: 1px solid var(--border-strong);
-  color: var(--text-secondary);
-  font-size: 9px;
+.craft2__title {
+  margin-top: 8px;
+  font-size: 32px;
   font-weight: 700;
+  line-height: 30.4px;
+  letter-spacing: -0.01em;
+  color: var(--c-text);
 }
 
-.craft__thanks {
-  margin-top: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 22px 18px;
-  border-radius: var(--radius-lg);
-  background: linear-gradient(160deg, #1b1240 0%, #2c1c5c 45%, #191033 100%);
-  border: 1px solid color-mix(in srgb, var(--purple) 30%, transparent);
-}
-
-.craft__thanks-bar {
-  width: 28px;
-  height: 3px;
-  border-radius: 2px;
-  background: linear-gradient(90deg, #4d7cfe, var(--purple));
-  margin-bottom: 4px;
-}
-
-.craft__thanks h2 {
-  font-size: 19px;
-  font-weight: 800;
-  line-height: 1.25;
-  color: #fff;
-}
-
-.craft__thanks-accent {
-  background: linear-gradient(135deg, #4d7cfe, var(--purple));
+.craft2__title-accent {
+  background: linear-gradient(90deg, #8cc6ff, #5b9ffa);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
 
-.craft__thanks p {
-  font-size: 12.5px;
-  color: rgba(255, 255, 255, 0.65);
+:root[data-theme='light'] .craft2__title-accent {
+  background: none;
+  color: var(--c-text);
+}
+
+.craft2__subtitle {
+  margin-top: 6px;
+  font-size: 10.5px;
+  font-weight: 400;
+  line-height: 13px;
+  color: var(--c-muted);
+}
+
+/* ---- Start Crafting ---- */
+
+.craft2__start {
+  position: relative;
+  margin: 0 15.5px;
+  height: 56.2px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 7px 0 13.5px;
+  border-radius: 13px;
+  background: var(--c-card);
+  border: 1px solid var(--c-card-border);
+  box-shadow: 0 10px 24px -14px rgba(0, 0, 0, 0.55);
+}
+
+:root[data-theme='light'] .craft2__start {
+  box-shadow: 0 8px 22px -12px rgba(30, 40, 60, 0.18);
+}
+
+.craft2__start-text h2 {
+  font-size: 16.8px;
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.craft2__start-text p {
+  margin-top: 3px;
+  font-size: 10.1px;
+  line-height: 1.2;
+  color: var(--c-muted);
+}
+
+.craft2__create {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: 131.2px;
+  height: 34.3px;
+  padding: 0 10px 0 7px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--c-blue) 88%, #fff) 0%, var(--c-blue) 100%);
+  color: #fff;
+  box-shadow: 0 8px 18px -8px color-mix(in srgb, var(--c-blue) 80%, transparent);
+}
+
+.craft2__create-plus {
+  flex-shrink: 0;
+  width: 19.5px;
+  height: 19.5px;
+  border-radius: 50%;
+  background: #fff;
+  color: var(--c-blue);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.craft2__create-label {
+  flex: 1;
+  text-align: left;
+  font-size: 10.9px;
+  font-weight: 600;
+}
+
+/* ---- Feature cards ---- */
+
+.craft2__features {
+  margin: 9.7px 15.5px 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 11px;
+}
+
+.craft2__feature {
+  position: relative;
+  height: 113.2px;
+  padding: 55px 4px 0 15.3px;
+  text-align: left;
+  border-radius: 11px;
+  display: flex;
+  flex-direction: column;
+  color: var(--c-text);
+}
+
+.craft2__feature--combine {
+  background: linear-gradient(160deg, #0f2440 0%, #0b1c31 100%);
+  border: 1px solid rgba(64, 128, 230, 0.32);
+}
+
+.craft2__feature--workflow {
+  background: linear-gradient(160deg, #1c1d3d 0%, #15172d 100%);
+  border: 1px solid rgba(120, 100, 235, 0.32);
+}
+
+.craft2__feature--possibilities {
+  background: linear-gradient(160deg, #332d22 0%, #26221b 100%);
+  border: 1px solid rgba(214, 160, 70, 0.38);
+}
+
+:root[data-theme='light'] .craft2__feature--combine {
+  background: linear-gradient(160deg, #e6effe 0%, #edf3fe 100%);
+  border-color: rgba(60, 110, 220, 0.08);
+}
+
+:root[data-theme='light'] .craft2__feature--workflow {
+  background: linear-gradient(160deg, #eeeafe 0%, #f3f0fe 100%);
+  border-color: rgba(100, 80, 220, 0.08);
+}
+
+:root[data-theme='light'] .craft2__feature--possibilities {
+  background: linear-gradient(160deg, #fef8ec 0%, #fefbf3 100%);
+  border-color: rgba(210, 150, 60, 0.12);
+}
+
+.craft2__feature-icon {
+  position: absolute;
+  left: 14px;
+  top: 11px;
+  width: 37px;
+  height: 39px;
+  object-position: left center;
+  object-fit: contain;
+}
+
+.craft2__feature-chevron {
+  position: absolute;
+  right: 11px;
+  top: 19px;
+  display: flex;
+}
+
+.craft2__feature--combine .craft2__feature-chevron { color: #3a8af6; }
+.craft2__feature--workflow .craft2__feature-chevron { color: #866ff1; }
+.craft2__feature--possibilities .craft2__feature-chevron { color: #fdb356; }
+
+:root[data-theme='light'] .craft2__feature--combine .craft2__feature-chevron { color: #1144a4; }
+:root[data-theme='light'] .craft2__feature--workflow .craft2__feature-chevron { color: #3828a5; }
+:root[data-theme='light'] .craft2__feature--possibilities .craft2__feature-chevron { color: #ae671a; }
+
+.craft2__feature strong {
+  font-size: 11.1px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.craft2__feature-desc {
+  display: flex;
+  flex-direction: column;
+  white-space: nowrap;
+  margin-top: 4px;
+  font-size: 9.4px;
+  line-height: 11.1px;
+  color: var(--c-muted);
+}
+
+/* ---- Still Cooking ---- */
+
+.craft2__cooking {
+  position: relative;
+  margin: 10.7px 15.5px 0;
+  height: 115.9px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #0e1924;
+  border: 1px solid var(--c-card-border);
+}
+
+:root[data-theme='light'] .craft2__cooking {
+  background: linear-gradient(90deg, #f6ece9 0%, #f5e9e2 100%);
+}
+
+.craft2__cooking-img {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 52%;
+  height: 100%;
+  object-fit: cover;
+  object-position: right center;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 30%);
+  mask-image: linear-gradient(90deg, transparent 0%, #000 30%);
+}
+
+.craft2__cooking-text {
+  position: relative;
+  padding: 14px 0 0 16.7px;
+}
+
+.craft2__cooking-text h2 {
+  font-size: 19.7px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.craft2__cooking-text p {
+  margin-top: 4px;
+  font-size: 11.6px;
+  line-height: 14.9px;
+  color: var(--c-muted);
+}
+
+.craft2__progress {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.craft2__progress-track {
+  width: 166.6px;
+  height: 11.6px;
+  border-radius: 999px;
+  background: var(--c-track);
+  overflow: hidden;
+}
+
+.craft2__progress-fill {
+  width: 70%;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #3a8bff, var(--c-blue));
+}
+
+.craft2__progress span {
+  font-size: 10.2px;
+  font-weight: 700;
+}
+
+/* ---- Featured Recipes ---- */
+
+.craft2__section-head {
+  margin: 14px 18px 0 18.6px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.craft2__section-head h2 {
+  font-size: 14.7px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.craft2__section-head p {
+  margin-top: 2px;
+  font-size: 10.5px;
+  line-height: 1.2;
+  color: var(--c-soft);
+}
+
+.craft2__view-all {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 0 8px;
+  font-size: 10.4px;
+  font-weight: 600;
+  color: var(--c-link);
+}
+
+.craft2__recipes {
+  margin: 10px 18px 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 13.5px;
+}
+
+.craft2__recipe {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.craft2__recipe-card {
+  width: 100%;
+  height: 124.8px;
+  padding: 0 4px;
+  border-radius: 12px;
+  background: var(--c-card);
+  border: 1px solid var(--c-card-border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+:root:not([data-theme='light']) .craft2__recipe-card {
+  background: #0f1824;
+}
+
+:root[data-theme='light'] .craft2__recipe-card {
+  box-shadow: 0 8px 20px -14px rgba(30, 40, 60, 0.2);
+}
+
+.craft2__recipe-tile {
+  position: relative;
+  width: calc(100% - 14px);
+  height: 55.7px;
+  margin-top: 13.9px;
+  border-radius: 9px;
+  background: var(--c-tile);
+}
+
+.craft2__recipe-tile img {
+  position: absolute;
+  left: 50%;
+  bottom: 1px;
+  width: auto;
+  max-width: 104%;
+  height: 64px;
+  object-fit: contain;
+  transform: translateX(-50%);
+}
+
+.craft2__recipe-card strong {
+  margin-top: 6px;
+  font-size: 11.7px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.craft2__recipe-card span {
+  margin-top: 2px;
+  font-size: 9.3px;
+  line-height: 11.1px;
+  color: var(--c-muted);
+}
+
+.craft2__recipe-soon {
+  margin-top: 3.7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  width: 88.7px;
+  height: 20.9px;
+  border-radius: 999px;
+  background: var(--c-pill);
+  color: var(--c-pill-text);
+  font-size: 8.6px;
+  font-weight: 600;
+}
+
+/* ---- Coming-soon toast ---- */
+
+.craft2__toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(110px + var(--safe-bottom));
+  z-index: 20;
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: rgba(20, 30, 46, 0.94);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 8px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.craft2__toast--show {
+  opacity: 1;
+  transform: translate(-50%, 0);
 }
