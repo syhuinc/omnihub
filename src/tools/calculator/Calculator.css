@@ -86,6 +86,11 @@
   padding: calc(var(--safe-top) + 12px) 31px 0 29px;
 }
 
+.calc2__top-left {
+  display: flex;
+  gap: 12px;
+}
+
 .calc2__round {
   width: 54px;
   height: 54px;

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Icon } from '../../components/Icon';
+import { useRouter } from '../../app/Router';
 import { useBackHandler } from '../../app/useBackHandler';
 import { hapticSelect, hapticTap, hapticWarning } from '../../haptics';
 import { storageGet, storageSet, StorageKeys } from '../../storage/db';
@@ -59,6 +60,7 @@ function OpGlyph({ op }: { op: ExprOp | '=' }) {
 type Overlay = 'history' | 'menu' | null;
 
 export function Calculator() {
+  const { back } = useRouter();
   const [expr, setExpr] = useState('');
   const [lastExpr, setLastExpr] = useState('');
   const [justEvaluated, setJustEvaluated] = useState(false);
@@ -159,9 +161,14 @@ export function Calculator() {
   return (
     <div className="screen calc2">
       <header className="calc2__top">
-        <button type="button" className="calc2__round" onClick={() => { hapticTap(); setOverlay(overlay === 'history' ? null : 'history'); }} aria-label="History">
-          <Icon name="history" size={28} strokeWidth={2.5} />
-        </button>
+        <div className="calc2__top-left">
+          <button type="button" className="calc2__round" onClick={() => { hapticTap(); back(); }} aria-label="Back">
+            <Icon name="arrow-left" size={26} strokeWidth={2.5} />
+          </button>
+          <button type="button" className="calc2__round" onClick={() => { hapticTap(); setOverlay(overlay === 'history' ? null : 'history'); }} aria-label="History">
+            <Icon name="history" size={28} strokeWidth={2.5} />
+          </button>
+        </div>
         <button type="button" className="calc2__round" onClick={() => { hapticTap(); setOverlay('menu'); }} aria-label="More options">
           <Icon name="more-vertical" size={28} strokeWidth={4} />
         </button>
