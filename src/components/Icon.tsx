@@ -113,6 +113,8 @@ export type IconName =
   | 'fingerprint'
   | 'cloud'
   | 'arrow-left'
+  | 'arrow-down'
+  | 'dart'
   | 'refresh';
 
 interface IconProps {
@@ -407,6 +409,14 @@ const paths: Record<IconName, React.ReactNode> = {
     <path d="M12 2a7 7 0 0 0-7 7v2c0 3.5-1 6-2 7.5 M12 2a7 7 0 0 1 7 7v2c0 2 .3 4 1 5.5 M8 21c1.2-1.7 2-4.3 2-7v-2a2 2 0 0 1 4 0v2c0 2 .4 4.3 1.5 6 M12 6a5 5 0 0 0-5 5v2c0 2.5-.5 5-1.8 7 M12 6a5 5 0 0 1 5 5v2c0 1.3.2 3 .7 4.5" />
   ),
   'arrow-left': <path d="M19 12H5M11 18l-6-6 6-6" />,
+  'arrow-down': <path d="M12 4v16M6 14l6 6 6-6" />,
+  dart: (
+    <>
+      <path d="M19.5 10.5A8.5 8.5 0 1 1 13.5 4.5" />
+      <circle cx="11" cy="13" r="4" />
+      <path d="M11 13l8.5-8.5M16 3.5v4.5h4.5" />
+    </>
+  ),
   refresh: <path d="M20 11a8 8 0 0 0-14.6-4.5M4.5 3v4h4M4 13a8 8 0 0 0 14.6 4.5M19.5 21v-4h-4" />,
   cloud: (
     <path d="M7 18h10a4 4 0 0 0 .5-7.97A5.5 5.5 0 0 0 7.1 8.04 4 4 0 0 0 7 18Z" />

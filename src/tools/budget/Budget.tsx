@@ -5,6 +5,7 @@ import { useBackHandler } from '../../app/useBackHandler';
 import { storageGet, storageSet, StorageKeys } from '../../storage/db';
 import { hapticTap, hapticWarning } from '../../haptics';
 import { useCloudSync } from '../../cloud/useCloudSync';
+import { useIsLightTheme } from '../../theme/useTheme';
 import { EXPENSE_CATEGORIES, getCategory, type ExpenseCategory } from '../expense-tracker/categories';
 import { currentMonthKey, formatMonthLabel, shiftMonthKey } from '../expense-tracker/month';
 import { DEFAULT_CURRENCY, formatMoney } from '../shared/currencies';
@@ -117,6 +118,40 @@ function SectionHead({ title, onSeeAll }: { title: string; onSeeAll?: () => void
   );
 }
 
+/** Light-theme "% used" ring on the main budget card. */
+function Ring({ value }: { value: number }) {
+  const r = 52;
+  const c = 2 * Math.PI * r;
+  return (
+    <span className="bd__ring">
+      <svg viewBox="0 0 124 124" aria-hidden="true">
+        <defs>
+          <linearGradient id="bd-ring" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stopColor="#3d8bff" />
+            <stop offset="1" stopColor="#1f6ff2" />
+          </linearGradient>
+        </defs>
+        <circle cx="62" cy="62" r={r} className="bd__ring-track" />
+        {value > 0 && (
+          <circle
+            cx="62"
+            cy="62"
+            r={r}
+            className="bd__ring-fill"
+            stroke={value > 100 ? '#f0505a' : 'url(#bd-ring)'}
+            strokeDasharray={`${(Math.min(100, value) / 100) * c} ${c}`}
+            transform="rotate(-90 62 62)"
+          />
+        )}
+      </svg>
+      <span className="bd__ring-label">
+        <strong>{Math.round(value)}%</strong>
+        <small>USED</small>
+      </span>
+    </span>
+  );
+}
+
 function Bar({ value, color }: { value: number; color: string }) {
   return (
     <div className="bd__track">
@@ -127,6 +162,7 @@ function Bar({ value, color }: { value: number; color: string }) {
 
 export function Budget() {
   const { back } = useRouter();
+  const isLight = useIsLightTheme();
   const [budgets, setBudgets] = useState<BudgetLimit[]>(() => loadBudgets());
   const [expenses] = useState<Expense[]>(() => storageGet(StorageKeys.expenses, []));
   const [prefs, setPrefs] = useState<BudgetPrefs>(() => loadPrefs());
@@ -180,6 +216,9 @@ export function Budget() {
   const remaining = available - totalSpent;
   const [year, month] = monthKey.split('-').map(Number);
   const daysLeft = Math.max(0, new Date(year, month, 0).getDate() - new Date().getDate());
+  const monthExpenses = expenses.filter((e) => e.dateISO.slice(0, 7) === monthKey).length;
+  const dailyAverage = totalSpent / Math.max(1, new Date().getDate());
+  const usedPct = available > 0 ? (totalSpent / available) * 100 : 0;
 
   const totalSaved = sum(entries.map((e) => e.amount));
   const savedThisMonth = sum(entries.filter((e) => e.dateISO.slice(0, 7) === monthKey).map((e) => e.amount));
@@ -293,11 +332,11 @@ export function Budget() {
   function entryRow(e: SavingsEntry) {
     const goal = e.goalId ? goals.find((g) => g.id === e.goalId) : undefined;
     const out = e.amount < 0;
-    const icon: IconName = out ? 'upload' : goal ? 'target' : 'download';
+    const icon: IconName = out ? 'upload' : goal ? 'dart' : 'arrow-down';
     return (
       <div key={e.id} className="bd__entry">
         <span className={`bd__entry-tile${goal ? ' bd__entry-tile--goal' : ''}`}>
-          <Icon name={icon} size={24} strokeWidth={2.4} />
+          <Icon name={icon} size={28} strokeWidth={2.4} />
         </span>
         <span className="bd__entry-text">
           <strong>{goal ? goal.name : 'Monthly Savings'}</strong>
@@ -321,34 +360,76 @@ export function Budget() {
       <>
         <Header title="Budget" subtitle={formatMonthLabel(monthKey)} onBack={back} onMore={() => { hapticTap(); setView('settings'); }} />
 
-        <section className="bd__card bd__overview">
-          <span className="bd__label">Monthly Budget</span>
-          <strong className="bd__big">{formatMoney(available, currency)}</strong>
-          {rolloverAmount > 0 && <span className="bd__rollover">Includes {formatMoney(rolloverAmount, currency)} rolled over</span>}
-          <div className="bd__overview-bar">
-            <Bar value={pct(totalSpent, available)} color={remaining < 0 ? 'var(--red)' : 'linear-gradient(90deg, #2f80ff, #3a8dff)'} />
-            <span>{Math.round(available > 0 ? (totalSpent / available) * 100 : 0)}%</span>
-          </div>
-          <div className="bd__stats">
-            <div>
-              <span>Spent</span>
-              <strong>{formatMoney(totalSpent, currency)}</strong>
+        {isLight ? (
+          <>
+            <section className="bd__card bd__ring-card">
+              <Ring value={usedPct} />
+              <div className="bd__ring-list">
+                <div>
+                  <span>Monthly Budget</span>
+                  <strong>{formatMoney(available, currency)}</strong>
+                </div>
+                <div>
+                  <span>Spent</span>
+                  <strong>{formatMoney(totalSpent, currency)}</strong>
+                </div>
+                <div>
+                  <span>{remaining < 0 ? 'Over by' : 'Remaining'}</span>
+                  <strong className={`bd__ring-remaining ${remaining < 0 ? 'bd__neg' : 'bd__pos'}`}>{formatMoney(Math.abs(remaining), currency)}</strong>
+                </div>
+              </div>
+            </section>
+            {rolloverAmount > 0 && <span className="bd__rollover">Includes {formatMoney(rolloverAmount, currency)} rolled over</span>}
+            {available <= 0 && (
+              <button type="button" className="bd__setup" onClick={() => setSheet({ kind: 'monthly' })}>
+                Set your monthly budget
+              </button>
+            )}
+            <div className="bd__mini-stats">
+              <div className="bd__mini">
+                <span className="bd__mini-tile"><img src={GOAL_ART.calendar} alt="" /></span>
+                <span><strong>{daysLeft}</strong><small>Days Left</small></span>
+              </div>
+              <div className={`bd__mini${formatMoney(dailyAverage, currency).length > 9 ? ' bd__mini--long' : ''}`}>
+                <span className="bd__mini-tile"><img src={ART.chart} alt="" /></span>
+                <span><strong>{formatMoney(dailyAverage, currency)}</strong><small>Daily Average</small></span>
+              </div>
+              <div className="bd__mini">
+                <span className="bd__mini-tile"><img src={GOAL_ART.document} alt="" /></span>
+                <span><strong>{monthExpenses}</strong><small>{monthExpenses === 1 ? 'Transaction' : 'Transactions'}</small></span>
+              </div>
             </div>
-            <div>
-              <span>{remaining < 0 ? 'Over by' : 'Remaining'}</span>
-              <strong className={remaining < 0 ? 'bd__neg' : 'bd__pos'}>{formatMoney(Math.abs(remaining), currency)}</strong>
+          </>
+        ) : (
+          <section className="bd__card bd__overview">
+            <span className="bd__label">Monthly Budget</span>
+            <strong className="bd__big">{formatMoney(available, currency)}</strong>
+            {rolloverAmount > 0 && <span className="bd__rollover">Includes {formatMoney(rolloverAmount, currency)} rolled over</span>}
+            <div className="bd__overview-bar">
+              <Bar value={pct(totalSpent, available)} color={remaining < 0 ? 'var(--red)' : 'linear-gradient(90deg, #2f80ff, #3a8dff)'} />
+              <span>{Math.round(available > 0 ? (totalSpent / available) * 100 : 0)}%</span>
             </div>
-            <div>
-              <span>Days Left</span>
-              <strong>{daysLeft}</strong>
+            <div className="bd__stats">
+              <div>
+                <span>Spent</span>
+                <strong>{formatMoney(totalSpent, currency)}</strong>
+              </div>
+              <div>
+                <span>{remaining < 0 ? 'Over by' : 'Remaining'}</span>
+                <strong className={remaining < 0 ? 'bd__neg' : 'bd__pos'}>{formatMoney(Math.abs(remaining), currency)}</strong>
+              </div>
+              <div>
+                <span>Days Left</span>
+                <strong>{daysLeft}</strong>
+              </div>
             </div>
-          </div>
-          {available <= 0 && (
-            <button type="button" className="bd__setup" onClick={() => setSheet({ kind: 'monthly' })}>
-              Set your monthly budget
-            </button>
-          )}
-        </section>
+            {available <= 0 && (
+              <button type="button" className="bd__setup" onClick={() => setSheet({ kind: 'monthly' })}>
+                Set your monthly budget
+              </button>
+            )}
+          </section>
+        )}
 
         <button type="button" className="bd__savings" onClick={() => { hapticTap(); setView('savings'); }}>
           <span className="bd__savings-tile">
@@ -368,6 +449,14 @@ export function Budget() {
 
         <SectionHead title="Category Budgets" onSeeAll={() => setView('categories')} />
         <div className="bd__list">{EXPENSE_CATEGORIES.slice(0, 6).map(categoryRow)}</div>
+        {isLight && (
+          <button type="button" className="bd__add-cat" onClick={() => { hapticTap(); setView('categories'); }}>
+            <span className="bd__add-cat-plus">
+              <Icon name="plus" size={15} strokeWidth={3} />
+            </span>
+            Add Category Budget
+          </button>
+        )}
       </>
     );
   } else if (view === 'categories') {
@@ -453,12 +542,12 @@ export function Budget() {
     const savingsAlloc = prefs.savingsAllocation;
     const unallocated = Math.max(0, monthlyBase - categoryTotal - savingsAlloc);
     const base = Math.max(monthlyBase, categoryTotal + savingsAlloc) || 1;
-    const rows: { label: string; icon: IconName; img?: string; danger?: boolean; onClick: () => void }[] = [
-      { label: 'Edit Category Budgets', icon: 'sliders', onClick: () => setView('categories') },
+    const rows: { label: string; icon: IconName; img?: string; tone?: 'blue'; danger?: boolean; onClick: () => void }[] = [
+      { label: 'Edit Category Budgets', icon: 'sliders', tone: 'blue', onClick: () => setView('categories') },
       { label: 'Savings Settings', icon: 'wallet', img: ART.piggyGreen, onClick: () => setSheet({ kind: 'allocation' }) },
-      { label: 'Budget Alerts', icon: 'bell', onClick: () => setSheet({ kind: 'alerts' }) },
+      { label: 'Budget Alerts', icon: 'bell', tone: 'blue', onClick: () => setSheet({ kind: 'alerts' }) },
       { label: 'Month Rollover', icon: 'calendar', onClick: () => setSheet({ kind: 'rollover' }) },
-      { label: 'Reset Budget', icon: 'refresh', onClick: () => setSheet({ kind: 'reset' }) },
+      { label: 'Reset Budget', icon: 'refresh', tone: 'blue', onClick: () => setSheet({ kind: 'reset' }) },
       { label: 'Delete Budget', icon: 'trash', danger: true, onClick: () => setSheet({ kind: 'delete' }) },
     ];
     const allocRows = [
@@ -500,11 +589,11 @@ export function Budget() {
 
         <section className="bd__card bd__menu-card">
           {rows.map((r) => (
-            <button key={r.label} type="button" className={`bd__menu-row${r.danger ? ' bd__menu-row--danger' : ''}`} onClick={() => { hapticTap(); r.onClick(); }}>
+            <button key={r.label} type="button" className={`bd__menu-row${r.danger ? ' bd__menu-row--danger' : ''}${r.tone ? ` bd__menu-row--${r.tone}` : ''}`} onClick={() => { hapticTap(); r.onClick(); }}>
               {r.img ? (
                 <img className="bd__menu-img" src={r.img} alt="" />
               ) : (
-                <Icon name={r.icon} size={25} strokeWidth={1.9} className={r.icon === 'bell' ? 'bd__icon-filled' : undefined} />
+                <Icon name={r.icon} size={27} strokeWidth={2.1} className={r.icon === 'bell' ? 'bd__icon-filled' : undefined} />
               )}
               <span>{r.label}</span>
               <Icon name="chevron-right" size={18} className="bd__chev" />
