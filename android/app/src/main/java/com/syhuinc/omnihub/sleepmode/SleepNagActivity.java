@@ -31,12 +31,15 @@ import com.syhuinc.omnihub.R;
 public class SleepNagActivity extends Activity {
     public static final String EXTRA_TEXT = "text";
     public static final String EXTRA_PERSONALITY = "personality";
+    /** Morning wake-up card: "I'm up" / "5 more minutes", and it stays until one is tapped. */
+    public static final String EXTRA_MORNING = "morning";
 
     /** Long enough to read a short reminder line, short enough to never feel stuck. */
     private static final long AUTO_DISMISS_MS = 8_000L;
 
     private final Handler autoDismissHandler = new Handler(Looper.getMainLooper());
     private final Runnable autoDismiss = this::finish;
+    private boolean morning;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,7 +53,7 @@ public class SleepNagActivity extends Activity {
 
         closeButton.setOnClickListener(v -> finish());
         primaryButton.setOnClickListener(v -> {
-            sendToReceiver(SleepModeReceiver.ACTION_STOP_TONIGHT);
+            sendToReceiver(morning ? SleepModeReceiver.ACTION_IM_UP : SleepModeReceiver.ACTION_STOP_TONIGHT);
             finish();
         });
         secondaryButton.setOnClickListener(v -> {
@@ -78,6 +81,8 @@ public class SleepNagActivity extends Activity {
     private void bindContent(Intent intent) {
         String text = intent.getStringExtra(EXTRA_TEXT);
         String personality = intent.getStringExtra(EXTRA_PERSONALITY);
+        morning = intent.getBooleanExtra(EXTRA_MORNING, false);
+        SleepNagOverlay.applyMode(findViewById(android.R.id.content), morning);
 
         TextView bodyText = findViewById(R.id.nag_body);
         if (text != null && !text.isEmpty()) bodyText.setText(text);
@@ -86,7 +91,8 @@ public class SleepNagActivity extends Activity {
         illustration.setImageResource(bannerResFor(personality));
 
         autoDismissHandler.removeCallbacks(autoDismiss);
-        autoDismissHandler.postDelayed(autoDismiss, AUTO_DISMISS_MS);
+        // A wake-up card stays until "I'm up" or snooze; a bedtime nudge clears itself.
+        if (!morning) autoDismissHandler.postDelayed(autoDismiss, AUTO_DISMISS_MS);
     }
 
     private int bannerResFor(String personality) {

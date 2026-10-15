@@ -25,6 +25,8 @@ export interface SleepModeConfig {
   relationshipStatus?: RelationshipStatus | null;
   interests?: string | null;
   customNotes?: string | null;
+  /** Morning wake-up companion: speaks at wake time and repeats until "I'm up" is tapped. */
+  wakeUpEnabled?: boolean;
 }
 
 export interface SleepModeStatus extends SleepModeConfig {
@@ -70,6 +72,15 @@ export interface SleepModePluginInterface {
   /** Caches the real-voice (Gemini TTS) clips generated alongside the AI pool — one base64 WAV
    *  per tier (null for any tier synthesis failed for), index-aligned with the tiers array. */
   setAiAudioClips(options: { personality: SleepPersonality; clips: (string | null)[] }): Promise<void>;
+  /** Clips for line 0 of the AI snooze / morning lists (null where synthesis failed). */
+  setAiExtraClips(options: {
+    personality: SleepPersonality;
+    snooze: string | null;
+    morning: (string | null)[];
+    morningSnooze: string | null;
+  }): Promise<void>;
+  /** Plays one morning wake-up line now, with its "I'm up" card, so it can be tried any time. */
+  testWakeUp(): Promise<void>;
 }
 
 export const DEFAULT_SLEEP_MODE_CONFIG: SleepModeConfig = {
@@ -87,6 +98,7 @@ export const DEFAULT_SLEEP_MODE_CONFIG: SleepModeConfig = {
   relationshipStatus: null,
   interests: null,
   customNotes: null,
+  wakeUpEnabled: false,
 };
 
 // A handful of sample lines per personality, only for the web preview's "hear a sample" button —
@@ -197,6 +209,14 @@ class SleepModePluginWeb extends WebPlugin implements SleepModePluginInterface {
 
   async setAiAudioClips(): Promise<void> {
     // no-op in the web preview — same as setAiMessages, only the native nag path consumes this
+  }
+
+  async setAiExtraClips(): Promise<void> {
+    // no-op in the web preview
+  }
+
+  async testWakeUp(): Promise<void> {
+    await this.speakTest({ text: 'Good morning! Time to get up.' });
   }
 }
 

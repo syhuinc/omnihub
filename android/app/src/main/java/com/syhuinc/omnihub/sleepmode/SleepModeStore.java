@@ -119,6 +119,48 @@ public class SleepModeStore {
         }
     }
 
+    /** One flat AI list ("snooze" or "morningSnooze") from the cached pool, or null if absent. */
+    public static synchronized String[] loadAiList(Context ctx, String personality, String field) {
+        JSONObject obj = loadAiPoolJson(ctx, personality);
+        if (obj == null) return null;
+        try {
+            JSONArray arr = obj.optJSONArray(field);
+            if (arr == null || arr.length() == 0) return null;
+            String[] lines = new String[arr.length()];
+            for (int i = 0; i < arr.length(); i++) lines[i] = arr.getString(i);
+            return lines;
+        } catch (JSONException e) {
+            return null;
+        }
+    }
+
+    /** One morning tier's AI lines from the cached pool, or null if absent. */
+    public static synchronized String[] loadAiMorning(Context ctx, String personality, int tier) {
+        JSONObject obj = loadAiPoolJson(ctx, personality);
+        if (obj == null) return null;
+        try {
+            JSONArray tiers = obj.optJSONArray("morning");
+            if (tiers == null || tier < 0 || tier >= tiers.length()) return null;
+            JSONArray arr = tiers.getJSONArray(tier);
+            String[] lines = new String[arr.length()];
+            for (int i = 0; i < arr.length(); i++) lines[i] = arr.getString(i);
+            return lines.length > 0 ? lines : null;
+        } catch (JSONException e) {
+            return null;
+        }
+    }
+
+    private static JSONObject loadAiPoolJson(Context ctx, String personality) {
+        SharedPreferences prefs = ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        String raw = prefs.getString(aiMessagesKey(personality), null);
+        if (raw == null) return null;
+        try {
+            return new JSONObject(raw);
+        } catch (JSONException e) {
+            return null;
+        }
+    }
+
     private static String aiMessagesKey(String personality) {
         return "ai_messages_" + personality;
     }
@@ -131,13 +173,32 @@ public class SleepModeStore {
      * SleepModeAiClipBank for the read side.
      */
     public static synchronized void saveAiAudioClip(Context ctx, String personality, int tier, byte[] wavBytes) {
+        saveAiAudioFile(ctx, personality + "_tier" + tier, wavBytes);
+    }
+
+    /** Writes one AI clip by base name (e.g. "savage_morning1"); see SleepModeAiClipBank for names. */
+    public static synchronized void saveAiAudioFile(Context ctx, String baseName, byte[] wavBytes) {
         java.io.File dir = new java.io.File(ctx.getFilesDir(), "sleep_ai_audio");
         if (!dir.exists() && !dir.mkdirs()) return;
-        java.io.File out = new java.io.File(dir, personality + "_tier" + tier + ".wav");
+        java.io.File out = new java.io.File(dir, baseName + ".wav");
         try (java.io.FileOutputStream fos = new java.io.FileOutputStream(out)) {
             fos.write(wavBytes);
         } catch (java.io.IOException ignored) {
             // best-effort — a missing clip just means this tier falls back to on-device TTS
+        }
+    }
+
+    /** Deletes every AI clip for a personality — called when a fresh pool replaces the old one, so a
+     *  clip can never play over a line it wasn't recorded for. */
+    public static synchronized void clearAiAudioClips(Context ctx, String personality) {
+        java.io.File dir = new java.io.File(ctx.getFilesDir(), "sleep_ai_audio");
+        java.io.File[] files = dir.listFiles();
+        if (files == null) return;
+        for (java.io.File f : files) {
+            if (f.getName().startsWith(personality + "_")) {
+                //noinspection ResultOfMethodCallIgnored
+                f.delete();
+            }
         }
     }
 }

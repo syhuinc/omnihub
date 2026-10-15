@@ -36,7 +36,10 @@ public class SleepModeData {
     // "single" | "relationship" | "married" | "prefer-not"
     public String relationshipStatus;
     public String interests; // free text, e.g. "Manga, Music, Games"
-    public String customNotes; // free text; stored for a future Sleep Mode AI pass, not yet used to alter messages
+    public String customNotes; // free text; sent to Sleep Mode AI (when signed in) to personalise generated lines
+
+    /** Morning wake-up companion: speak at wake time and keep nudging until "I'm up" is tapped. */
+    public boolean wakeUpEnabled;
 
     // Nightly runtime state — reset each time a fresh bedtime session starts
     public long sessionStartMillis;
@@ -45,6 +48,10 @@ public class SleepModeData {
     public String recentKeysCsv = ""; // last few MessageBank pick keys, comma-joined, for anti-repeat
     /** Beats before this timestamp are skipped silently — set by the "Snooze"/"Stop for tonight" notification actions. 0 = not muted. */
     public long mutedUntilMillis;
+
+    // Morning runtime state — set when the wake-up alarm fires, cleared by "I'm up" or after the last nudge
+    public boolean morningActive;
+    public int morningCount;
 
     public SleepModeData() {}
 
@@ -64,6 +71,9 @@ public class SleepModeData {
         o.put("relationshipStatus", relationshipStatus == null ? JSONObject.NULL : relationshipStatus);
         o.put("interests", interests == null ? JSONObject.NULL : interests);
         o.put("customNotes", customNotes == null ? JSONObject.NULL : customNotes);
+        o.put("wakeUpEnabled", wakeUpEnabled);
+        o.put("morningActive", morningActive);
+        o.put("morningCount", morningCount);
         o.put("sessionStartMillis", sessionStartMillis);
         o.put("nagCount", nagCount);
         o.put("lastNagMillis", lastNagMillis);
@@ -88,6 +98,9 @@ public class SleepModeData {
         d.relationshipStatus = o.isNull("relationshipStatus") ? null : o.optString("relationshipStatus", null);
         d.interests = o.isNull("interests") ? null : o.optString("interests", null);
         d.customNotes = o.isNull("customNotes") ? null : o.optString("customNotes", null);
+        d.wakeUpEnabled = o.optBoolean("wakeUpEnabled", false);
+        d.morningActive = o.optBoolean("morningActive", false);
+        d.morningCount = o.optInt("morningCount", 0);
         d.sessionStartMillis = o.optLong("sessionStartMillis", 0);
         d.nagCount = o.optInt("nagCount", 0);
         d.lastNagMillis = o.optLong("lastNagMillis", 0);

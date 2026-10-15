@@ -4,7 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-/** Android clears all AlarmManager alarms on reboot — re-arm tonight's bedtime if Sleep Mode is on. */
+/** Android clears all AlarmManager alarms on reboot — re-arm tonight's bedtime (and the morning wake-up) if Sleep Mode is on. */
 public class SleepModeBootReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -16,6 +16,7 @@ public class SleepModeBootReceiver extends BroadcastReceiver {
         SleepModeData data = SleepModeStore.load(context);
         if (data.enabled) {
             SleepModeScheduler.armBedtime(context, data);
+            SleepModeScheduler.armMorning(context, data);
         }
     }
 }

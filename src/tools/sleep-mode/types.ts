@@ -9,7 +9,7 @@ export interface PersonalityMeta {
   image?: string;
   icon?: string;
   color: string;
-  /** 'normal' personalities are free and selectable today; 'ai' ones are shown but locked until Sleep Mode AI exists. */
+  /** 'normal' personalities are free for everyone; 'ai' ones (Sleep Mode AI) need sign-in to pick. */
   tier: 'normal' | 'ai';
 }
 

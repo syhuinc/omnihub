@@ -1995,3 +1995,111 @@
   background: color-mix(in srgb, var(--purple) 16%, var(--bg-elevated-2));
   color: var(--purple);
 }
+
+/* Morning wake-up row (Schedule section) */
+
+.sm__wake-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.sm__wake-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sm__wake-text strong {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.sm__wake-text span {
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--text-secondary);
+}
+
+.sm__wake-try {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--orange) 14%, var(--bg-elevated));
+  color: var(--orange);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+/* AI-tier personalities in the Home picker */
+
+.sm__personality-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sm__personality-ai {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 6px;
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--purple) 16%, transparent);
+  color: var(--purple);
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.sm__personality--locked .sm__personality-emoji,
+.sm__personality--locked .sm__personality-info {
+  opacity: 0.55;
+}
+
+.sm__locked-hint {
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--purple);
+}
+
+/* AI tab: write-new-lines action */
+
+.sm__ai2-write {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sm__ai2-write-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 10px 16px;
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--purple) 16%, var(--bg-elevated));
+  border: 1px solid color-mix(in srgb, var(--purple) 35%, transparent);
+  color: var(--purple);
+  font-size: 13.5px;
+  font-weight: 700;
+}
+
+.sm__ai2-write-btn:disabled {
+  opacity: 0.7;
+}
+
+.sm__ai2-write-error {
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--red);
+}

@@ -7,7 +7,8 @@ import { hapticSelect, hapticTap, hapticWarning } from '../../haptics';
 import { WheelTimePicker } from '../alarm/WheelTimePicker';
 import { SleepModePlugin, DEFAULT_SLEEP_MODE_CONFIG, type SleepModeConfig, type SleepModeStatus } from '../../sleep-mode/plugin';
 import { useAuth } from '../../cloud/AuthContext';
-import { generateSleepReminders, type SleepAiPersonality } from '../../cloud/generateSleepReminders';
+import { refreshAiReminders } from './aiRefresh';
+import { PersonalizationScreen } from './PersonalizationScreen';
 import { INTERVAL_OPTIONS_MIN, WIND_DOWN_ACTIONS } from './types';
 import { HomePersonalitySection } from './HomePersonalitySection';
 import { WindDownMode } from './WindDownMode';
@@ -30,16 +31,9 @@ function formatTimeOfDay(ms: number): string {
 }
 
 type TimeField = 'bedtime' | 'wake';
-type SubScreen = SleepTab | 'wind-down';
+type SubScreen = SleepTab | 'wind-down' | 'personalize';
 
 const TAB_SCREENS = new Set<SubScreen>(['main', 'sleep-insights', 'sleep-sounds', 'ai']);
-
-const AI_ENABLED_PERSONALITIES = new Set<SleepAiPersonality>(['gentle', 'friendly']);
-const AI_POOL_MAX_AGE_MS = 24 * 60 * 60 * 1000;
-
-function isAiPersonality(p: string): p is SleepAiPersonality {
-  return AI_ENABLED_PERSONALITIES.has(p as SleepAiPersonality);
-}
 
 export function SleepMode() {
   const { back } = useRouter();
@@ -93,23 +87,27 @@ export function SleepMode() {
     void maybeRefreshAiReminders(next);
   }
 
-  /** Best-effort background refresh of the cached AI reminder pool. Never surfaces an error or
-   *  blocks Sleep Mode — the hand-written MessageBank pool is always there as a fallback.
-   *  Requires sign-in (the Cloud Function needs an ID token and rate-limits per account) but no
-   *  longer requires Pro — Sleep Mode AI is available to anyone signed in. */
+  /** Best-effort background refresh of the cached AI reminder pool (all five personalities). Never
+   *  surfaces an error or blocks Sleep Mode — the hand-written MessageBank pool is always there as
+   *  a fallback. Requires sign-in (the Cloud Function needs an ID token and rate-limits per
+   *  account). Regenerates when the pool is a day old or Personal Mode details changed. */
   async function maybeRefreshAiReminders(next: SleepModeConfig) {
-    if (!user || !isAiPersonality(next.personality)) return;
+    if (!user) return;
     try {
-      const info = await SleepModePlugin.getAiMessagesInfo({ personality: next.personality });
-      if (Date.now() - info.generatedAt < AI_POOL_MAX_AGE_MS) return;
-      const { tiersJson, audioClips } = await generateSleepReminders({ personality: next.personality });
-      await SleepModePlugin.setAiMessages({ personality: next.personality, tiersJson });
-      if (audioClips.length) {
-        await SleepModePlugin.setAiAudioClips({ personality: next.personality, clips: audioClips });
-      }
+      await refreshAiReminders(next);
     } catch {
       // network hiccup, rate limit, or unsupported platform — fine, try again next edit
     }
+  }
+
+  function toggleWakeUp() {
+    hapticSelect();
+    persist({ ...config, wakeUpEnabled: !config.wakeUpEnabled });
+  }
+
+  function tryWakeUp() {
+    hapticTap();
+    SleepModePlugin.testWakeUp().catch(() => {});
   }
 
   async function handleToggleEnabled() {
@@ -196,6 +194,10 @@ export function SleepMode() {
     setScreen(tab);
   }
 
+  if (screen === 'personalize') {
+    return <PersonalizationScreen config={config} onBack={() => setScreen('main')} onPersist={persist} />;
+  }
+
   if (screen === 'wind-down') {
     return (
       <WindDownMode
@@ -213,7 +215,7 @@ export function SleepMode() {
   } else if (screen === 'sleep-sounds') {
     body = <SleepSounds onBack={() => setScreen('main')} />;
   } else if (screen === 'ai') {
-    body = <SleepModeAiTab onBack={() => setScreen('main')} />;
+    body = <SleepModeAiTab config={config} onBack={() => setScreen('main')} />;
   } else {
     body = (
       <div className="screen">
@@ -245,7 +247,7 @@ export function SleepMode() {
               <strong>{config.enabled ? 'Active' : 'Off'}</strong>
               <span className="sm__hero-desc">
                 {config.enabled
-                  ? `Nagging you between ${formatTime(config.bedtimeHour, config.bedtimeMinute)} and ${formatTime(config.wakeHour, config.wakeMinute)}`
+                  ? `Nagging you between ${formatTime(config.bedtimeHour, config.bedtimeMinute)} and ${formatTime(config.wakeHour, config.wakeMinute)}${config.wakeUpEnabled ? ', then waking you up' : ''}`
                   : 'Turn it on to get talked into sleeping on time.'}
               </span>
             </div>
@@ -379,7 +381,53 @@ export function SleepMode() {
                 Always audible, even on silent or Do Not Disturb — set independently of your phone&rsquo;s own volume.
               </p>
             </div>
+
+            <div className="sm__wake-row">
+              <span className="sm__time-icon sm__time-icon--day">
+                <Icon name="sun" size={16} />
+              </span>
+              <span className="sm__wake-text">
+                <strong>Wake me up</strong>
+                <span>
+                  At {formatTime(config.wakeHour, config.wakeMinute)}, your companion wakes you and keeps going until you
+                  tap &ldquo;I&rsquo;m up&rdquo;.
+                </span>
+              </span>
+              <button
+                type="button"
+                className={`sm__switch sm__switch--small${config.wakeUpEnabled ? ' sm__switch--on' : ''}`}
+                onClick={toggleWakeUp}
+                aria-label="Toggle morning wake-up"
+                aria-pressed={!!config.wakeUpEnabled}
+              >
+                <span className="sm__switch-knob" />
+              </button>
+            </div>
+            {config.wakeUpEnabled && (
+              <button type="button" className="sm__wake-try" onClick={tryWakeUp}>
+                <Icon name="play" size={13} />
+                Try the wake-up now
+              </button>
+            )}
+            {config.wakeUpEnabled && !config.enabled && (
+              <p className="sm__volume-hint">Turn Sleep Mode on above for the wake-up to run.</p>
+            )}
           </section>
+
+          <button type="button" className="sm__menu-row" onClick={() => { hapticTap(); setScreen('personalize'); }}>
+            <span className="sm__menu-icon" style={{ '--menu-color': 'var(--purple)' } as CSSProperties}>
+              <Icon name="user" size={17} />
+            </span>
+            <span className="sm__menu-text">
+              <strong>Personalize</strong>
+              <span>
+                {config.mode === 'personal'
+                  ? `On${config.callName ? ` · calls you ${config.callName}` : ''}`
+                  : 'Your name, routine and interests'}
+              </span>
+            </span>
+            <Icon name="chevron-right" size={16} className="sm__time-chevron" />
+          </button>
 
           <button type="button" className="sm__start-btn" onClick={() => openWindDown({ autoStart: true })}>
             <Icon name="play" size={17} />

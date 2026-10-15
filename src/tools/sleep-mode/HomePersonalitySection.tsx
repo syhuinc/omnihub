@@ -2,6 +2,7 @@ import { useState, type CSSProperties } from 'react';
 import { Icon } from '../../components/Icon';
 import { hapticSelect, hapticTap } from '../../haptics';
 import { SleepModePlugin, type SleepModeConfig, type SleepModeStatus, type SleepPersonality } from '../../sleep-mode/plugin';
+import { useAuth } from '../../cloud/AuthContext';
 import { PERSONALITY_META } from './types';
 
 interface HomePersonalitySectionProps {
@@ -9,11 +10,14 @@ interface HomePersonalitySectionProps {
   onPersist: (next: SleepModeConfig) => void;
 }
 
-const NORMAL_PERSONALITIES = PERSONALITY_META.filter((p) => p.tier === 'normal');
+/** Custom is shown in the AI tab only — it has no lines of its own yet. */
+const PICKABLE = PERSONALITY_META.filter((p) => p.id !== 'custom');
 
-/** The free, selectable Gentle/Friendly picker, right on Sleep Mode's Home tab — the AI-tier
- *  personalities (locked, not built yet) live in the AI tab instead. */
+/** The personality picker on Sleep Mode's Home tab. Gentle and Friendly are free; Teasing, Strict
+ *  and Savage are Sleep Mode AI personalities and need sign-in to pick. */
 export function HomePersonalitySection({ config, onPersist }: HomePersonalitySectionProps) {
+  const { user } = useAuth();
+  const [lockedHint, setLockedHint] = useState<string | null>(null);
   const [sampleText, setSampleText] = useState<string | null>(null);
   const [sampleAvatarId, setSampleAvatarId] = useState<string | null>(null);
   const [sampleLoading, setSampleLoading] = useState(false);
@@ -23,8 +27,14 @@ export function HomePersonalitySection({ config, onPersist }: HomePersonalitySec
   const sampleAvatar = samplePersonality?.image;
   const sampleEmoji = samplePersonality?.emoji;
 
-  function selectPersonality(id: SleepPersonality) {
+  function selectPersonality(id: SleepPersonality, locked: boolean) {
     hapticSelect();
+    if (locked) {
+      const label = PERSONALITY_META.find((p) => p.id === id)?.label ?? 'This personality';
+      setLockedHint(`${label} is a Sleep Mode AI personality. Sign in from your Desk to use it.`);
+      return;
+    }
+    setLockedHint(null);
     onPersist({ ...config, personality: id });
   }
 
@@ -57,20 +67,29 @@ export function HomePersonalitySection({ config, onPersist }: HomePersonalitySec
       </h2>
 
       <div className="sm__personality-list">
-        {NORMAL_PERSONALITIES.map((p) => {
+        {PICKABLE.map((p) => {
           const active = config.personality === p.id;
+          const locked = p.tier === 'ai' && !user && !active;
           return (
             <button
               key={p.id}
               type="button"
-              className={`sm__personality${active ? ' sm__personality--active' : ''}`}
-              onClick={() => selectPersonality(p.id as SleepPersonality)}
+              className={`sm__personality${active ? ' sm__personality--active' : ''}${locked ? ' sm__personality--locked' : ''}`}
+              onClick={() => selectPersonality(p.id as SleepPersonality, locked)}
             >
               <span className="sm__personality-emoji" style={{ '--emoji-color': p.color } as CSSProperties}>
                 {p.image ? <img src={p.image} alt="" /> : <Icon name={(p.icon ?? 'user') as never} size={18} />}
               </span>
               <span className="sm__personality-info">
-                <span className="sm__personality-label">{p.label}</span>
+                <span className="sm__personality-label">
+                  {p.label}
+                  {p.tier === 'ai' && (
+                    <span className="sm__personality-ai">
+                      {locked && <Icon name="lock" size={9} />}
+                      AI
+                    </span>
+                  )}
+                </span>
                 <span className="sm__personality-desc">{p.description}</span>
               </span>
               <span className="sm__radio" aria-hidden="true" />
@@ -78,6 +97,8 @@ export function HomePersonalitySection({ config, onPersist }: HomePersonalitySec
           );
         })}
       </div>
+
+      {lockedHint && <p className="sm__locked-hint">{lockedHint}</p>}
 
       <button type="button" className="sm__sample-btn" onClick={hearSample} disabled={sampleLoading}>
         <Icon name="activity" size={16} />

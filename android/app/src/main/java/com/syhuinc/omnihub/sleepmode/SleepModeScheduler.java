@@ -24,8 +24,13 @@ public class SleepModeScheduler {
     public static final String EXTRA_KIND = "kind"; // "bedtime" | "beat"
     public static final String KIND_BEDTIME = "bedtime";
     public static final String KIND_BEAT = "beat";
+    /** The morning wake-up runs on its own alarm (MORNING_REQUEST_CODE) so it never replaces, or is
+     *  replaced by, the bedtime loop's single pending beat. */
+    public static final String KIND_MORNING = "morning";
+    public static final String KIND_MORNING_BEAT = "morning_beat";
 
     private static final int REQUEST_CODE = "sleepmode_next".hashCode();
+    private static final int MORNING_REQUEST_CODE = "sleepmode_morning".hashCode();
 
     public static boolean canScheduleExactAlarms(Context ctx) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return true;
@@ -43,7 +48,28 @@ public class SleepModeScheduler {
         return scheduleAt(ctx, triggerAtMillis, KIND_BEAT);
     }
 
+    /** Arms the next morning wake-up at the next occurrence of the wake time, if turned on. */
+    public static boolean armMorning(Context ctx, SleepModeData data) {
+        if (!data.enabled || !data.wakeUpEnabled) {
+            disarmMorning(ctx);
+            return false;
+        }
+        return scheduleAt(ctx, nextWakeTriggerMillis(data), KIND_MORNING, MORNING_REQUEST_CODE);
+    }
+
+    public static boolean scheduleMorningBeat(Context ctx, long triggerAtMillis) {
+        return scheduleAt(ctx, triggerAtMillis, KIND_MORNING_BEAT, MORNING_REQUEST_CODE);
+    }
+
+    public static void disarmMorning(Context ctx) {
+        cancel(ctx, MORNING_REQUEST_CODE);
+    }
+
     private static boolean scheduleAt(Context ctx, long triggerAtMillis, String kind) {
+        return scheduleAt(ctx, triggerAtMillis, kind, REQUEST_CODE);
+    }
+
+    private static boolean scheduleAt(Context ctx, long triggerAtMillis, String kind, int requestCode) {
         AlarmManager am = (AlarmManager) ctx.getSystemService(Context.ALARM_SERVICE);
         if (am == null) return false;
 
@@ -52,10 +78,10 @@ public class SleepModeScheduler {
 
         int flags = PendingIntent.FLAG_UPDATE_CURRENT;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) flags |= PendingIntent.FLAG_IMMUTABLE;
-        PendingIntent pi = PendingIntent.getBroadcast(ctx, REQUEST_CODE, intent, flags);
+        PendingIntent pi = PendingIntent.getBroadcast(ctx, requestCode, intent, flags);
 
         Intent showIntent = new Intent(ctx, com.syhuinc.omnihub.MainActivity.class);
-        PendingIntent showPi = PendingIntent.getActivity(ctx, REQUEST_CODE, showIntent, flags);
+        PendingIntent showPi = PendingIntent.getActivity(ctx, requestCode, showIntent, flags);
 
         try {
             am.setAlarmClock(new AlarmManager.AlarmClockInfo(triggerAtMillis, showPi), pi);
@@ -67,12 +93,30 @@ public class SleepModeScheduler {
     }
 
     public static void disarm(Context ctx) {
+        cancel(ctx, REQUEST_CODE);
+    }
+
+    private static void cancel(Context ctx, int requestCode) {
         AlarmManager am = (AlarmManager) ctx.getSystemService(Context.ALARM_SERVICE);
         if (am == null) return;
         Intent intent = new Intent(ctx, SleepModeReceiver.class);
         int flags = PendingIntent.FLAG_UPDATE_CURRENT;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) flags |= PendingIntent.FLAG_IMMUTABLE;
-        am.cancel(PendingIntent.getBroadcast(ctx, REQUEST_CODE, intent, flags));
+        am.cancel(PendingIntent.getBroadcast(ctx, requestCode, intent, flags));
+    }
+
+    /** The next wake time strictly after now. */
+    public static long nextWakeTriggerMillis(SleepModeData data) {
+        Calendar now = Calendar.getInstance();
+        Calendar candidate = (Calendar) now.clone();
+        candidate.set(Calendar.HOUR_OF_DAY, data.wakeHour);
+        candidate.set(Calendar.MINUTE, data.wakeMinute);
+        candidate.set(Calendar.SECOND, 0);
+        candidate.set(Calendar.MILLISECOND, 0);
+        if (!candidate.after(now)) {
+            candidate.add(Calendar.DAY_OF_YEAR, 1);
+        }
+        return candidate.getTimeInMillis();
     }
 
     public static long nextBedtimeTriggerMillis(SleepModeData data) {

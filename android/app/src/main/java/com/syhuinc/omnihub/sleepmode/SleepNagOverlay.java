@@ -54,7 +54,17 @@ final class SleepNagOverlay {
         return Settings.canDrawOverlays(context);
     }
 
-    static void show(Context context, String text, String personality) {
+    /** Swaps the card's title and button labels between the bedtime and morning versions. */
+    static void applyMode(View root, boolean morning) {
+        TextView title = root.findViewById(R.id.nag_title);
+        TextView primary = root.findViewById(R.id.nag_btn_primary);
+        TextView secondary = root.findViewById(R.id.nag_btn_secondary);
+        if (title != null) title.setText(morning ? "Wake-up Companion" : "Sleep Companion");
+        if (primary != null) primary.setText(morning ? "I'm up" : "I'm going to sleep");
+        if (secondary != null) secondary.setText("5 more minutes");
+    }
+
+    static void show(Context context, String text, String personality, boolean morning) {
         if (!canShow(context)) return;
         try {
             dismissInternal();
@@ -72,6 +82,8 @@ final class SleepNagOverlay {
             // sidesteps that class of bug entirely, at a negligible cost for something this size.
             view.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
 
+            applyMode(view, morning);
+
             TextView bodyText = view.findViewById(R.id.nag_body);
             if (text != null && !text.isEmpty()) bodyText.setText(text);
 
@@ -84,7 +96,7 @@ final class SleepNagOverlay {
 
             closeButton.setOnClickListener(v -> dismiss());
             primaryButton.setOnClickListener(v -> {
-                sendToReceiver(appContext, SleepModeReceiver.ACTION_STOP_TONIGHT);
+                sendToReceiver(appContext, morning ? SleepModeReceiver.ACTION_IM_UP : SleepModeReceiver.ACTION_STOP_TONIGHT);
                 dismiss();
             });
             secondaryButton.setOnClickListener(v -> {
@@ -109,8 +121,10 @@ final class SleepNagOverlay {
             currentView = view;
             currentWindowManager = wm;
 
-            dismissRunnable = SleepNagOverlay::dismiss;
-            dismissHandler.postDelayed(dismissRunnable, AUTO_DISMISS_MS);
+            if (!morning) {
+                dismissRunnable = SleepNagOverlay::dismiss;
+                dismissHandler.postDelayed(dismissRunnable, AUTO_DISMISS_MS);
+            }
         } catch (Exception e) {
             // Never let a WindowManager quirk (a stale token, a denied-after-check permission,
             // an OEM restriction) take the service or the rest of the reminder down with it -

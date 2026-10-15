@@ -49,6 +49,14 @@ public class SleepModeSpeakService extends Service {
      *  EXTRA_AUDIO_RES_ID isn't set, same priority/fallback rules as the resource-id clip path. */
     public static final String EXTRA_AUDIO_FILE_PATH = "audioFilePath";
     public static final String EXTRA_PERSONALITY = "personality";
+    /** How the line is presented — see the STYLE_ constants. Defaults to STYLE_NAG. */
+    public static final String EXTRA_STYLE = "style";
+    /** A bedtime reminder: heads-up notification + card with "I'm going to sleep" / "5 more minutes". */
+    public static final String STYLE_NAG = "nag";
+    /** A spoken reply to a button tap (snooze): a plain notification, no card, no buttons. */
+    public static final String STYLE_REACTION = "reaction";
+    /** The morning wake-up: card + notification with "I'm up" / "5 more minutes". */
+    public static final String STYLE_MORNING = "morning";
 
     private static final String TAG = "SleepModeSpeak";
 
@@ -94,6 +102,8 @@ public class SleepModeSpeakService extends Service {
         int audioResId = intent != null ? intent.getIntExtra(EXTRA_AUDIO_RES_ID, 0) : 0;
         String audioFilePath = intent != null ? intent.getStringExtra(EXTRA_AUDIO_FILE_PATH) : null;
         String personality = intent != null ? intent.getStringExtra(EXTRA_PERSONALITY) : null;
+        String styleExtra = intent != null ? intent.getStringExtra(EXTRA_STYLE) : null;
+        final String style = styleExtra != null ? styleExtra : STYLE_NAG;
         if (text == null || text.isEmpty()) {
             stopSelf();
             return START_NOT_STICKY;
@@ -103,7 +113,7 @@ public class SleepModeSpeakService extends Service {
         float volume = Math.max(0f, Math.min(100f, volumePercent)) / 100f;
 
         try {
-            startForegroundWithNotification(text, personality);
+            startForegroundWithNotification(text, personality, style);
             acquireWakeLock();
         } catch (Throwable t) {
             Log.e(TAG, "Failed to start foreground notification, stopping", t);
@@ -128,13 +138,15 @@ public class SleepModeSpeakService extends Service {
         // deferred to the next looper pass, strictly after audio has already been kicked off
         // above, so even if this somehow fails again, it can never take the reminder's audio
         // down with it a third time.
-        safetyHandler.post(() -> {
-            try {
-                SleepNagOverlay.show(this, text, personality);
-            } catch (Throwable t) {
-                Log.w(TAG, "Failed to show nag overlay", t);
-            }
-        });
+        if (!STYLE_REACTION.equals(style)) {
+            safetyHandler.post(() -> {
+                try {
+                    SleepNagOverlay.show(this, text, personality, STYLE_MORNING.equals(style));
+                } catch (Throwable t) {
+                    Log.w(TAG, "Failed to show nag overlay", t);
+                }
+            });
+        }
 
         safetyHandler.removeCallbacks(safetyStop);
         safetyHandler.postDelayed(safetyStop, MAX_SPEAK_MS);
@@ -286,24 +298,38 @@ public class SleepModeSpeakService extends Service {
         }
     }
 
-    private void startForegroundWithNotification(String text, String personality) {
+    private void startForegroundWithNotification(String text, String personality, String style) {
         String emoji = PERSONALITY_EMOJI.getOrDefault(personality, DEFAULT_EMOJI);
-        String title = emoji + " Sleep Mode";
+        boolean morning = STYLE_MORNING.equals(style);
+        String title = emoji + (morning ? " Good morning" : " Sleep Mode");
 
-        PendingIntent nagActivityPi = nagActivityPendingIntent(text, personality);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
                 .setContentTitle(title)
                 .setContentText(text)
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(text).setBigContentTitle(title))
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .setCategory(NotificationCompat.CATEGORY_REMINDER)
-                .setOngoing(false)
-                .setAutoCancel(false)
-                .setFullScreenIntent(nagActivityPi, true)
-                .setContentIntent(nagActivityPi)
-                .addAction(android.R.drawable.ic_popup_reminder, "5 more minutes", actionPendingIntent(SleepModeReceiver.ACTION_SNOOZE))
-                .addAction(android.R.drawable.ic_menu_close_clear_cancel, "I'm going to sleep", actionPendingIntent(SleepModeReceiver.ACTION_STOP_TONIGHT));
+                .setOngoing(false);
+
+        if (STYLE_REACTION.equals(style)) {
+            // Just the reply to a tap the user already made — no card, no buttons, gone shortly.
+            builder.setCategory(NotificationCompat.CATEGORY_REMINDER)
+                    .setAutoCancel(true)
+                    .setTimeoutAfter(15_000L);
+        } else {
+            PendingIntent nagActivityPi = nagActivityPendingIntent(text, personality, morning);
+            builder.setCategory(morning ? NotificationCompat.CATEGORY_ALARM : NotificationCompat.CATEGORY_REMINDER)
+                    .setAutoCancel(false)
+                    .setFullScreenIntent(nagActivityPi, true)
+                    .setContentIntent(nagActivityPi);
+            if (morning) {
+                builder.addAction(android.R.drawable.ic_menu_day, "I'm up", actionPendingIntent(SleepModeReceiver.ACTION_IM_UP))
+                        .addAction(android.R.drawable.ic_popup_reminder, "5 more minutes", actionPendingIntent(SleepModeReceiver.ACTION_SNOOZE));
+            } else {
+                builder.addAction(android.R.drawable.ic_popup_reminder, "5 more minutes", actionPendingIntent(SleepModeReceiver.ACTION_SNOOZE))
+                        .addAction(android.R.drawable.ic_menu_close_clear_cancel, "I'm going to sleep", actionPendingIntent(SleepModeReceiver.ACTION_STOP_TONIGHT));
+            }
+        }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             ServiceCompat.startForeground(
@@ -323,10 +349,11 @@ public class SleepModeSpeakService extends Service {
         return PendingIntent.getBroadcast(this, action.hashCode(), intent, flags);
     }
 
-    private PendingIntent nagActivityPendingIntent(String text, String personality) {
+    private PendingIntent nagActivityPendingIntent(String text, String personality, boolean morning) {
         Intent intent = new Intent(this, SleepNagActivity.class)
                 .putExtra(SleepNagActivity.EXTRA_TEXT, text)
                 .putExtra(SleepNagActivity.EXTRA_PERSONALITY, personality)
+                .putExtra(SleepNagActivity.EXTRA_MORNING, morning)
                 .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         int flags = PendingIntent.FLAG_UPDATE_CURRENT;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) flags |= PendingIntent.FLAG_IMMUTABLE;

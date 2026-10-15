@@ -4,15 +4,18 @@ import { Icon, type IconName } from '../../components/Icon';
 import { hapticTap, hapticSelect } from '../../haptics';
 import { useAuth } from '../../cloud/AuthContext';
 import { PERSONALITY_META } from './types';
+import type { SleepModeConfig } from '../../sleep-mode/plugin';
+import { aiPoolUpdatedAt, GenerateRemindersError, refreshAiReminders } from './aiRefresh';
 import { PREVIEW_SAMPLES, heroBanner, type PreviewPhase } from '../../assets/sleep-mode';
 import './SleepMode.css';
 
-/** Only these two actually get AI-generated lines/voice (see isAiPersonality in SleepMode.tsx
- *  and generateSleepReminders) — the rest stay hand-written-only even when signed in. */
-const AI_ENABLED = new Set(['gentle', 'friendly']);
-const AI_ENABLED_LABEL = PERSONALITY_META.filter((p) => AI_ENABLED.has(p.id))
-  .map((p) => p.label)
-  .join(' and ');
+function timeAgo(ms: number): string {
+  const mins = Math.round((Date.now() - ms) / 60_000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins} min ago`;
+  const hours = Math.round(mins / 60);
+  return hours < 24 ? `${hours} h ago` : `${Math.round(hours / 24)} d ago`;
+}
 
 const PHASE_LABEL: Record<PreviewPhase, string> = {
   bedtime: 'Bedtime',
@@ -30,12 +33,31 @@ const PERKS: { icon: IconName; title: string; desc: string }[] = [
 ];
 
 interface SleepModeAiTabProps {
+  config: SleepModeConfig;
   onBack: () => void;
 }
 
-export function SleepModeAiTab({ onBack }: SleepModeAiTabProps) {
+export function SleepModeAiTab({ config, onBack }: SleepModeAiTabProps) {
   const { user } = useAuth();
   const isActive = !!user;
+  const current = PERSONALITY_META.find((p) => p.id === config.personality);
+  const [updatedAt, setUpdatedAt] = useState(() => aiPoolUpdatedAt(config.personality));
+  const [writing, setWriting] = useState(false);
+  const [writeError, setWriteError] = useState<string | null>(null);
+
+  async function writeNewLines() {
+    hapticTap();
+    setWriting(true);
+    setWriteError(null);
+    try {
+      await refreshAiReminders(config, true);
+      setUpdatedAt(aiPoolUpdatedAt(config.personality));
+    } catch (err) {
+      setWriteError(err instanceof GenerateRemindersError ? err.message : 'Something went wrong. Please try again.');
+    } finally {
+      setWriting(false);
+    }
+  }
   const [activeId, setActiveId] = useState<string | null>(null);
   const [sampleIndex, setSampleIndex] = useState(0);
   const [playing, setPlaying] = useState(false);
@@ -133,7 +155,11 @@ export function SleepModeAiTab({ onBack }: SleepModeAiTabProps) {
               )}
             </span>
             <span className="sm__ai2-toggle-desc">
-              {isActive ? `Active for your ${AI_ENABLED_LABEL} reminders.` : 'Sign in to activate your AI companion.'}
+              {isActive
+                ? updatedAt
+                  ? `${current?.label ?? 'Your'} lines written ${timeAgo(updatedAt)}, with snooze replies and a wake-up.`
+                  : `Active for all five personalities. Your ${current?.label ?? ''} lines are being written.`
+                : 'Sign in to activate your AI companion.'}
             </span>
           </span>
           <span className={`sm__ai2-toggle-switch${isActive ? ' sm__ai2-toggle-switch--active' : ''}`}>
@@ -141,9 +167,19 @@ export function SleepModeAiTab({ onBack }: SleepModeAiTabProps) {
           </span>
         </div>
 
+        {isActive && (
+          <div className="sm__ai2-write">
+            <button type="button" className="sm__ai2-write-btn" onClick={writeNewLines} disabled={writing}>
+              <Icon name="zap" size={14} />
+              {writing ? `Writing ${current?.label ?? ''} lines… (up to a minute)` : `Write new ${current?.label ?? ''} lines`}
+            </button>
+            {writeError && <p className="sm__ai2-write-error">{writeError}</p>}
+          </div>
+        )}
+
         <div className="sm__ai2-section-head">
           <h2>Meet Your AI Companion</h2>
-          <p>Six unique personalities, same goal. A better you.</p>
+          <p>Five personalities, same goal. A better you. Custom is coming soon.</p>
         </div>
 
         <div className="sm__ai2-grid">

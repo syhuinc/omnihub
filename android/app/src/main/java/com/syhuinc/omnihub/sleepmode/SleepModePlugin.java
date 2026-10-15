@@ -40,6 +40,7 @@ public class SleepModePlugin extends Plugin {
         data.relationshipStatus = call.getString("relationshipStatus", null);
         data.interests = call.getString("interests", null);
         data.customNotes = call.getString("customNotes", null);
+        data.wakeUpEnabled = call.getBoolean("wakeUpEnabled", false);
 
         // A settings change always (re)starts scheduling from now, rather than trying to preserve
         // an in-progress nightly session's nag count/anti-repeat state across an edit.
@@ -52,8 +53,10 @@ public class SleepModePlugin extends Plugin {
         boolean armed = false;
         if (data.enabled) {
             armed = SleepModeScheduler.armBedtime(getContext(), data);
+            SleepModeScheduler.armMorning(getContext(), data);
         } else {
             SleepModeScheduler.disarm(getContext());
+            SleepModeScheduler.disarmMorning(getContext());
             // Cut off a reminder that's speaking right now if the user disables mid-utterance.
             getContext().stopService(new Intent(getContext(), SleepModeSpeakService.class));
         }
@@ -110,6 +113,9 @@ public class SleepModePlugin extends Plugin {
             JSONObject obj = new JSONObject(tiersJson);
             obj.put("generatedAt", System.currentTimeMillis());
             SleepModeStore.saveAiMessages(getContext(), personality, obj.toString());
+            // The old clips were recorded for the old lines — drop them; setAiAudioClips /
+            // setAiExtraClips follow with the new ones.
+            SleepModeStore.clearAiAudioClips(getContext(), personality);
             call.resolve();
         } catch (JSONException e) {
             call.reject("tiersJson must be valid JSON shaped {\"tiers\": [[...],[...],[...],[...]]}", e);
@@ -140,6 +146,49 @@ public class SleepModePlugin extends Plugin {
                 // a malformed entry just means that tier keeps falling back to on-device TTS
             }
         }
+        call.resolve();
+    }
+
+    /**
+     * Voice clips for the snooze replies and morning wake-up lines (line 0 of each list), base64
+     * WAV or null: { personality, snooze, morning: [3], morningSnooze }.
+     */
+    @PluginMethod
+    public void setAiExtraClips(PluginCall call) {
+        String personality = call.getString("personality");
+        if (personality == null) {
+            call.reject("personality is required");
+            return;
+        }
+        saveClip(personality + "_snooze", call.getString("snooze", null));
+        saveClip(personality + "_morningsnooze", call.getString("morningSnooze", null));
+        com.getcapacitor.JSArray morning = call.getArray("morning");
+        if (morning != null) {
+            for (int t = 0; t < morning.length(); t++) {
+                try {
+                    saveClip(personality + "_morning" + t, morning.isNull(t) ? null : morning.getString(t));
+                } catch (JSONException ignored) {
+                    // that morning tier falls back to on-device TTS
+                }
+            }
+        }
+        call.resolve();
+    }
+
+    private void saveClip(String baseName, String b64) {
+        if (b64 == null || b64.isEmpty()) return;
+        try {
+            SleepModeStore.saveAiAudioFile(getContext(), baseName, android.util.Base64.decode(b64, android.util.Base64.DEFAULT));
+        } catch (IllegalArgumentException ignored) {
+            // malformed base64 — on-device TTS covers it
+        }
+    }
+
+    /** Plays one morning wake-up line right now (with its "I'm up" card), so it can be tried without waiting for morning. */
+    @PluginMethod
+    public void testWakeUp(PluginCall call) {
+        Intent intent = new Intent(getContext(), SleepModeReceiver.class).setAction(SleepModeReceiver.ACTION_TEST_MORNING);
+        getContext().sendBroadcast(intent);
         call.resolve();
     }
 

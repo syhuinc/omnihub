@@ -364,6 +364,178 @@ public class MessageBank {
         };
     }
 
+    /** Phases outside the bedtime escalation tiers: reacting to a snooze tap, and the morning wake-up. */
+    public static final int MORNING_TIER_COUNT = 3;
+
+    // [personality] -> reply when "5 more minutes" is tapped on a bedtime reminder
+    private static final String[][] SNOOZE_NIGHT = {
+            { // gentle
+                    "You can have your five minutes. Then we're going to bed, okay?",
+                    "Alright, five more minutes. I'll check on you after.",
+                    "Okay. Finish up gently, and then it's time to rest.",
+            },
+            { // friendly
+                    "You really want another five minutes? Fine. I'll be back.",
+                    "Five minutes, mate. I'm counting.",
+                    "Okay, okay, five more. Don't make me come back twice.",
+            },
+            { // teasing
+                    "Snooze? Of course. I totally saw that coming.",
+                    "Five more minutes, huh? That's what you said last time.",
+                    "Sure, sure. Five minutes. I'll just wait right here. Watching.",
+            },
+            { // strict
+                    "Five minutes. Use them to wrap up, not to start something new.",
+                    "Fine. Five minutes, then the phone goes down. No arguments.",
+                    "You have five minutes. I'll be back on time. Be ready.",
+            },
+            { // savage
+                    "Snooze again? Incredible. Your commitment to avoiding sleep is impressive.",
+                    "Five more minutes of what, exactly? Fine. Go on.",
+                    "Sure, take five. Your future self already filed a complaint.",
+            },
+    };
+
+    // [personality][morning tier] -> wake-up lines (0 = alarm just went off, 2 = last call)
+    private static final String[][][] MORNING = {
+            { // gentle
+                    { "Good morning. No rush. Just sit up first. We'll take it from there.",
+                            "Morning. Take a slow breath, and let's open those eyes.",
+                            "Good morning. A new day's here, nice and easy." },
+                    { "Still cosy? Let's sit up now, just for me.",
+                            "Gently now, feet on the floor. You can do this.",
+                            "Come on, sleepy. A little stretch, and up we get." },
+                    { "Okay, time to really get up now. I believe in you.",
+                            "Let's not be late today. Up you get, please.",
+                            "I know it's hard, but it's time. Up now, okay?" },
+            },
+            { // friendly
+                    { "Morning! You're up! Come on, let's get this day started.",
+                            "Rise and shine, mate! New day, let's go.",
+                            "Hey, good morning! Time to wake up." },
+                    { "Still in bed? Come on, up you get!",
+                            "Mate, the day's waiting. Let's move.",
+                            "Alright, sit up. Coffee's not going to make itself." },
+                    { "Okay, for real now, get up! You've got this.",
+                            "Last call, mate. Feet on the floor, right now.",
+                            "Up, up, up! Don't make me keep shouting." },
+            },
+            { // teasing
+                    { "Good morning, sleepyhead. Did you actually sleep, or were you negotiating with me all night?",
+                            "Wakey wakey. The pillow had you all night. My turn.",
+                            "Morning! Look at you, all crumpled and confused." },
+                    { "Still horizontal? Bold strategy. Let's see how it plays out.",
+                            "I can hear you pretending to be asleep, you know.",
+                            "Five seconds to sit up. Five. Four. I'm not kidding." },
+                    { "Okay, this is getting embarrassing. Up!",
+                            "You and that blanket need to break up. Today.",
+                            "Get up before I start singing. You don't want that." },
+            },
+            { // strict
+                    { "Alarm dismissed. Feet on the floor. Start your morning.",
+                            "Good morning. Eyes open. Sit up now.",
+                            "It's wake-up time. Out of bed." },
+                    { "You're still in bed. That's not the plan. Up.",
+                            "Sit up. Feet down. Stand. Now.",
+                            "No more lying there. Get moving." },
+                    { "This is your last warning. Get up immediately.",
+                            "Enough. You're getting up right now.",
+                            "Out of bed. This is not a request." },
+            },
+            { // savage
+                    { "My job is done. If you crawl back into that bed, that's between you and tomorrow.",
+                            "Morning. Try to look alive, it's a good look on you.",
+                            "Wake up. The day already started without your permission." },
+                    { "Still in bed? Fascinating. The world keeps spinning without you.",
+                            "You're not resting, you're hiding. Get up.",
+                            "Lying there won't make the day disappear. I checked." },
+                    { "Get up. Your bed isn't a lifestyle choice.",
+                            "This is the part where a functioning adult stands up. Go on.",
+                            "Last chance. After this, your morning is officially a disaster." },
+            },
+    };
+
+    // [personality] -> reply when "5 more minutes" is tapped on the morning wake-up
+    private static final String[][] SNOOZE_MORNING = {
+            { // gentle
+                    "Okay, five more minutes. Then we get up together.",
+                    "Rest a tiny bit longer. I'll wake you again soon.",
+                    "Five minutes, then it's really time, okay?",
+            },
+            { // friendly
+                    "Five more minutes? Fine. But then you're up, no excuses.",
+                    "Alright, quick snooze. I'll be right back.",
+                    "Five minutes, mate. Make them count.",
+            },
+            { // teasing
+                    "Snooze? Of course. I totally saw that coming.",
+                    "Another five minutes? Shocking. Truly.",
+                    "Sure, five more. I'll be back to ruin it.",
+            },
+            { // strict
+                    "You chose snooze. Five minutes. After that, you're getting up.",
+                    "Five minutes. Not one second more.",
+                    "Fine. Five minutes. Then you're on your feet.",
+            },
+            { // savage
+                    "Snooze again? Incredible. Your commitment to avoiding responsibility is impressive.",
+                    "Five more minutes won't fix whatever this is, but go ahead.",
+                    "Sure. Snooze. The day will wait. Spoiler: it won't.",
+            },
+    };
+
+    /** One of the non-tier phases above. aiPool is that phase's AI-generated list (or null). */
+    public enum Phase { SNOOZE_NIGHT, MORNING, SNOOZE_MORNING }
+
+    public static Pick pickPhase(
+            String personality,
+            Phase phase,
+            int morningTier,
+            String[] aiPool,
+            Set<String> recentKeys
+    ) {
+        int p = idx(personality);
+        int t = Math.max(0, Math.min(MORNING_TIER_COUNT - 1, morningTier));
+        String[] hand;
+        String prefix;
+        switch (phase) {
+            case MORNING:
+                hand = MORNING[p][t];
+                prefix = "m" + t;
+                break;
+            case SNOOZE_MORNING:
+                hand = SNOOZE_MORNING[p];
+                prefix = "ms";
+                break;
+            default:
+                hand = SNOOZE_NIGHT[p];
+                prefix = "s";
+                break;
+        }
+
+        List<String> keys = new ArrayList<>();
+        List<String> texts = new ArrayList<>();
+        for (int j = 0; j < hand.length; j++) {
+            keys.add(personality + ":" + prefix + ":" + j);
+            texts.add(hand[j]);
+        }
+        if (aiPool != null) {
+            for (int j = 0; j < aiPool.length; j++) {
+                if (aiPool[j] == null || aiPool[j].trim().isEmpty()) continue;
+                keys.add(personality + ":ai" + prefix + ":" + j);
+                texts.add(aiPool[j]);
+            }
+        }
+
+        List<Integer> fresh = new ArrayList<>();
+        for (int i = 0; i < keys.size(); i++) {
+            if (!recentKeys.contains(keys.get(i))) fresh.add(i);
+        }
+        List<Integer> pickFrom = fresh.isEmpty() ? allIndices(keys.size()) : fresh;
+        int chosen = pickFrom.get(RANDOM.nextInt(pickFrom.size()));
+        return new Pick(texts.get(chosen), keys.get(chosen));
+    }
+
     public static class Pick {
         public final String text;
         public final String key;
